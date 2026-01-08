@@ -22,16 +22,28 @@
             ]
           },
           {
-            "group": "Integrations",
+            "group": "Management",
             "pages": [
-              "essentials/settings",
-              "essentials/navigation",
-              "essentials/navigation-copied-1",
-              "essentials/navigation-copied-2",
-              "essentials/navigation-copied-3",
-              "essentials/navigation-copied-4",
-              "essentials/navigation-copied-5",
-              "essentials/navigation-copied-6"
+              "guides/management/untitled-page",
+              "guides/management/untitled-page-copied-1"
+            ]
+          },
+          {
+            "group": "Configuration",
+            "pages": [
+              {
+                "group": "Integrations",
+                "pages": [
+                  "essentials/settings",
+                  "essentials/navigation",
+                  "essentials/navigation-copied-1",
+                  "essentials/navigation-copied-2",
+                  "essentials/navigation-copied-3",
+                  "essentials/navigation-copied-4",
+                  "essentials/navigation-copied-5",
+                  "essentials/navigation-copied-6"
+                ]
+              }
             ]
           }
         ]
