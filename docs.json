@@ -45,7 +45,18 @@
                 ]
               },
               "guides/configuration/alert-rules",
-              "guides/configuration/alert-rules-copied-1"
+              "guides/configuration/alert-rules-copied-1",
+              "guides/configuration/alert-rules-copied-2",
+              "guides/configuration/alert-rules-copied-3",
+              "guides/configuration/alert-rules-copied-4"
+            ]
+          },
+          {
+            "group": "Access Management",
+            "pages": [
+              "guides/access-management/users",
+              "guides/access-management/teams",
+              "guides/access-management/roles"
             ]
           }
         ]
