@@ -19,7 +19,6 @@
         {
           "anchor": "Blog",
           "icon": "newspaper",
-          "hidden": true,
           "href": "https://mintlify.com/blog"
         }
       ]
