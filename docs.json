@@ -85,11 +85,6 @@
       }
     ]
   },
-  "logo": {
-    "light": "/logo/light.svg",
-    "dark": "/logo/light.svg",
-    "href": "https://alertup.easycontact.ai"
-  },
   "navbar": {
     "links": [
       {
