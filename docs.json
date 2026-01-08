@@ -68,11 +68,6 @@
       {
         "label": "Support",
         "href": "mailto:contact@easyduty.io"
-      },
-      {
-        "type": "button",
-        "label": "Dashboard",
-        "href": "https://alertup.easycontact.ai"
       }
     ],
     "primary": {
