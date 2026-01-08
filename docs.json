@@ -22,27 +22,16 @@
             ]
           },
           {
-            "group": "Customization",
+            "group": "Integrations",
             "pages": [
               "essentials/settings",
-              "essentials/navigation"
-            ]
-          },
-          {
-            "group": "Writing content",
-            "pages": [
-              "essentials/markdown",
-              "essentials/code",
-              "essentials/images",
-              "essentials/reusable-snippets"
-            ]
-          },
-          {
-            "group": "AI tools",
-            "pages": [
-              "ai-tools/cursor",
-              "ai-tools/claude-code",
-              "ai-tools/windsurf"
+              "essentials/navigation",
+              "essentials/navigation-copied-1",
+              "essentials/navigation-copied-2",
+              "essentials/navigation-copied-3",
+              "essentials/navigation-copied-4",
+              "essentials/navigation-copied-5",
+              "essentials/navigation-copied-6"
             ]
           }
         ]
