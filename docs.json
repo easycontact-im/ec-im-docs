@@ -23,7 +23,9 @@
           },
           {
             "group": "Management",
-            "pages": []
+            "pages": [
+              "guides/management/teams"
+            ]
           },
           {
             "group": "Configuration",
