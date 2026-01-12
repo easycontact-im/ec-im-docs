@@ -1,86 +1,449 @@
 ---
-title: "Custom Webhook"
-description: "The navigation field in docs.json defines the pages that go in the navigation menu"
-icon: "map"
+title: 'Custom Webhook'
+description: 'Integrate any tool that can send HTTP webhooks'
+icon: 'code'
 ---
 
-The navigation menu is the list of links on every website.
+## Overview
 
-You will likely update `docs.json` every time you add a new page. Pages do not show up automatically.
+The Custom integration allows you to connect any monitoring tool, script, or application that can send HTTP POST requests. EasyContact automatically extracts common fields and captures additional data as tags.
 
-## Navigation syntax
+<Info>
+  Use Custom integration when your monitoring tool isn't in our supported list, or when you want to send alerts from custom applications.
+</Info>
 
-Our navigation syntax is recursive which means you can make nested navigation groups. You don't need to include `.mdx` in page names.
+---
 
-<CodeGroup>
+## Setup Instructions
 
-```json Regular Navigation
-"navigation": {
-  "tabs": [
-    {
-      "tab": "Docs",
-      "groups": [
-        {
-          "group": "Getting Started",
-          "pages": ["quickstart"]
-        }
-      ]
-    }
-  ]
+<Steps>
+  <Step title="Create Integration in EasyContact">
+    1. Go to **Configuration** → **Integrations**
+    2. Click **Add Integration**
+    3. Select **Custom** as the type
+    4. Enter a name (e.g., "Internal Monitoring")
+    5. Save and copy the webhook URL
+  </Step>
+  <Step title="Configure Your Source">
+    Set up your monitoring tool or script to POST JSON to the webhook URL
+  </Step>
+  <Step title="Send a Test Event">
+    Send a test payload and verify it appears in EasyContact
+  </Step>
+  <Step title="Configure Mappings">
+    Adjust severity mapping and enrichment based on your payload structure
+  </Step>
+</Steps>
+
+---
+
+## Webhook URL
+
+Your webhook URL:
+
+```
+https://api.easycontact.ai/api/v1/webhooks/ingest/{token}
+```
+
+### Request Format
+
+| Setting | Value |
+|---------|-------|
+| **Method** | POST |
+| **Content-Type** | application/json |
+| **Authentication** | None (token in URL) |
+
+---
+
+## Recommended Payload Format
+
+Send events in this structure for best results:
+
+```json
+{
+  "eventId": "unique-event-id-123",
+  "title": "Alert title",
+  "description": "Detailed description of the alert",
+  "severity": "critical",
+  "status": "problem",
+  "host": "server-name",
+  "hostIp": "192.168.1.100",
+  "service": "service-name",
+  "environment": "production",
+  "timestamp": "2024-01-15T10:30:00Z",
+  "url": "https://your-monitoring-tool/alert/123",
+  "tags": {
+    "team": "platform",
+    "region": "eu-west-1"
+  }
 }
 ```
 
+---
 
-```json Nested Navigation
-"navigation": {
-  "tabs": [
-    {
-      "tab": "Docs",
-      "groups": [
-        {
-          "group": "Getting Started",
-          "pages": [
-            "quickstart",
-            {
-              "group": "Nested Reference Pages",
-              "pages": ["nested-reference-page"]
-            }
-          ]
-        }
-      ]
-    }
-  ]
+## Field Recognition
+
+EasyContact automatically recognizes these common field names:
+
+### Title Fields
+- `title`
+- `name`
+- `subject`
+- `summary`
+- `alert_name`
+- `message_title`
+
+### Description Fields
+- `description`
+- `message`
+- `body`
+- `text`
+- `details`
+
+### Severity Fields
+- `severity`
+- `priority`
+- `level`
+- `criticality`
+
+### Status Fields
+- `status`
+- `state`
+- `alert_status`
+- `current_state`
+
+### Host Fields
+- `host`
+- `hostname`
+- `server`
+- `node`
+- `instance`
+- `machine`
+
+### IP Address Fields
+- `hostIp`
+- `host_ip`
+- `ip`
+- `ip_address`
+- `source_ip`
+
+### Service Fields
+- `service`
+- `application`
+- `app`
+- `component`
+
+### Environment Fields
+- `environment`
+- `env`
+
+### Other Fields
+- `region`, `datacenter`, `dc`, `location`
+- `team`, `owner`
+- `customer`, `client`, `tenant`
+
+---
+
+## Severity Values
+
+These values are automatically mapped:
+
+| Input Value | EasyContact Severity |
+|-------------|---------------------|
+| critical, disaster, fatal, emergency, P1 | Critical |
+| error, high, major, P2 | High |
+| warning, warn, medium, minor, average, P3 | Warning |
+| info, information, low, notice, P4, P5 | Info |
+| ok, resolved, recovery, clear, success | OK |
+
+Values are case-insensitive.
+
+---
+
+## Status Values
+
+| Input Value | EasyContact Status |
+|-------------|-------------------|
+| problem, alert, alerting, triggered, firing, open, active | Problem |
+| ok, resolved, recovery, clear, closed, inactive | OK |
+
+---
+
+## Tags Handling
+
+All unrecognized fields are captured as tags:
+
+```json
+{
+  "title": "Alert",
+  "severity": "warning",
+  "custom_field_1": "value1",
+  "custom_field_2": "value2"
 }
 ```
 
-</CodeGroup>
+Results in tags:
+- `custom_field_1: value1`
+- `custom_field_2: value2`
 
-## Folders
+### Nested Tags
 
-Simply put your MDX files in folders and update the paths in `docs.json`.
+You can also send structured tags:
 
-For example, to have a page at `https://yoursite.com/your-folder/your-page` you would make a folder called `your-folder` containing an MDX file called `your-page.mdx`.
-
-<Warning>
-  You cannot use `api` for the name of a folder unless you nest it inside another folder. Mintlify uses Next.js which reserves the top-level `api` folder for internal server calls. A folder name such as `api-reference` would be accepted.
-</Warning>
-
-```json Navigation With Folder
-"navigation": {
-  "tabs": [
-    {
-      "tab": "Docs",
-      "groups": [
-        {
-          "group": "Group Name",
-          "pages": ["your-folder/your-page"]
-        }
-      ]
-    }
-  ]
+```json
+{
+  "tags": {
+    "environment": "production",
+    "team": "platform",
+    "service": "api"
+  }
 }
 ```
 
-## Hidden pages
+---
 
-MDX files not included in `docs.json` will not show up in the sidebar but are accessible through the search bar and by linking directly to them.
+## Example Payloads
+
+### Minimal Payload
+
+```json
+{
+  "title": "High CPU Usage",
+  "severity": "critical",
+  "host": "web-01"
+}
+```
+
+### Full Payload
+
+```json
+{
+  "eventId": "evt-12345",
+  "title": "Database connection pool exhausted",
+  "description": "All database connections are in use. New requests are being queued.",
+  "severity": "critical",
+  "status": "problem",
+  "host": "db-server-01",
+  "hostIp": "10.0.1.50",
+  "service": "postgresql",
+  "environment": "production",
+  "region": "us-east-1",
+  "timestamp": "2024-01-15T10:30:00Z",
+  "url": "https://internal-monitoring.example.com/alerts/12345",
+  "tags": {
+    "team": "database",
+    "tier": "critical",
+    "customer": "acme-corp"
+  },
+  "metrics": {
+    "active_connections": 100,
+    "max_connections": 100,
+    "queue_length": 25
+  }
+}
+```
+
+### Recovery Payload
+
+```json
+{
+  "eventId": "evt-12345",
+  "title": "Database connection pool exhausted",
+  "status": "resolved",
+  "timestamp": "2024-01-15T10:45:00Z"
+}
+```
+
+---
+
+## Custom Severity Mapping
+
+If your tool uses custom severity values:
+
+```json
+{
+  "severityMapping": {
+    "sourceField": "priority",
+    "mappings": {
+      "urgent": "critical",
+      "high": "high",
+      "medium": "warning",
+      "low": "info"
+    },
+    "default": "warning"
+  }
+}
+```
+
+---
+
+## Enrichment Examples
+
+Add context to all custom alerts:
+
+```json
+{
+  "enrichment": {
+    "tags.source": "custom-monitoring",
+    "tags.datacenter": "dc1",
+    "owner": "ops-team"
+  }
+}
+```
+
+---
+
+## cURL Examples
+
+### Sending an Alert
+
+```bash
+curl -X POST "YOUR_WEBHOOK_URL" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "title": "Test Alert",
+    "severity": "warning",
+    "host": "test-server",
+    "description": "This is a test alert"
+  }'
+```
+
+### Sending a Recovery
+
+```bash
+curl -X POST "YOUR_WEBHOOK_URL" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "eventId": "same-event-id",
+    "status": "resolved"
+  }'
+```
+
+---
+
+## Integration Examples
+
+### From a Shell Script
+
+```bash
+#!/bin/bash
+
+WEBHOOK_URL="YOUR_WEBHOOK_URL"
+
+# Check disk usage
+DISK_USAGE=$(df -h / | awk 'NR==2 {print $5}' | tr -d '%')
+
+if [ "$DISK_USAGE" -gt 90 ]; then
+  curl -X POST "$WEBHOOK_URL" \
+    -H "Content-Type: application/json" \
+    -d "{
+      \"title\": \"High Disk Usage\",
+      \"severity\": \"critical\",
+      \"host\": \"$(hostname)\",
+      \"description\": \"Disk usage is at ${DISK_USAGE}%\"
+    }"
+fi
+```
+
+### From Python
+
+```python
+import requests
+import json
+
+webhook_url = "YOUR_WEBHOOK_URL"
+
+payload = {
+    "title": "Application Error",
+    "severity": "high",
+    "host": "app-server-01",
+    "service": "payment-service",
+    "description": "Payment processing failed",
+    "tags": {
+        "error_code": "PAY-001",
+        "transaction_id": "txn-12345"
+    }
+}
+
+response = requests.post(
+    webhook_url,
+    headers={"Content-Type": "application/json"},
+    data=json.dumps(payload)
+)
+
+print(f"Status: {response.status_code}")
+```
+
+### From Node.js
+
+```javascript
+const axios = require('axios');
+
+const webhookUrl = 'YOUR_WEBHOOK_URL';
+
+const payload = {
+  title: 'Service Degradation',
+  severity: 'warning',
+  host: 'api-gateway',
+  service: 'user-service',
+  description: 'Response times increased by 50%',
+  tags: {
+    p99_latency: '2500ms',
+    error_rate: '2.5%'
+  }
+};
+
+axios.post(webhookUrl, payload)
+  .then(response => console.log('Alert sent:', response.status))
+  .catch(error => console.error('Error:', error.message));
+```
+
+---
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Webhook returns error">
+    1. Verify Content-Type is `application/json`
+    2. Ensure payload is valid JSON
+    3. Check webhook URL is correct
+    4. Look at response body for error details
+  </Accordion>
+  <Accordion title="Fields not being extracted">
+    1. Use recognized field names from the list above
+    2. Check field name spelling and casing
+    3. View webhook samples to see parsed result
+  </Accordion>
+  <Accordion title="Wrong severity assigned">
+    1. Check severity value spelling
+    2. Configure custom severity mapping
+    3. Set appropriate default severity
+  </Accordion>
+  <Accordion title="Recovery not resolving incident">
+    1. Include same `eventId` in recovery
+    2. Set `status` to "resolved" or "ok"
+    3. Verify both payloads reach EasyContact
+  </Accordion>
+</AccordionGroup>
+
+---
+
+## Best Practices
+
+<AccordionGroup>
+  <Accordion title="Use Consistent Event IDs">
+    Include a unique `eventId` that stays consistent between alert and recovery. This enables automatic incident resolution.
+  </Accordion>
+  <Accordion title="Include Relevant Context">
+    Add host, service, and environment fields to help responders quickly understand the alert.
+  </Accordion>
+  <Accordion title="Use Tags for Routing">
+    Add tags that can be used in escalation routing rules (team, environment, customer).
+  </Accordion>
+  <Accordion title="Test Thoroughly">
+    Send test alerts and recoveries before relying on the integration in production.
+  </Accordion>
+  <Accordion title="Include URLs">
+    Add links to your monitoring tool or relevant dashboards in the `url` field.
+  </Accordion>
+</AccordionGroup>
