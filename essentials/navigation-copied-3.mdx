@@ -1,86 +1,274 @@
 ---
-title: "Dynatrace"
-description: "The navigation field in docs.json defines the pages that go in the navigation menu"
-icon: "map"
+title: 'Dynatrace'
+description: 'Receive problem notifications from Dynatrace'
+icon: 'd'
 ---
 
-The navigation menu is the list of links on every website.
+## Overview
 
-You will likely update `docs.json` every time you add a new page. Pages do not show up automatically.
+Dynatrace is an AI-powered software intelligence platform. EasyContact integrates with Dynatrace Problem Notifications, automatically creating incidents when Dynatrace detects problems in your environment.
 
-## Navigation syntax
+---
 
-Our navigation syntax is recursive which means you can make nested navigation groups. You don't need to include `.mdx` in page names.
+## Setup Instructions
 
-<CodeGroup>
+<Steps>
+  <Step title="Create Integration in EasyContact">
+    1. Go to **Configuration** → **Integrations**
+    2. Click **Add Integration**
+    3. Select **Dynatrace** as the type
+    4. Enter a name (e.g., "Production Dynatrace")
+    5. Save and copy the webhook URL
+  </Step>
+  <Step title="Configure Problem Notification in Dynatrace">
+    1. Go to **Settings** → **Integration** → **Problem notifications**
+    2. Click **Add notification**
+    3. Select **Custom Integration**
+  </Step>
+  <Step title="Configure Webhook">
+    - **Name**: EasyContact
+    - **Webhook URL**: Your EasyContact webhook URL
+    - **Accept any SSL certificate**: Based on your setup
+    - Configure the payload (see below)
+  </Step>
+  <Step title="Test the Integration">
+    Use the **Send test notification** button in Dynatrace
+  </Step>
+</Steps>
 
-```json Regular Navigation
-"navigation": {
-  "tabs": [
-    {
-      "tab": "Docs",
-      "groups": [
-        {
-          "group": "Getting Started",
-          "pages": ["quickstart"]
-        }
-      ]
-    }
-  ]
+---
+
+## Webhook Configuration
+
+### Recommended Payload
+
+```json
+{
+  "PID": "{PID}",
+  "ProblemID": "{ProblemID}",
+  "ProblemTitle": "{ProblemTitle}",
+  "ProblemDetails": "{ProblemDetailsText}",
+  "ProblemSeverity": "{ProblemSeverity}",
+  "ProblemImpact": "{ProblemImpact}",
+  "State": "{State}",
+  "ProblemURL": "{ProblemURL}",
+  "ImpactedEntities": "{ImpactedEntities}",
+  "ImpactedEntityNames": "{ImpactedEntityNames}",
+  "RootCauseEntity": "{RootCauseEntity}",
+  "ProblemStartTime": {ProblemStartTime},
+  "ProblemEndTime": {ProblemEndTime},
+  "Tags": "{Tags}"
 }
 ```
 
+---
 
-```json Nested Navigation
-"navigation": {
-  "tabs": [
-    {
-      "tab": "Docs",
-      "groups": [
-        {
-          "group": "Getting Started",
-          "pages": [
-            "quickstart",
-            {
-              "group": "Nested Reference Pages",
-              "pages": ["nested-reference-page"]
-            }
-          ]
-        }
-      ]
-    }
-  ]
+## Placeholder Variables
+
+| Placeholder | Description |
+|-------------|-------------|
+| `{PID}` | Problem ID (short form) |
+| `{ProblemID}` | Full problem identifier |
+| `{ProblemTitle}` | Problem title |
+| `{ProblemDetailsText}` | Detailed description |
+| `{ProblemSeverity}` | Severity level |
+| `{ProblemImpact}` | Impact type |
+| `{State}` | OPEN, RESOLVED, or MERGED |
+| `{ProblemURL}` | Link to problem in Dynatrace |
+| `{ImpactedEntities}` | JSON array of affected entities |
+| `{ImpactedEntityNames}` | Entity names (comma-separated) |
+| `{RootCauseEntity}` | Root cause entity |
+| `{ProblemStartTime}` | Start time (epoch ms) |
+| `{ProblemEndTime}` | End time (epoch ms, -1 if open) |
+| `{Tags}` | Problem tags |
+
+---
+
+## Field Mapping
+
+| Dynatrace Field | EasyContact Field |
+|-----------------|-------------------|
+| `PID` / `ProblemID` | Event ID |
+| `ProblemTitle` | Title |
+| `ProblemDetails` / `ProblemDetailsText` | Description |
+| `State` | Status |
+| `ProblemSeverity` | Severity |
+| `ProblemImpact` | Impact tag |
+| `ImpactedEntityNames` | Host/Service |
+| `ProblemURL` | URL |
+| `RootCauseEntity` | Root cause tag |
+
+---
+
+## Severity Mapping
+
+| Dynatrace Severity | EasyContact Severity |
+|-------------------|---------------------|
+| AVAILABILITY | Critical |
+| ERROR | Critical |
+| PERFORMANCE | High |
+| RESOURCE_CONTENTION | High |
+| CUSTOM_ALERT | Warning |
+
+### Custom Mapping
+
+```json
+{
+  "severityMapping": {
+    "sourceField": "ProblemSeverity",
+    "mappings": {
+      "AVAILABILITY": "critical",
+      "ERROR": "critical",
+      "PERFORMANCE": "high",
+      "RESOURCE_CONTENTION": "warning",
+      "CUSTOM_ALERT": "warning"
+    },
+    "default": "warning"
+  }
 }
 ```
 
-</CodeGroup>
+---
 
-## Folders
+## Status Handling
 
-Simply put your MDX files in folders and update the paths in `docs.json`.
+| Dynatrace State | EasyContact Status |
+|-----------------|-------------------|
+| OPEN | Problem |
+| RESOLVED | OK |
+| MERGED | Problem (linked) |
 
-For example, to have a page at `https://yoursite.com/your-folder/your-page` you would make a folder called `your-folder` containing an MDX file called `your-page.mdx`.
+---
 
-<Warning>
-  You cannot use `api` for the name of a folder unless you nest it inside another folder. Mintlify uses Next.js which reserves the top-level `api` folder for internal server calls. A folder name such as `api-reference` would be accepted.
-</Warning>
+## Example Payload
 
-```json Navigation With Folder
-"navigation": {
-  "tabs": [
-    {
-      "tab": "Docs",
-      "groups": [
-        {
-          "group": "Group Name",
-          "pages": ["your-folder/your-page"]
-        }
-      ]
-    }
-  ]
+```json
+{
+  "PID": "P-12345",
+  "ProblemID": "-1234567890123456789_1705315800000",
+  "ProblemTitle": "High CPU on host web-server-01",
+  "ProblemDetails": "CPU usage exceeded 90% threshold",
+  "ProblemSeverity": "RESOURCE_CONTENTION",
+  "ProblemImpact": "INFRASTRUCTURE",
+  "State": "OPEN",
+  "ProblemURL": "https://abc12345.live.dynatrace.com/#problems/problemdetails;pid=P-12345",
+  "ImpactedEntities": "[{\"entity\":\"HOST-ABC123\",\"name\":\"web-server-01\"}]",
+  "ImpactedEntityNames": "web-server-01",
+  "RootCauseEntity": "HOST-ABC123",
+  "ProblemStartTime": 1705315800000,
+  "ProblemEndTime": -1,
+  "Tags": "env:production,team:platform"
 }
 ```
 
-## Hidden pages
+---
 
-MDX files not included in `docs.json` will not show up in the sidebar but are accessible through the search bar and by linking directly to them.
+## Impact Types
+
+Dynatrace categorizes problem impact:
+
+| Impact | Description |
+|--------|-------------|
+| INFRASTRUCTURE | Affects infrastructure components |
+| SERVICE | Affects monitored services |
+| APPLICATION | Affects applications |
+| ENVIRONMENT | Affects entire environment |
+
+Impact is captured as a tag for routing.
+
+---
+
+## Impacted Entities
+
+The `ImpactedEntities` field contains a JSON array:
+
+```json
+[
+  {
+    "entity": "HOST-ABC123",
+    "name": "web-server-01",
+    "type": "HOST"
+  },
+  {
+    "entity": "SERVICE-DEF456",
+    "name": "checkout-service",
+    "type": "SERVICE"
+  }
+]
+```
+
+The first entity's name is used as the host/service.
+
+---
+
+## Enrichment Examples
+
+```json
+{
+  "enrichment": {
+    "tags.source": "dynatrace",
+    "tags.environment": "production",
+    "tags.ai_powered": "true"
+  }
+}
+```
+
+---
+
+## Alerting Profile Integration
+
+Configure which problems trigger notifications:
+
+1. Go to **Settings** → **Alerting** → **Alerting profiles**
+2. Create or edit a profile
+3. Define severity and scope rules
+4. Link to your webhook notification
+
+This allows fine-grained control over which problems reach EasyContact.
+
+---
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Notifications not being received">
+    1. Verify webhook URL in Dynatrace settings
+    2. Test with "Send test notification" button
+    3. Check Dynatrace notification logs
+    4. Verify SSL/TLS settings if using HTTPS
+  </Accordion>
+  <Accordion title="Resolved problems not closing incidents">
+    1. Ensure `State` field is in payload
+    2. Check that RESOLVED state is being sent
+    3. Verify `PID` matches between OPEN and RESOLVED
+  </Accordion>
+  <Accordion title="Missing entity information">
+    1. Include `{ImpactedEntityNames}` in payload
+    2. Check that problem has entity association
+    3. Use `{ImpactedEntities}` for detailed JSON
+  </Accordion>
+  <Accordion title="Wrong severity mapping">
+    1. Review `ProblemSeverity` values in samples
+    2. Configure custom severity mapping
+    3. Check alerting profile severity filters
+  </Accordion>
+</AccordionGroup>
+
+---
+
+## Best Practices
+
+<AccordionGroup>
+  <Accordion title="Use Alerting Profiles">
+    Filter which problems send notifications to avoid noise from low-priority issues.
+  </Accordion>
+  <Accordion title="Include Problem URL">
+    Always include `{ProblemURL}` so responders can quickly access Dynatrace for details.
+  </Accordion>
+  <Accordion title="Tag Your Entities">
+    Use Dynatrace tags (environment, team, service) for better routing in EasyContact.
+  </Accordion>
+  <Accordion title="Configure Problem Detection">
+    Tune Dynatrace's automatic problem detection to reduce false positives before they reach EasyContact.
+  </Accordion>
+</AccordionGroup>
