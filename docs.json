@@ -36,21 +36,19 @@
                 "group": "Integrations",
                 "pages": [
                   "guides/configuration/integrations/overview",
-                  "essentials/settings",
-                  "essentials/navigation",
-                  "essentials/navigation-copied-1",
-                  "essentials/navigation-copied-2",
-                  "essentials/navigation-copied-3",
-                  "essentials/navigation-copied-4",
-                  "essentials/navigation-copied-5",
-                  "essentials/navigation-copied-6"
+                  "guides/configuration/integrations/zabbix",
+                  "guides/configuration/integrations/prometheus",
+                  "guides/configuration/integrations/grafana",
+                  "guides/configuration/integrations/appdynamics",
+                  "guides/configuration/integrations/dynatrace",
+                  "guides/configuration/integrations/newrelic",
+                  "guides/configuration/integrations/datadog",
+                  "guides/configuration/integrations/custom"
                 ]
               },
               "guides/configuration/alert-rules",
               "guides/configuration/escalation-routing",
-              "guides/configuration/alert-rules-copied-2",
-              "guides/configuration/alert-rules-copied-3",
-              "guides/configuration/alert-rules-copied-4"
+              "guides/configuration/settings"
             ]
           },
           {
