@@ -24,9 +24,9 @@
           {
             "group": "Management",
             "pages": [
-              "guides/management/escalation-policies",
+              "guides/management/teams",
               "guides/management/schedules",
-              "guides/management/teams"
+              "guides/management/escalation-policies"
             ]
           },
           {
