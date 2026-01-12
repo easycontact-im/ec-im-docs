@@ -1,86 +1,317 @@
 ---
-title: "Grafana"
-description: "The navigation field in docs.json defines the pages that go in the navigation menu"
-icon: "map"
+title: 'Grafana'
+description: 'Receive alerts from Grafana unified alerting and legacy alerts'
+icon: 'chart-line'
 ---
 
-The navigation menu is the list of links on every website.
+## Overview
 
-You will likely update `docs.json` every time you add a new page. Pages do not show up automatically.
+Grafana is a popular open-source platform for monitoring and observability. EasyContact supports both Grafana's **Unified Alerting** (Grafana 8+) and **Legacy Alerting** formats.
 
-## Navigation syntax
+<Info>
+  Grafana 8+ uses Unified Alerting by default. Legacy alerting is deprecated but still supported for older installations.
+</Info>
 
-Our navigation syntax is recursive which means you can make nested navigation groups. You don't need to include `.mdx` in page names.
+---
 
-<CodeGroup>
+## Setup Instructions
 
-```json Regular Navigation
-"navigation": {
-  "tabs": [
+<Steps>
+  <Step title="Create Integration in EasyContact">
+    1. Go to **Configuration** → **Integrations**
+    2. Click **Add Integration**
+    3. Select **Grafana** as the type
+    4. Enter a name (e.g., "Production Grafana")
+    5. Save and copy the webhook URL
+  </Step>
+  <Step title="Create Contact Point (Unified Alerting)">
+    1. Go to **Alerting** → **Contact points**
+    2. Click **Add contact point**
+    3. Select **Webhook** as the type
+    4. Paste your EasyContact webhook URL
+    5. Save the contact point
+  </Step>
+  <Step title="Create Notification Policy">
+    1. Go to **Alerting** → **Notification policies**
+    2. Edit or create a policy
+    3. Set the contact point to your EasyContact webhook
+  </Step>
+  <Step title="Test the Integration">
+    Use the **Test** button in the contact point configuration to send a test alert
+  </Step>
+</Steps>
+
+---
+
+## Unified Alerting Configuration
+
+### Contact Point Setup
+
+1. Navigate to **Alerting** → **Contact points**
+2. Click **Add contact point**
+3. Configure:
+   - **Name**: EasyContact
+   - **Type**: Webhook
+   - **URL**: Your EasyContact webhook URL
+   - **HTTP Method**: POST
+
+### Optional Settings
+
+| Setting | Recommended Value |
+|---------|-------------------|
+| Max Alerts | 0 (unlimited) |
+| Disable Resolved Message | No (keep enabled) |
+| HTTP Basic Auth | Not required |
+
+---
+
+## Legacy Alerting Configuration
+
+For Grafana 7.x and earlier with legacy alerting:
+
+<Steps>
+  <Step title="Create Notification Channel">
+    1. Go to **Alerting** → **Notification channels**
+    2. Click **Add channel**
+    3. Select **webhook** as the type
+  </Step>
+  <Step title="Configure Webhook">
+    - **Name**: EasyContact
+    - **URL**: Your EasyContact webhook URL
+    - **HTTP Method**: POST
+    - **Send on all alerts**: Yes
+    - **Include image**: Optional
+  </Step>
+</Steps>
+
+---
+
+## Field Mapping
+
+### Unified Alerting
+
+| Grafana Field | EasyContact Field |
+|---------------|-------------------|
+| `labels.alertname` | Title |
+| `annotations.summary` | Title (fallback) |
+| `annotations.description` | Description |
+| `status` | Status (firing → problem, resolved → ok) |
+| `labels.severity` | Severity |
+| `labels.instance` | Host |
+| `labels.job` | Service |
+| `fingerprint` | Event ID |
+
+### Legacy Alerting
+
+| Grafana Field | EasyContact Field |
+|---------------|-------------------|
+| `ruleName` | Title |
+| `message` | Description |
+| `state` | Status |
+| `ruleUrl` | URL |
+| `evalMatches` | Metric details |
+
+---
+
+## Severity Mapping
+
+### Default Mapping
+
+| Grafana Severity | EasyContact Severity |
+|-----------------|---------------------|
+| critical | Critical |
+| high | High |
+| warning | Warning |
+| info | Info |
+
+### Legacy State Mapping
+
+| Grafana State | EasyContact Status |
+|---------------|-------------------|
+| alerting | Problem |
+| ok | OK |
+| pending | Problem (warning) |
+| no_data | Problem (warning) |
+
+---
+
+## Example Payloads
+
+### Unified Alerting Payload
+
+```json
+{
+  "receiver": "easycontact",
+  "status": "firing",
+  "alerts": [
     {
-      "tab": "Docs",
-      "groups": [
-        {
-          "group": "Getting Started",
-          "pages": ["quickstart"]
-        }
-      ]
+      "status": "firing",
+      "labels": {
+        "alertname": "HighCPU",
+        "severity": "critical",
+        "instance": "server-01",
+        "grafana_folder": "Infrastructure"
+      },
+      "annotations": {
+        "summary": "High CPU usage detected",
+        "description": "CPU usage exceeded 90%",
+        "runbook_url": "https://wiki.example.com/runbooks/high-cpu"
+      },
+      "startsAt": "2024-01-15T10:30:00Z",
+      "endsAt": "0001-01-01T00:00:00Z",
+      "fingerprint": "abc123",
+      "silenceURL": "https://grafana.example.com/alerting/silence/new",
+      "dashboardURL": "https://grafana.example.com/d/abc123",
+      "panelURL": "https://grafana.example.com/d/abc123?viewPanel=1"
     }
-  ]
+  ],
+  "groupLabels": {},
+  "commonLabels": {
+    "alertname": "HighCPU"
+  },
+  "commonAnnotations": {},
+  "externalURL": "https://grafana.example.com",
+  "orgId": 1
 }
 ```
 
+### Legacy Alerting Payload
 
-```json Nested Navigation
-"navigation": {
-  "tabs": [
+```json
+{
+  "dashboardId": 1,
+  "evalMatches": [
     {
-      "tab": "Docs",
-      "groups": [
-        {
-          "group": "Getting Started",
-          "pages": [
-            "quickstart",
-            {
-              "group": "Nested Reference Pages",
-              "pages": ["nested-reference-page"]
-            }
-          ]
-        }
-      ]
+      "value": 95.5,
+      "metric": "cpu_usage",
+      "tags": {
+        "host": "server-01"
+      }
     }
-  ]
+  ],
+  "imageUrl": "https://grafana.example.com/render/...",
+  "message": "CPU usage is above threshold",
+  "orgId": 1,
+  "panelId": 2,
+  "ruleId": 1,
+  "ruleName": "High CPU Alert",
+  "ruleUrl": "https://grafana.example.com/d/abc123",
+  "state": "alerting",
+  "tags": {
+    "environment": "production"
+  },
+  "title": "[Alerting] High CPU Alert"
 }
 ```
 
-</CodeGroup>
+---
 
-## Folders
+## Grafana-Specific Features
 
-Simply put your MDX files in folders and update the paths in `docs.json`.
+### Dashboard Links
 
-For example, to have a page at `https://yoursite.com/your-folder/your-page` you would make a folder called `your-folder` containing an MDX file called `your-page.mdx`.
+Grafana includes helpful links in alerts:
 
-<Warning>
-  You cannot use `api` for the name of a folder unless you nest it inside another folder. Mintlify uses Next.js which reserves the top-level `api` folder for internal server calls. A folder name such as `api-reference` would be accepted.
-</Warning>
+| Field | Description |
+|-------|-------------|
+| `dashboardURL` | Link to the dashboard |
+| `panelURL` | Direct link to the panel |
+| `silenceURL` | Quick link to silence the alert |
+| `generatorURL` | Link to the alert rule |
 
-```json Navigation With Folder
-"navigation": {
-  "tabs": [
-    {
-      "tab": "Docs",
-      "groups": [
-        {
-          "group": "Group Name",
-          "pages": ["your-folder/your-page"]
-        }
-      ]
-    }
-  ]
+These are captured and displayed in the incident details.
+
+---
+
+## Alert Rule Examples
+
+### CPU Alert Rule (Unified)
+
+```yaml
+apiVersion: 1
+groups:
+  - name: Infrastructure
+    rules:
+      - uid: high-cpu
+        title: High CPU Usage
+        condition: C
+        data:
+          - refId: A
+            datasourceUid: prometheus
+            model:
+              expr: 100 - (avg(rate(node_cpu_seconds_total{mode="idle"}[5m])) * 100)
+          - refId: C
+            datasourceUid: __expr__
+            model:
+              type: threshold
+              conditions:
+                - evaluator:
+                    type: gt
+                    params: [90]
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "High CPU usage on {{ index $labels \"instance\" }}"
+          description: "CPU usage is {{ $values.A }}%"
+```
+
+---
+
+## Enrichment Examples
+
+```json
+{
+  "enrichment": {
+    "tags.source": "grafana",
+    "tags.environment": "production",
+    "tags.team": "platform"
+  }
 }
 ```
 
-## Hidden pages
+---
 
-MDX files not included in `docs.json` will not show up in the sidebar but are accessible through the search bar and by linking directly to them.
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Alerts not being received">
+    1. Test the contact point from Grafana UI
+    2. Check Grafana server logs for webhook errors
+    3. Verify network connectivity to EasyContact
+    4. Ensure notification policy routes to correct contact point
+  </Accordion>
+  <Accordion title="Resolved alerts not working">
+    1. Verify "Disable Resolved Message" is NOT checked
+    2. Check notification policy includes resolved alerts
+    3. Verify alert rule has proper conditions for resolution
+  </Accordion>
+  <Accordion title="Missing dashboard links">
+    1. Ensure `externalURL` is configured in Grafana
+    2. Check Grafana root URL settings
+  </Accordion>
+  <Accordion title="Legacy vs Unified format issues">
+    1. Check which alerting system is enabled in Grafana
+    2. EasyContact auto-detects format, but verify payload structure
+    3. Review webhook samples for actual format being sent
+  </Accordion>
+</AccordionGroup>
+
+---
+
+## Best Practices
+
+<AccordionGroup>
+  <Accordion title="Use Unified Alerting">
+    Migrate to Unified Alerting for better features and consistency with Prometheus/Alertmanager format.
+  </Accordion>
+  <Accordion title="Include Runbook URLs">
+    Add `runbook_url` annotation to help responders quickly find remediation steps.
+  </Accordion>
+  <Accordion title="Organize with Folders">
+    Use Grafana folders to organize alerts and include folder name in labels.
+  </Accordion>
+  <Accordion title="Configure External URL">
+    Set Grafana's external URL properly so dashboard links work correctly.
+  </Accordion>
+</AccordionGroup>
