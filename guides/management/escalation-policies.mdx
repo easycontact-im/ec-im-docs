@@ -1,4 +1,545 @@
 ---
 title: 'Escalation Policies'
+description: 'Define how incidents are escalated when they are not acknowledged'
+icon: 'arrow-up-right-dots'
 ---
 
+## Overview
+
+Escalation Policies define the notification sequence when an incident occurs. They ensure the right people are contacted in the right order until someone acknowledges and takes ownership. With multi-level escalations, flexible targeting, and automatic retries, you can build robust response workflows for any scenario.
+
+<CardGroup cols={2}>
+  <Card title="Multi-Level Escalation" icon="stairs">
+    Define sequential levels with increasing urgency and broader reach
+  </Card>
+  <Card title="Flexible Targeting" icon="bullseye">
+    Target individuals, teams, or on-call schedules at each level
+  </Card>
+  <Card title="Multiple Channels" icon="tower-broadcast">
+    Reach responders via call, SMS, email, or webhooks
+  </Card>
+  <Card title="Smart Retries" icon="rotate-right">
+    Automatic call retries with configurable delays
+  </Card>
+</CardGroup>
+
+---
+
+## How Escalation Works
+
+When an incident triggers an escalation policy:
+
+```
+Incident Created
+       ↓
+   Level 1 → Notify targets (call, SMS, email)
+       ↓
+   No response within timeout?
+       ↓
+   Level 2 → Notify next set of targets
+       ↓
+   No response within timeout?
+       ↓
+   Level 3 → Final escalation
+       ↓
+   Still no response?
+       ↓
+   Repeat cycle (if configured)
+```
+
+The escalation stops immediately when someone **acknowledges** the incident.
+
+---
+
+## Viewing Escalation Policies
+
+The Escalation Policies page shows all your policies:
+
+| Column | Description |
+|--------|-------------|
+| **Policy** | Name, description, and default indicator (⭐) |
+| **Escalation Flow** | Preview of levels with target counts |
+| **Status** | Active or Inactive |
+| **Actions** | Edit, Duplicate, Delete |
+
+### Default Policy
+
+One policy can be marked as the **default**. This policy is used when:
+- No routing rule matches the incident
+- A service doesn't have a specific policy assigned
+
+The default policy is indicated with a star icon (⭐).
+
+---
+
+## Creating Escalation Policies
+
+<Steps>
+  <Step title="Open Create Dialog">
+    Click the **Add Policy** button
+  </Step>
+  <Step title="Configure Policy Settings">
+    In the **Policy Settings** tab:
+    - **Name** — Descriptive name (e.g., "Production Critical - 24/7")
+    - **Description** — Explain when this policy should be used
+    - **Set as Default** — Toggle if this should be the fallback policy
+  </Step>
+  <Step title="Add Escalation Levels">
+    In the **Escalation Levels** tab:
+    - Click **Add Level** to create your first level
+    - Configure targets, channels, and timing
+    - Add more levels as needed
+  </Step>
+  <Step title="Save Policy">
+    Click **Create** to save your policy
+  </Step>
+</Steps>
+
+---
+
+## Configuring Escalation Levels
+
+Each level defines who gets notified and how.
+
+### Level Timing
+
+<Tabs>
+  <Tab title="Level 1">
+    Level 1 is triggered immediately when an incident is created.
+
+    The **delay** setting determines how long to wait before escalating to Level 2 if no one acknowledges.
+
+    **Example:** "Escalate to Level 2 after 5 minutes (if no response)"
+  </Tab>
+  <Tab title="Level 2+">
+    Subsequent levels trigger after the previous level's timeout expires.
+
+    **Example:** Level 2 with 10-minute delay means it triggers 10 minutes after Level 1 started (if still unacknowledged).
+  </Tab>
+  <Tab title="Final Level">
+    The last level has no further escalation. If no one acknowledges:
+    - The policy can repeat from Level 1 (if configured)
+    - Or the escalation is marked as exhausted
+  </Tab>
+</Tabs>
+
+### Notification Targets
+
+Add targets using the dropdown selectors:
+
+| Target Type | Description |
+|-------------|-------------|
+| **Users** | Individual team members |
+| **Teams** | All members of a team receive notifications |
+| **Schedules** | The current on-call person from the schedule |
+
+<Tip>
+  Combine target types for comprehensive coverage. For example, Level 1 might target the on-call schedule, while Level 2 adds the entire team.
+</Tip>
+
+### Target Mode
+
+Choose how targets are notified:
+
+<CardGroup cols={2}>
+  <Card title="Parallel" icon="arrows-split-up-and-left">
+    **All targets notified simultaneously**
+
+    - Everyone receives notifications at once
+    - First person to acknowledge handles it
+    - Best for: Time-critical incidents
+  </Card>
+  <Card title="Sequential" icon="arrow-down-1-9">
+    **Targets notified one by one**
+
+    - Moves to next target after max retries
+    - Stops when someone acknowledges
+    - Best for: Defined escalation order
+  </Card>
+</CardGroup>
+
+<Accordion title="Example: Sequential vs Parallel">
+  **Scenario:** Level with targets Alice, Bob, Charlie
+
+  **Parallel Mode:**
+  - T=0:00 — Alice, Bob, Charlie all receive calls simultaneously
+  - T=0:01 — Bob answers and acknowledges
+  - Result: Escalation stops, Alice and Charlie calls become moot
+
+  **Sequential Mode:**
+  - T=0:00 — Alice receives call (no answer)
+  - T=0:30 — Alice retry #1 (no answer)
+  - T=1:00 — Alice retry #2 (no answer, max retries reached)
+  - T=1:00 — Bob receives call (answers!)
+  - Result: Escalation stops, Charlie never contacted
+</Accordion>
+
+### Notification Channels
+
+Select which channels to use for notifications:
+
+| Channel | Description | Best For |
+|---------|-------------|----------|
+| **Call** | Phone call with retry support | Urgent, must reach someone |
+| **SMS** | Text message | Quick notifications |
+| **Email** | Email notification | Detailed information, audit trail |
+| **Webhook** | Integration notifications | Slack, Teams, custom systems |
+
+<Info>
+  Multiple channels can be enabled simultaneously. All selected channels fire in parallel for each target.
+</Info>
+
+### Call Retry Settings
+
+When **Call** is enabled, configure retry behavior:
+
+- **Retry Count** (0-5) — How many times to retry after initial call fails
+  - Total attempts = 1 + retry count
+  - Example: 2 retries = 3 total call attempts
+
+- **Retry Delay** (10-300 seconds) — Wait time between call attempts
+  - Default: 30 seconds
+  - Gives time for the person to call back
+
+<Accordion title="Example: Call Retry Flow">
+  **Settings:** 2 retries, 30-second delay
+
+  ```
+  T=0:00  Call attempt #1 → No answer
+  T=0:30  Call attempt #2 (retry #1) → No answer
+  T=1:00  Call attempt #3 (retry #2) → No answer
+  T=1:00  Max retries reached
+          → Sequential: Move to next target
+          → Parallel: Mark target exhausted
+  ```
+</Accordion>
+
+### Webhook Selection
+
+When **Webhook** is enabled:
+
+- Select specific webhooks from your configured integrations
+- If none selected: All tenant webhooks are triggered
+- Webhooks receive full incident details and escalation context
+
+---
+
+## Level Configuration Example
+
+<Accordion title="Example: 3-Level Production Policy">
+  **Level 1: On-Call Engineer**
+  - Timing: Immediate (0 min delay)
+  - Targets: On-Call Schedule "Platform Engineering"
+  - Mode: Sequential
+  - Channels: Call, SMS
+  - Call Retries: 2 (3 total attempts)
+  - Retry Delay: 30 seconds
+  - Timeout: 5 minutes
+
+  **Level 2: Engineering Team**
+  - Timing: 5 minutes after Level 1
+  - Targets: Team "Backend Engineering", Engineering Lead (user)
+  - Mode: Parallel
+  - Channels: Call, SMS, Email
+  - Call Retries: 2
+  - Timeout: 10 minutes
+
+  **Level 3: Management**
+  - Timing: 10 minutes after Level 2
+  - Targets: VP Engineering (user)
+  - Mode: Parallel
+  - Channels: Call, SMS, Email, Webhook (Slack)
+  - Call Retries: 2
+  - No further escalation
+</Accordion>
+
+---
+
+## Repeat Settings
+
+Configure what happens when all levels complete without acknowledgment:
+
+### Repeat Limit
+
+How many times to cycle through the entire policy:
+- **1** (default) — Single pass through all levels
+- **2** — Policy repeats once (2 total passes)
+- **3+** — Multiple repeat cycles
+
+### Repeat Delay
+
+Wait time between policy repeats:
+- Default: 30 minutes
+- Gives time for the situation to potentially resolve
+- Or for responders to become available
+
+<Accordion title="Example: Repeat Cycle">
+  **Settings:** repeatLimit=2, repeatDelay=30 min
+
+  ```
+  Pass 1:
+    Level 1 → Level 2 → Level 3 (no acknowledgment)
+    ↓
+    [30 minute delay]
+    ↓
+  Pass 2:
+    Level 1 → Level 2 → Level 3 (no acknowledgment)
+    ↓
+  ESCALATION EXHAUSTED
+  (No more repeats, incident marked as exhausted)
+  ```
+</Accordion>
+
+---
+
+## Reordering Levels
+
+Levels can be reordered after creation:
+
+1. Open the policy for editing
+2. Use the **Move Up** (↑) and **Move Down** (↓) arrows
+3. Levels are renumbered automatically
+4. Save to apply changes
+
+<Note>
+  The first level always triggers immediately. Subsequent levels use their delay setting relative to when they're reached.
+</Note>
+
+---
+
+## Editing Policies
+
+<Steps>
+  <Step title="Find the Policy">
+    Locate it in the list or use search
+  </Step>
+  <Step title="Open Edit Dialog">
+    Click the **three-dot menu** (⋮) and select **Edit**
+  </Step>
+  <Step title="Make Changes">
+    Modify settings, add/remove levels, adjust timing
+  </Step>
+  <Step title="Save Changes">
+    Click **Save** to apply
+  </Step>
+</Steps>
+
+<Warning>
+  Editing a policy affects all future escalations using it. Active escalations continue with their original configuration.
+</Warning>
+
+---
+
+## Duplicating Policies
+
+Create a copy of an existing policy:
+
+1. Click the **three-dot menu** (⋮)
+2. Select **Duplicate**
+3. A copy opens in the create dialog with "(Copy)" appended to the name
+4. Modify as needed and save
+
+<Tip>
+  Use duplication to create variants for different scenarios (e.g., business hours vs after-hours versions).
+</Tip>
+
+---
+
+## Deleting Policies
+
+<Steps>
+  <Step title="Open Delete Dialog">
+    Click the three-dot menu and select **Delete**
+  </Step>
+  <Step title="Confirm Deletion">
+    Review the warning and click **Delete**
+  </Step>
+</Steps>
+
+<Warning>
+  Deleting a policy removes all its levels. Make sure no services or routing rules depend on it.
+</Warning>
+
+---
+
+## Escalation Flow Visualization
+
+The policy list shows a preview of each policy's escalation flow:
+
+```
+Level 1 (3 targets) → 5m → Level 2 (2 targets) → 10m → Level 3 (1 target)
+```
+
+This helps you quickly understand the escalation structure without opening each policy.
+
+---
+
+## Target Resolution
+
+Targets are resolved at escalation time, not when the policy is created:
+
+### User Targets
+- Direct notification to the specified user
+- Uses their configured contact methods
+
+### Team Targets
+- Expands to all current team members
+- If membership changes, new escalations use updated membership
+
+### Schedule Targets
+- Resolves to whoever is currently on-call
+- Handles overrides and rotation automatically
+- If no one is on-call (coverage gap), target is skipped
+
+<Info>
+  Dynamic resolution means your escalation policies stay current with team and schedule changes.
+</Info>
+
+---
+
+## Best Practices
+
+<AccordionGroup>
+  <Accordion title="Start with On-Call">
+    Level 1 should typically target an on-call schedule. This ensures the designated responder is contacted first before broader escalation.
+  </Accordion>
+  <Accordion title="Increase Reach at Each Level">
+    Each level should reach more people or higher authority:
+    - Level 1: Individual on-call
+    - Level 2: Team or backup
+    - Level 3: Management
+  </Accordion>
+  <Accordion title="Set Appropriate Timeouts">
+    Balance urgency with reasonable response time:
+    - Critical: 3-5 minute timeouts
+    - High: 5-10 minute timeouts
+    - Medium: 10-15 minute timeouts
+  </Accordion>
+  <Accordion title="Use Multiple Channels">
+    Don't rely on a single channel. People might miss calls but see SMS, or vice versa.
+  </Accordion>
+  <Accordion title="Configure Retries Wisely">
+    2-3 call retries with 30-second delays gives responders time to answer or call back without excessive notification fatigue.
+  </Accordion>
+  <Accordion title="Test Your Policies">
+    Create test incidents to verify escalation flows work as expected before relying on them for production.
+  </Accordion>
+  <Accordion title="Document Policy Purpose">
+    Use the description field to explain when this policy applies and any special considerations.
+  </Accordion>
+</AccordionGroup>
+
+---
+
+## Common Patterns
+
+<AccordionGroup>
+  <Accordion title="24/7 Critical Response">
+    **Level 1:** On-call schedule (sequential, call+SMS, 5 min)
+    **Level 2:** Entire team (parallel, call+SMS+email, 10 min)
+    **Level 3:** Management (parallel, all channels, 15 min)
+    **Repeat:** 2 cycles with 30 min delay
+  </Accordion>
+  <Accordion title="Business Hours Only">
+    **Level 1:** Support team (parallel, email+SMS, 15 min)
+    **Level 2:** Team lead (sequential, call+SMS, 10 min)
+    **Repeat:** 1 cycle (no repeat)
+
+    Combine with routing rules to use different policies after hours.
+  </Accordion>
+  <Accordion title="Follow-the-Sun">
+    Create separate policies for each region:
+    - EMEA Policy → EMEA on-call schedule
+    - APAC Policy → APAC on-call schedule
+    - Americas Policy → Americas on-call schedule
+
+    Use routing rules based on time or incident origin.
+  </Accordion>
+  <Accordion title="VIP Customer Escalation">
+    **Level 1:** Dedicated support (sequential, call+SMS, 3 min)
+    **Level 2:** Account team (parallel, all channels, 5 min)
+    **Level 3:** Customer success + Management (parallel, 10 min)
+    **Repeat:** 3 cycles with 15 min delay
+  </Accordion>
+</AccordionGroup>
+
+---
+
+## Escalation Status
+
+Incidents track their escalation status:
+
+| Status | Description |
+|--------|-------------|
+| **Triggered** | Escalation active, Level 1 in progress |
+| **Escalated** | Moved to a higher level |
+| **Acknowledged** | Someone responded, escalation stopped |
+| **Exhausted** | All levels and repeats completed without acknowledgment |
+
+---
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Escalation not starting">
+    1. Verify the policy is set to **Active**
+    2. Check that a routing rule or default policy is configured
+    3. Confirm the service has escalation enabled
+    4. Look for initial delay settings that might postpone escalation
+  </Accordion>
+  <Accordion title="Wrong people being notified">
+    1. Check target resolution (teams expand to current members)
+    2. Verify schedule is showing correct on-call person
+    3. Review target mode (parallel vs sequential)
+    4. Check routing rules aren't selecting a different policy
+  </Accordion>
+  <Accordion title="Notifications not being received">
+    1. Verify user contact methods are configured correctly
+    2. Check notification channel is enabled for the level
+    3. Confirm phone numbers are in correct format
+    4. Review webhook configurations if using integrations
+  </Accordion>
+  <Accordion title="Escalation stopping too early">
+    1. Someone may have acknowledged without you knowing
+    2. Check incident status in the incident timeline
+    3. Verify level timeout settings are sufficient
+    4. Review call retry settings
+  </Accordion>
+  <Accordion title="Escalation continuing after acknowledgment">
+    1. Ensure acknowledgment was properly recorded
+    2. Check for multiple simultaneous escalations
+    3. Verify the incident ID matches
+    4. Review incident timeline for acknowledgment event
+  </Accordion>
+</AccordionGroup>
+
+---
+
+## Quick Reference
+
+### Target Modes
+
+| Mode | Behavior |
+|------|----------|
+| Parallel | All targets notified simultaneously |
+| Sequential | Targets notified one by one |
+
+### Notification Channels
+
+| Channel | Retries | Delivery |
+|---------|---------|----------|
+| Call | Yes (configurable) | Synchronous |
+| SMS | No | Fire-and-forget |
+| Email | No | Fire-and-forget |
+| Webhook | No | Fire-and-forget |
+
+### Default Settings
+
+| Setting | Default Value |
+|---------|---------------|
+| Target Mode | Parallel |
+| Call Retries | 2 |
+| Retry Delay | 30 seconds |
+| Level Delay | 5 minutes |
+| Repeat Limit | 1 (no repeat) |
+| Repeat Delay | 30 minutes |
