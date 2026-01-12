@@ -1,7 +1,7 @@
 ---
-title: 'Teams'
-description: 'Organize your responders into teams for streamlined incident management and escalations'
-icon: 'people-group'
+title: "Teams"
+description: "Organize your responders into teams for streamlined incident management and escalations"
+icon: "people-group"
 ---
 
 ## Overview
@@ -57,13 +57,13 @@ Teams are the foundation of your incident response structure. By grouping respon
 
 The Teams page displays all teams in your organization:
 
-| Column | Description |
-|--------|-------------|
-| **Team** | Team name and description |
+| Column      | Description                           |
+| ----------- | ------------------------------------- |
+| **Team**    | Team name and description             |
 | **Members** | Number of members with avatar preview |
-| **Status** | Active or Inactive |
-| **Created** | When the team was created |
-| **Actions** | Edit, manage members, or delete |
+| **Status**  | Active or Inactive                    |
+| **Created** | When the team was created             |
+| **Actions** | Edit, manage members, or delete       |
 
 ### Filtering Teams
 
@@ -82,6 +82,7 @@ Use the toolbar to find specific teams:
   </Step>
   <Step title="Enter Team Details">
     Fill in the team information:
+
     - **Name** — Display name for the team (e.g., "Platform Engineering")
     - **Slug** — Unique identifier, lowercase with hyphens (e.g., `platform-engineering`)
     - **Description** — Brief explanation of the team's responsibility
@@ -98,12 +99,14 @@ Use the toolbar to find specific teams:
 ### Slug Format
 
 The slug must follow these rules:
+
 - Lowercase letters only
 - Numbers allowed
 - Hyphens for spaces
 - No special characters
 
 **Examples:**
+
 - `backend-api`
 - `customer-support-tier1`
 - `devops-infrastructure`
@@ -119,6 +122,7 @@ The slug must follow these rules:
 ### Viewing Members
 
 Team members are shown in the Members column with avatar previews:
+
 - Up to 4 avatars displayed
 - "+X" indicator shows additional members
 - Click the members cell to open the full member list
@@ -160,6 +164,7 @@ The member is added immediately and can start receiving notifications for team-a
 ### Member Information
 
 The members dialog shows:
+
 - **Avatar** — User's profile picture or initials
 - **Name** — Full name
 - **Email** — Contact email address
@@ -171,10 +176,10 @@ The members dialog shows:
 
 Each team member can have one of two roles:
 
-| Role | Description |
-|------|-------------|
-| **Lead** | Team leader with management responsibilities |
-| **Member** | Standard team member |
+| Role       | Description                                  |
+| ---------- | -------------------------------------------- |
+| **Lead**   | Team leader with management responsibilities |
+| **Member** | Standard team member                         |
 
 <Tip>
   Member roles are informational and help identify team structure. Both roles receive the same notifications.
@@ -218,6 +223,7 @@ Deactivate a team to temporarily disable it while preserving its configuration:
 3. Save changes
 
 **Inactive teams:**
+
 - Won't appear in escalation target selections
 - Members remain associated
 - Can be reactivated at any time
@@ -271,6 +277,7 @@ When a team is notified through an escalation:
 ### Mixed Targets
 
 Escalation levels can combine different target types:
+
 - Individual users
 - Teams
 - On-call schedules
@@ -279,13 +286,16 @@ This flexibility allows complex notification flows tailored to your organization
 
 <Accordion title="Example: Multi-Level Escalation">
   **Level 1** (0 min):
+
   - On-Call Schedule: "Primary On-Call"
 
   **Level 2** (5 min):
+
   - Team: "Backend Engineering"
   - Mode: Parallel
 
   **Level 3** (15 min):
+
   - User: "Engineering Manager"
   - Team: "Leadership"
 
@@ -350,12 +360,14 @@ This flexibility allows complex notification flows tailored to your organization
   </Accordion>
   <Accordion title="Document Team Purpose">
     Use the description field to explain:
+
     - What services/areas the team owns
     - When to escalate to this team
     - Team lead or contact person
   </Accordion>
   <Accordion title="Regular Membership Reviews">
     Periodically review team membership:
+
     - Remove people who've left or changed roles
     - Add new team members promptly
     - Verify contact information is current
@@ -391,6 +403,7 @@ This flexibility allows complex notification flows tailored to your organization
   </Accordion>
   <Accordion title="Can't delete a team">
     Check if the team is referenced in:
+
     - Active escalation policies
     - Incident assignments
 
@@ -404,12 +417,12 @@ This flexibility allows complex notification flows tailored to your organization
 
 Teams and Groups serve different purposes in EasyContact:
 
-| Aspect | Teams | Groups |
-|--------|-------|--------|
-| **Purpose** | Incident response and escalations | Access control and permissions |
-| **Used For** | On-call, incident assignment, notifications | Role assignment, feature access |
-| **Found In** | Escalation policies, incidents | User management, IAM |
-| **Members** | Responders for specific services | Users needing similar permissions |
+| Aspect       | Teams                                       | Groups                            |
+| ------------ | ------------------------------------------- | --------------------------------- |
+| **Purpose**  | Incident response and escalations           | Access control and permissions    |
+| **Used For** | On-call, incident assignment, notifications | Role assignment, feature access   |
+| **Found In** | Escalation policies, incidents              | User management, IAM              |
+| **Members**  | Responders for specific services            | Users needing similar permissions |
 
 <Tip>
   Use **Teams** for operational structure (who responds to incidents) and **Groups** for access control (who can do what in the platform).
