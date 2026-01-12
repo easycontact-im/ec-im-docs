@@ -24,6 +24,7 @@
           {
             "group": "Management",
             "pages": [
+              "guides/management/schedules",
               "guides/management/teams"
             ]
           },
