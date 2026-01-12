@@ -1,320 +1,290 @@
 ---
-title: "Zabbix"
-description: "Mintlify gives you complete control over the look and feel of your documentation using the docs.json file"
-icon: "gear"
+title: 'Zabbix'
+description: 'Receive alerts from Zabbix monitoring system'
+icon: 'z'
 ---
 
-Every Mintlify site needs a `docs.json` file with the core configuration settings. Learn more about the [properties](#properties) below.
+## Overview
 
-## Properties
+Zabbix is an open-source enterprise monitoring solution for networks and applications. EasyContact receives alerts from Zabbix via webhook media type, automatically creating incidents from trigger events.
 
-<ResponseField name="name" type="string" required>
-  Name of your project. Used for the global title.
+<Info>
+  This integration works with Zabbix 4.4+ which supports native webhook media types.
+</Info>
 
-  Example: `mintlify`
-</ResponseField>
+---
 
-<ResponseField name="navigation" type="Navigation[]" required>
-  An array of groups with all the pages within that group
+## Setup Instructions
 
-  <Expandable title="Navigation">
-    <ResponseField name="group" type="string">
-      The name of the group.
+<Steps>
+  <Step title="Create Integration in EasyContact">
+    1. Go to **Configuration** → **Integrations**
+    2. Click **Add Integration**
+    3. Select **Zabbix** as the type
+    4. Enter a name (e.g., "Production Zabbix")
+    5. Save and copy the webhook URL
+  </Step>
+  <Step title="Create Media Type in Zabbix">
+    1. Go to **Administration** → **Media Types**
+    2. Click **Create media type**
+    3. Set **Type** to **Webhook**
+    4. Enter **Name**: "EasyContact"
+  </Step>
+  <Step title="Configure Webhook Parameters">
+    Add the following parameters:
 
-      Example: `Settings`
-    </ResponseField>
-    <ResponseField name="pages" type="string[]">
-      The relative paths to the markdown files that will serve as pages.
+    | Name | Value |
+    |------|-------|
+    | `URL` | Your EasyContact webhook URL |
+    | `HTTPProxy` | (optional) Your proxy if needed |
 
-      Example: `["customization", "page"]`
-    </ResponseField>
-  </Expandable>
-</ResponseField>
+    Set the script (see below)
+  </Step>
+  <Step title="Create Action">
+    1. Go to **Configuration** → **Actions**
+    2. Create a new action for trigger events
+    3. Add operation with media type "EasyContact"
+  </Step>
+  <Step title="Test the Integration">
+    Trigger a test alert in Zabbix and verify it appears in EasyContact
+  </Step>
+</Steps>
 
-<ResponseField name="logo" type="string or object">
-  Path to logo image or object with path to "light" and "dark" mode logo images
+---
 
-  <Expandable title="Logo">
-    <ResponseField name="light" type="string">
-      Path to the logo in light mode
-    </ResponseField>
-    <ResponseField name="dark" type="string">
-      Path to the logo in dark mode
-    </ResponseField>
-    <ResponseField name="href" type="string" default="/">
-      Where clicking on the logo links you to
-    </ResponseField>
-  </Expandable>
-</ResponseField>
+## Webhook Script
 
-<ResponseField name="favicon" type="string">
-  Path to the favicon image
-</ResponseField>
+Use this script in your Zabbix webhook media type:
 
-<ResponseField name="colors" type="Colors">
-  Hex color codes for your global theme
+```javascript
+var params = JSON.parse(value),
+    req = new HttpRequest(),
+    resp;
 
-  <Expandable title="Colors">
-    <ResponseField name="primary" type="string" required>
-      The primary color. Used for most often for highlighted content, section headers, accents, in light mode
-    </ResponseField>
-    <ResponseField name="light" type="string">
-      The primary color for dark mode. Used for most often for highlighted content, section headers, accents, in dark mode
-    </ResponseField>
-    <ResponseField name="dark" type="string">
-      The primary color for important buttons
-    </ResponseField>
-    <ResponseField name="background" type="object">
-      The color of the background in both light and dark mode
+req.addHeader('Content-Type: application/json');
 
-      <Expandable title="Object">
-        <ResponseField name="light" type="string" required>
-          The hex color code of the background in light mode
-        </ResponseField>
-        <ResponseField name="dark" type="string" required>
-          The hex color code of the background in dark mode
-        </ResponseField>
-      </Expandable>
-    </ResponseField>
-  </Expandable>
-</ResponseField>
+var payload = {
+    event_id: params.event_id,
+    trigger_id: params.trigger_id,
+    trigger_name: params.trigger_name,
+    trigger_severity: params.trigger_severity,
+    trigger_status: params.trigger_status,
+    host_name: params.host_name,
+    host_ip: params.host_ip,
+    item_name: params.item_name,
+    item_value: params.item_value,
+    event_date: params.event_date,
+    event_time: params.event_time,
+    event_tags: params.event_tags,
+    trigger_description: params.trigger_description,
+    trigger_url: params.trigger_url
+};
 
-<ResponseField name="topbarLinks" type="TopbarLink[]">
-  Array of `name`s and `url`s of links you want to include in the topbar
+resp = req.post(params.URL, JSON.stringify(payload));
 
-  <Expandable title="TopbarLink">
-    <ResponseField name="name" type="string">
-      The name of the button.
+if (req.getStatus() !== 200) {
+    throw 'Response code: ' + req.getStatus();
+}
 
-      Example: `Contact us`
-    </ResponseField>
-    <ResponseField name="url" type="string">
-      The url once you click on the button. Example: `https://mintlify.com/docs`
-    </ResponseField>
-  </Expandable>
-</ResponseField>
+return true;
+```
 
-<ResponseField name="topbarCtaButton" type="Call to Action">
-  <Expandable title="Topbar Call to Action">
-    <ResponseField name="type" type={'"link" or "github"'} default="link">
-      Link shows a button. GitHub shows the repo information at the url provided including the number of GitHub stars.
-    </ResponseField>
-    <ResponseField name="url" type="string">
-      If `link`: What the button links to.
+---
 
-      If `github`: Link to the repository to load GitHub information from.
-    </ResponseField>
-    <ResponseField name="name" type="string">
-      Text inside the button. Only required if `type` is a `link`.
-    </ResponseField>
-  </Expandable>
-</ResponseField>
+## Webhook Parameters
 
-<ResponseField name="versions" type="string[]">
-  Array of version names. Only use this if you want to show different versions of docs with a dropdown in the navigation bar.
-</ResponseField>
+Configure these parameters in the Zabbix media type:
 
-<ResponseField name="anchors" type="Anchor[]">
-  An array of the anchors, includes the `icon`, `color`, and `url`.
+| Parameter | Macro | Description |
+|-----------|-------|-------------|
+| `event_id` | `{EVENT.ID}` | Unique event identifier |
+| `trigger_id` | `{TRIGGER.ID}` | Trigger identifier |
+| `trigger_name` | `{TRIGGER.NAME}` | Trigger name/title |
+| `trigger_severity` | `{TRIGGER.SEVERITY}` | Severity level |
+| `trigger_status` | `{TRIGGER.STATUS}` | PROBLEM or OK |
+| `host_name` | `{HOST.NAME}` | Affected host |
+| `host_ip` | `{HOST.IP}` | Host IP address |
+| `item_name` | `{ITEM.NAME}` | Item that triggered |
+| `item_value` | `{ITEM.VALUE}` | Current value |
+| `event_date` | `{EVENT.DATE}` | Event date |
+| `event_time` | `{EVENT.TIME}` | Event time |
+| `event_tags` | `{EVENT.TAGS}` | Event tags |
+| `trigger_description` | `{TRIGGER.DESCRIPTION}` | Description |
+| `trigger_url` | `{TRIGGER.URL}` | Link to trigger |
 
-  <Expandable title="Anchor">
-    <ResponseField name="icon" type="string">
-      The [Font Awesome](https://fontawesome.com/search?q=heart) icon used to feature the anchor.
+---
 
-      Example: `comments`
-    </ResponseField>
-    <ResponseField name="name" type="string">
-      The name of the anchor label.
+## Field Mapping
 
-      Example: `Community`
-    </ResponseField>
-    <ResponseField name="url" type="string">
-      The start of the URL that marks what pages go in the anchor. Generally, this is the name of the folder you put your pages in.
-    </ResponseField>
-    <ResponseField name="color" type="string">
-      The hex color of the anchor icon background. Can also be a gradient if you pass an object with the properties `from` and `to` that are each a hex color.
-    </ResponseField>
-    <ResponseField name="version" type="string">
-      Used if you want to hide an anchor until the correct docs version is selected.
-    </ResponseField>
-    <ResponseField name="isDefaultHidden" type="boolean" default="false">
-      Pass `true` if you want to hide the anchor until you directly link someone to docs inside it.
-    </ResponseField>
-    <ResponseField name="iconType" type="string" default="duotone">
-      One of: "brands", "duotone", "light", "sharp-solid", "solid", or "thin"
-    </ResponseField>
-  </Expandable>
-</ResponseField>
+EasyContact automatically maps Zabbix fields:
 
-<ResponseField name="topAnchor" type="Object">
-  Override the default configurations for the top-most anchor.
+| Zabbix Field | EasyContact Field |
+|--------------|-------------------|
+| `event_id` / `eventid` | Event ID |
+| `trigger_name` | Title |
+| `trigger_description` | Description |
+| `trigger_status` | Status (PROBLEM → problem, OK → ok) |
+| `trigger_severity` | Severity |
+| `host_name` / `hostname` | Host |
+| `host_ip` | Host IP |
+| `item_name` / `application` | Service |
+| `host_group` | Environment |
+| `event_tags` | Tags |
 
-  <Expandable title="Object">
-    <ResponseField name="name" type="string" default="Documentation">
-      The name of the top-most anchor
-    </ResponseField>
-    <ResponseField name="icon" type="string" default="book-open">
-      Font Awesome icon.
-    </ResponseField>
-    <ResponseField name="iconType" type="string" default="duotone">
-      One of: "brands", "duotone", "light", "sharp-solid", "solid", or "thin"
-    </ResponseField>
-  </Expandable>
-</ResponseField>
+---
 
-<ResponseField name="tabs" type="Tabs[]">
-  An array of navigational tabs.
+## Severity Mapping
 
-  <Expandable title="Tabs">
-    <ResponseField name="name" type="string">
-      The name of the tab label.
-    </ResponseField>
-    <ResponseField name="url" type="string">
-      The start of the URL that marks what pages go in the tab. Generally, this is the name of the folder you put your pages in.
-    </ResponseField>
-  </Expandable>
-</ResponseField>
+Zabbix uses numeric and text severity levels:
 
-<ResponseField name="api" type="API">
-  Configuration for API settings. Learn more about API pages at [API Components](/api-playground/demo).
+| Zabbix Value | Zabbix Name | EasyContact Severity |
+|--------------|-------------|---------------------|
+| 5 | Disaster | Critical |
+| 4 | High | High |
+| 3 | Average | Warning |
+| 2 | Warning | Warning |
+| 1 | Information | Info |
+| 0 | Not classified | Info |
 
-  <Expandable title="API">
-    <ResponseField name="baseUrl" type="string">
-      The base url for all API endpoints. If `baseUrl` is an array, it will enable for multiple base url options that the user can toggle.
-    </ResponseField>
-    <ResponseField name="auth" type="Auth">
-      <Expandable title="Auth">
-        <ResponseField name="method" type='"bearer" | "basic" | "key"'>
-          The authentication strategy used for all API endpoints.
-        </ResponseField>
-        <ResponseField name="name" type="string">
-          The name of the authentication parameter used in the API playground.
+### Custom Mapping
 
-          If method is `basic`, the format should be `[usernameName]:[passwordName]`
-        </ResponseField>
-        <ResponseField name="inputPrefix" type="string">
-          The default value that's designed to be a prefix for the authentication input field.
+Override the default mapping if needed:
 
-          E.g. If an `inputPrefix` of `AuthKey` would inherit the default input result of the authentication field as `AuthKey`.
-        </ResponseField>
-      </Expandable>
-    </ResponseField>
-    <ResponseField name="playground" type="Playground">
-      Configurations for the API playground
-
-      <Expandable title="Playground">
-        <ResponseField name="mode" type='"show" | "simple" | "hide"' default="show">
-          Whether the playground is showing, hidden, or only displaying the endpoint with no added user interactivity `simple`
-
-          Learn more at the [playground guides](/api-playground/demo)
-        </ResponseField>
-      </Expandable>
-    </ResponseField>
-    <ResponseField name="maintainOrder" type="boolean">
-      Enabling this flag ensures that key ordering in OpenAPI pages matches the key ordering defined in the OpenAPI file.
-
-      <Warning>
-        This behavior will soon be enabled by default, at which point this field will be deprecated.
-      </Warning>
-    </ResponseField>
-  </Expandable>
-</ResponseField>
-
-<ResponseField name="openapi" type="string | string[]">
-  A string or an array of strings of URL(s) or relative path(s) pointing to your OpenAPI file.
-
-  Examples:
-
-  <CodeGroup>
-
-  ```json Absolute
-  "openapi": "https://example.com/openapi.json"
-  ```
-
-  
-  ```json Relative
-  "openapi": "/openapi.json"
-  ```
-
-  
-  ```json Multiple
-  "openapi": ["https://example.com/openapi1.json", "/openapi2.json", "/openapi3.json"]
-  ```
-
-  </CodeGroup>
-</ResponseField>
-
-<ResponseField name="footerSocials" type="FooterSocials">
-  An object of social media accounts where the key:property pair represents the social media platform and the account url.
-
-  Example:
-
-  ```json
-  {
-    "x": "https://x.com/mintlify",
-    "website": "https://mintlify.com"
+```json
+{
+  "severityMapping": {
+    "sourceField": "trigger_severity",
+    "mappings": {
+      "disaster": "critical",
+      "high": "critical",
+      "average": "high",
+      "warning": "warning",
+      "information": "info",
+      "not_classified": "info"
+    },
+    "default": "warning"
   }
-  ```
+}
+```
 
-  <Expandable title="FooterSocials">
-    <ResponseField name="[key]" type="string">
-      One of the following values `website`, `facebook`, `x`, `discord`, `slack`, `github`, `linkedin`, `instagram`, `hacker-news`
+---
 
-      Example: `x`
-    </ResponseField>
-    <ResponseField name="property" type="string">
-      The URL to the social platform.
+## Status Handling
 
-      Example: `https://x.com/mintlify`
-    </ResponseField>
-  </Expandable>
-</ResponseField>
+| Zabbix Status | EasyContact Status | Action |
+|---------------|-------------------|--------|
+| PROBLEM | Problem | Creates/updates incident |
+| OK | OK | Resolves incident |
 
-<ResponseField name="feedback" type="Feedback">
-  Configurations to enable feedback buttons
+Recovery events (OK status) automatically resolve the corresponding incident.
 
-  <Expandable title="Feedback">
-    <ResponseField name="suggestEdit" type="boolean" default="false">
-      Enables a button to allow users to suggest edits via pull requests
-    </ResponseField>
-    <ResponseField name="raiseIssue" type="boolean" default="false">
-      Enables a button to allow users to raise an issue about the documentation
-    </ResponseField>
-  </Expandable>
-</ResponseField>
+---
 
-<ResponseField name="modeToggle" type="ModeToggle">
-  Customize the dark mode toggle.
+## Tags Support
 
-  <Expandable title="ModeToggle">
-    <ResponseField name="default" type={'"light" or "dark"'}>
-      Set if you always want to show light or dark mode for new users. When not set, we default to the same mode as the user's operating system.
-    </ResponseField>
-    <ResponseField name="isHidden" type="boolean" default="false">
-      Set to true to hide the dark/light mode toggle. You can combine `isHidden` with `default` to force your docs to only use light or dark mode. For example:
+Zabbix tags are captured in two formats:
 
-      <CodeGroup>
+### Native Format (Zabbix 5.0+)
+```json
+{
+  "tags": [
+    {"tag": "environment", "value": "production"},
+    {"tag": "team", "value": "platform"}
+  ]
+}
+```
 
-      ```json Only Dark Mode
-      "modeToggle": {
-        "default": "dark",
-        "isHidden": true
-      }
-      ```
+### Legacy Format
+```json
+{
+  "event_tags": "environment:production,team:platform"
+}
+```
 
-      
-      ```json Only Light Mode
-      "modeToggle": {
-        "default": "light",
-        "isHidden": true
-      }
-      ```
+Both formats are automatically parsed and added to the incident tags.
 
-      </CodeGroup>
-    </ResponseField>
-  </Expandable>
-</ResponseField>
+---
 
-<ResponseField name="backgroundImage" type="string">
-  A background image to be displayed behind every page. See example with [Infisical](https://infisical.com/docs) and [FRPC](https://frpc.io).
-</ResponseField>
+## Example Payload
+
+```json
+{
+  "event_id": "12345",
+  "trigger_id": "67890",
+  "trigger_name": "High CPU usage on {HOST.NAME}",
+  "trigger_severity": "high",
+  "trigger_status": "PROBLEM",
+  "host_name": "web-server-01",
+  "host_ip": "192.168.1.100",
+  "item_name": "CPU utilization",
+  "item_value": "95%",
+  "event_date": "2024.01.15",
+  "event_time": "10:30:00",
+  "event_tags": "environment:production,team:platform",
+  "trigger_description": "CPU usage is above 90% for 5 minutes",
+  "trigger_url": "https://zabbix.example.com/triggers/67890"
+}
+```
+
+---
+
+## Enrichment Examples
+
+Add context to all Zabbix alerts:
+
+```json
+{
+  "enrichment": {
+    "tags.source": "zabbix",
+    "tags.environment": "production",
+    "tags.datacenter": "dc1",
+    "owner": "infrastructure-team"
+  }
+}
+```
+
+---
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Alerts not being received">
+    1. Verify the webhook URL is correct in Zabbix media type
+    2. Check Zabbix can reach the EasyContact API (no firewall blocking)
+    3. Test the webhook script manually in Zabbix
+    4. Review Zabbix action logs for errors
+  </Accordion>
+  <Accordion title="Wrong severity mapping">
+    1. Check if Zabbix sends numeric (0-5) or text severity
+    2. Configure appropriate severity mapping
+    3. View webhook samples to see actual values
+  </Accordion>
+  <Accordion title="Recovery events not resolving incidents">
+    1. Verify recovery operations are enabled in Zabbix action
+    2. Check the `trigger_status` field is included in payload
+    3. Ensure event_id matches between PROBLEM and OK events
+  </Accordion>
+  <Accordion title="Missing host information">
+    1. Add `{HOST.NAME}` and `{HOST.IP}` macros to webhook parameters
+    2. Verify the macros resolve correctly in Zabbix
+  </Accordion>
+</AccordionGroup>
+
+---
+
+## Best Practices
+
+<AccordionGroup>
+  <Accordion title="Use Event Tags">
+    Add tags in Zabbix for better routing and filtering in EasyContact. Tags like environment, team, and service help with escalation routing.
+  </Accordion>
+  <Accordion title="Include Trigger URL">
+    Add `{TRIGGER.URL}` to help responders quickly navigate to Zabbix for more details.
+  </Accordion>
+  <Accordion title="Configure Recovery">
+    Enable recovery operations to automatically resolve incidents when the problem clears.
+  </Accordion>
+  <Accordion title="Test with Low Severity">
+    Use Information or Warning severity triggers for initial testing to avoid unnecessary escalations.
+  </Accordion>
+</AccordionGroup>
