@@ -1,4 +1,504 @@
 ---
 title: 'Schedules'
+description: 'Set up on-call rotations to ensure 24/7 incident coverage'
+icon: 'calendar-days'
 ---
 
+## Overview
+
+Schedules define who is on-call and when. By creating rotation schedules, you ensure there's always someone available to respond to incidents. EasyContact's scheduling system supports flexible rotation patterns, multiple coverage layers, time-based restrictions, and temporary overrides.
+
+<CardGroup cols={2}>
+  <Card title="Rotation Management" icon="rotate">
+    Define daily or weekly rotations with automatic handoffs
+  </Card>
+  <Card title="Multi-Layer Coverage" icon="layer-group">
+    Stack multiple layers for primary, secondary, and specialized coverage
+  </Card>
+  <Card title="Flexible Restrictions" icon="clock">
+    Set active hours and days for each layer
+  </Card>
+  <Card title="Temporary Overrides" icon="user-clock">
+    Handle vacations and swaps without changing the schedule
+  </Card>
+</CardGroup>
+
+---
+
+## Understanding Schedules
+
+A schedule consists of several key components:
+
+### Rotation Type
+
+<Tabs>
+  <Tab title="Daily Rotation">
+    The on-call person changes every day at the specified handoff time.
+
+    **Best for:**
+    - High-volume alert environments
+    - Distributing load evenly
+    - Teams that prefer short shifts
+
+    **Example:**
+    - Handoff time: 09:00
+    - Monday: Alice → Tuesday: Bob → Wednesday: Carol → ...
+  </Tab>
+  <Tab title="Weekly Rotation">
+    The on-call person changes once per week on the specified day and time.
+
+    **Best for:**
+    - Lower-volume environments
+    - Deeper context during shifts
+    - Teams with longer handoff processes
+
+    **Example:**
+    - Handoff: Monday at 09:00
+    - Week 1: Alice → Week 2: Bob → Week 3: Carol → ...
+  </Tab>
+</Tabs>
+
+### Layers
+
+Layers allow multiple rotation tracks within a single schedule. Each layer can have its own users and restrictions.
+
+<Accordion title="Example: Multi-Layer Schedule">
+  **Primary Layer (Priority 1)**
+  - Users: Alice, Bob, Carol
+  - Rotation: Weekly
+  - Active: 24/7
+
+  **Weekend Layer (Priority 2)**
+  - Users: Dave, Eve
+  - Rotation: Weekly
+  - Active: Saturday-Sunday only
+
+  **Result:** During weekdays, only the primary layer is active. On weekends, both layers provide coverage, with primary taking precedence.
+</Accordion>
+
+### Restrictions
+
+Layers can be restricted to specific times or days:
+
+| Restriction Type | Description | Example |
+|------------------|-------------|---------|
+| **Time-based** | Active during specific hours | 09:00 - 18:00 (business hours) |
+| **Day-based** | Active on specific days | Monday - Friday (weekdays) |
+| **Overnight** | Spans across midnight | 18:00 - 09:00 (night shift) |
+
+<Tip>
+  Combine restrictions to create complex coverage patterns. For example, a "Weekend Nights" layer could be active Saturday-Sunday, 20:00-08:00.
+</Tip>
+
+---
+
+## Viewing Schedules
+
+The Schedules list shows all your on-call schedules:
+
+| Column | Description |
+|--------|-------------|
+| **Schedule** | Name and description |
+| **Rotation** | Daily or Weekly badge |
+| **On-Call Now** | Current on-call person(s) |
+| **Layers** | Number of layers and total users |
+| **Timezone** | Schedule's timezone |
+| **Status** | Active or Inactive |
+
+### On-Call Status
+
+The "On-Call Now" column shows who's currently responsible:
+- **User avatar** — The current on-call person
+- **Multiple avatars** — Multiple layers active simultaneously
+- **Override badge** — An override is in effect
+
+---
+
+## Creating Schedules
+
+<Steps>
+  <Step title="Open Create Dialog">
+    Click the **Create Schedule** button
+  </Step>
+  <Step title="Configure Basic Settings">
+    In the **Schedule Settings** tab:
+    - **Name** — Descriptive name (e.g., "Platform Engineering On-Call")
+    - **Timezone** — The timezone for handoff times
+    - **Description** — Optional explanation
+    - **Rotation Type** — Daily or Weekly
+    - **Handoff Time** — When rotation changes occur
+    - **Handoff Day** — For weekly, which day of the week
+  </Step>
+  <Step title="Add Rotation Layers">
+    In the **Rotation Layers** tab:
+    - Click **Add Layer**
+    - Name the layer (e.g., "Primary")
+    - Select users in rotation order
+    - Configure restrictions if needed
+  </Step>
+  <Step title="Save Schedule">
+    Click **Create** to save your schedule
+  </Step>
+</Steps>
+
+### Setting Up Rotation Order
+
+When selecting users for a layer, the order matters:
+
+1. Check users in the order they should rotate
+2. The first user checked rotates first
+3. View the rotation order with numbered badges (#1, #2, #3...)
+
+<Info>
+  The rotation order determines who's on-call first. Make sure to order users correctly when setting up the layer.
+</Info>
+
+---
+
+## Configuring Layers
+
+### Adding a Layer
+
+<Steps>
+  <Step title="Click Add Layer">
+    In the Rotation Layers tab, click **Add Layer**
+  </Step>
+  <Step title="Name the Layer">
+    Enter a descriptive name (e.g., "Primary", "Weekend Coverage", "Night Shift")
+  </Step>
+  <Step title="Select Users">
+    Check users in the desired rotation order
+  </Step>
+  <Step title="Set Restrictions (Optional)">
+    Configure when this layer should be active
+  </Step>
+</Steps>
+
+### Configuring Time Restrictions
+
+To limit when a layer is active:
+
+<Steps>
+  <Step title="Enable Time Restriction">
+    Toggle on the time restriction option
+  </Step>
+  <Step title="Set Hours">
+    - **Start Time** — When the layer becomes active
+    - **End Time** — When the layer becomes inactive
+  </Step>
+  <Step title="Handle Overnight">
+    For overnight shifts (e.g., 18:00 - 08:00), the system automatically handles the day transition
+  </Step>
+</Steps>
+
+### Configuring Day Restrictions
+
+To limit which days a layer is active:
+
+<Steps>
+  <Step title="Enable Day Restriction">
+    Toggle on the day restriction option
+  </Step>
+  <Step title="Select Days">
+    Click on the days when this layer should be active (Monday through Sunday)
+  </Step>
+</Steps>
+
+### Layer Priority
+
+When multiple layers are active simultaneously:
+- **Lower index = Higher priority**
+- The first layer (Primary) takes precedence
+- All active layers are displayed in the on-call view
+
+<Warning>
+  Ensure at least one layer covers all time periods to avoid coverage gaps.
+</Warning>
+
+---
+
+## Schedule Detail View
+
+Click on a schedule to see its detail page with:
+
+### Calendar View
+
+A monthly calendar showing:
+- **Gray cells** — Normal rotation coverage
+- **Blue cells** — Override in effect
+- **Red cells** — Coverage gap detected
+
+Click any day to see detailed on-call information.
+
+### On-Call Timeline
+
+Shows daily coverage with:
+- Primary user (PRI badge)
+- Secondary users (SEC badge)
+- Override users (OVR badge)
+- Layer assignments
+- Time restrictions
+
+### Current On-Call
+
+Displays who's on-call right now:
+- User name and avatar
+- Layer they're covering
+- Override indicator if applicable
+- Time until next handoff
+
+### Coverage Gaps
+
+Warnings for periods with no coverage:
+- Gap start and end times
+- Duration in hours
+- Total uncovered time in the analysis period
+
+### Active Overrides
+
+List of current and upcoming overrides:
+- User who's covering
+- Override date range
+- Reason (if provided)
+- Quick delete option
+
+---
+
+## Managing Overrides
+
+Overrides let you temporarily change who's on-call without modifying the rotation.
+
+### Creating an Override
+
+<Steps>
+  <Step title="Open Override Dialog">
+    On the schedule detail page, click **Add Override**
+  </Step>
+  <Step title="Select User">
+    Choose who will be on-call during this period
+  </Step>
+  <Step title="Set Date Range">
+    - **Start** — When the override begins
+    - **End** — When the override ends
+  </Step>
+  <Step title="Add Reason (Optional)">
+    Document why this override exists (e.g., "Alice on vacation")
+  </Step>
+  <Step title="Save Override">
+    Click **Create** to activate the override
+  </Step>
+</Steps>
+
+### Override Behavior
+
+- Overrides take **highest priority** over all layers
+- Override applies to the **entire schedule**, not just one layer
+- Multiple overrides can exist but shouldn't overlap
+- Past overrides remain for historical reference
+
+### Common Override Scenarios
+
+<AccordionGroup>
+  <Accordion title="Vacation Coverage">
+    When Alice is on vacation for a week:
+    - Create override for the full vacation period
+    - Assign to the backup person (e.g., Bob)
+    - Add reason: "Alice on PTO"
+  </Accordion>
+  <Accordion title="Shift Swap">
+    When Bob and Carol want to swap shifts:
+    - Create override for Bob's shift, assign to Carol
+    - Create override for Carol's shift, assign to Bob
+    - Add reason: "Shift swap agreed"
+  </Accordion>
+  <Accordion title="Emergency Coverage">
+    When the scheduled person is unavailable:
+    - Create immediate override starting now
+    - Assign to available team member
+    - Delete when original person returns
+  </Accordion>
+</AccordionGroup>
+
+### Deleting Overrides
+
+1. Find the override in the Active Overrides list
+2. Click the delete button (trash icon)
+3. Confirm deletion
+
+<Note>
+  Deleting an override immediately returns to the normal rotation. The original on-call person becomes active.
+</Note>
+
+---
+
+## Understanding Coverage Gaps
+
+Coverage gaps occur when no layer is active for a time period.
+
+### How Gaps Happen
+
+<AccordionGroup>
+  <Accordion title="Missing Day Coverage">
+    A layer is set to weekdays only, but no layer covers weekends.
+  </Accordion>
+  <Accordion title="Missing Time Coverage">
+    One layer covers 09:00-18:00, another covers 22:00-06:00, but 18:00-22:00 is uncovered.
+  </Accordion>
+  <Accordion title="Empty Layers">
+    A layer has no users assigned during its active period.
+  </Accordion>
+</AccordionGroup>
+
+### Detecting Gaps
+
+The schedule detail page automatically analyzes coverage:
+- Checks the next 30 days by default
+- Shows gap periods with start/end times
+- Calculates total uncovered hours
+
+### Fixing Gaps
+
+1. Add users to cover the gap period
+2. Extend layer restrictions to cover more time
+3. Add a new layer specifically for the gap period
+4. Create standing overrides if gaps are intentional
+
+<Warning>
+  Coverage gaps mean incidents during those periods won't have an on-call responder. Always resolve gaps for critical schedules.
+</Warning>
+
+---
+
+## Timezone Handling
+
+Schedules operate in a specific timezone:
+
+- **Handoff times** are in the schedule's timezone
+- **Overrides** use ISO format with timezone info
+- **Calendar view** displays in the schedule's timezone
+
+<Tip>
+  For global teams, create separate schedules per region, each in the appropriate timezone, and use escalation policies to chain them together.
+</Tip>
+
+---
+
+## Best Practices
+
+<AccordionGroup>
+  <Accordion title="Start Simple">
+    Begin with a single layer covering 24/7. Add complexity (multiple layers, restrictions) only when needed.
+  </Accordion>
+  <Accordion title="Ensure Full Coverage">
+    After any change, check the calendar view and gap detection to verify there are no uncovered periods.
+  </Accordion>
+  <Accordion title="Use Meaningful Names">
+    Name schedules and layers clearly:
+    - **Schedule:** "Backend Engineering On-Call"
+    - **Layers:** "Primary", "Weekend Backup", "Night Shift"
+  </Accordion>
+  <Accordion title="Plan for Absences">
+    - Document the override process for your team
+    - Set up overrides in advance for known absences
+    - Have a backup plan for unexpected unavailability
+  </Accordion>
+  <Accordion title="Right-Size Rotations">
+    - Daily rotations work well for 5+ person teams
+    - Weekly rotations suit smaller teams
+    - Consider alert volume when choosing rotation length
+  </Accordion>
+  <Accordion title="Review Regularly">
+    - Check schedules when team membership changes
+    - Verify coverage after organizational changes
+    - Archive inactive schedules to reduce clutter
+  </Accordion>
+</AccordionGroup>
+
+---
+
+## Schedules in Escalation Policies
+
+Schedules integrate with escalation policies as notification targets:
+
+1. Add a schedule as an escalation target
+2. When the escalation level triggers:
+   - The current on-call person is determined
+   - That person receives the notification
+3. If no one is on-call (gap), the escalation continues to the next level
+
+<Accordion title="Example: Schedule in Escalation">
+  **Level 1:** Schedule "Backend On-Call"
+  - Notifies whoever is currently on-call
+  - 5-minute timeout
+
+  **Level 2:** Team "Backend Engineering"
+  - If no acknowledgment, notifies entire team
+  - 10-minute timeout
+
+  **Level 3:** User "Engineering Manager"
+  - Final escalation to management
+</Accordion>
+
+---
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Wrong person showing as on-call">
+    1. Check the schedule's timezone matches your expectation
+    2. Verify the handoff time hasn't passed
+    3. Look for active overrides that might change assignments
+    4. Check layer restrictions that might exclude the expected user
+  </Accordion>
+  <Accordion title="Coverage gaps appearing unexpectedly">
+    1. Review all layer restrictions
+    2. Ensure time restrictions don't leave gaps
+    3. Check day restrictions cover all days
+    4. Verify layers have users assigned
+  </Accordion>
+  <Accordion title="Override not taking effect">
+    1. Verify the override start time has passed
+    2. Check the override end time hasn't passed
+    3. Confirm the override is for the correct schedule
+    4. Refresh the page to see latest data
+  </Accordion>
+  <Accordion title="Rotation not advancing">
+    1. Check the rotation type (daily vs weekly)
+    2. Verify the handoff time/day settings
+    3. Confirm the schedule timezone is correct
+    4. Ensure there are multiple users in the rotation
+  </Accordion>
+  <Accordion title="Notifications going to wrong person">
+    1. Check escalation policy is using correct schedule
+    2. Verify current on-call in schedule detail view
+    3. Look for overrides that might redirect
+    4. Check user's notification settings
+  </Accordion>
+</AccordionGroup>
+
+---
+
+## Quick Reference
+
+### Rotation Calculation
+
+| Type | Changes | Example |
+|------|---------|---------|
+| Daily | Every day at handoff time | 09:00 daily |
+| Weekly | Every week on handoff day at handoff time | Monday 09:00 |
+
+### Layer Priority
+
+| Priority | Description |
+|----------|-------------|
+| 1 (Primary) | First layer, highest priority |
+| 2 (Secondary) | Backup when primary unavailable |
+| 3+ | Additional specialized layers |
+
+### Coverage Status Colors
+
+| Color | Meaning |
+|-------|---------|
+| Gray | Normal rotation coverage |
+| Blue | Override active |
+| Red | Coverage gap |
