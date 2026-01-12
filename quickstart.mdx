@@ -1,80 +1,352 @@
 ---
-title: "3 Core Rule System"
-description: "Start building awesome documentation in minutes"
+title: 'Why EasyContact'
+description: 'Never miss a critical alert. Always reach the right person.'
+icon: 'sparkles'
 ---
 
-## Get started in three steps
+<div className="text-center">
+  <h1 className="text-4xl font-bold">Never Miss a Critical Alert</h1>
+  <p className="text-xl text-gray-600 mt-4">
+    Intelligent incident management that ensures the right people are notified at the right time.
+  </p>
+</div>
 
-Get your documentation site running locally and make your first customization.
+---
 
-### Step 1: Set up your local environment
+## The Problem
 
-<AccordionGroup>
-  <Accordion icon="copy" title="Clone your docs locally">
-    During the onboarding process, you created a GitHub repository with your docs content if you didn't already have one. You can find a link to this repository in your [dashboard](https://dashboard.mintlify.com).
-    
-    To clone the repository locally so that you can make and preview changes to your docs, follow the [Cloning a repository](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository) guide in the GitHub docs.
-  </Accordion>
-  <Accordion icon="rectangle-terminal" title="Start the preview server">
-    1. Install the Mintlify CLI: `npm i -g mint`
-    2. Navigate to your docs directory and run: `mint dev`
-    3. Open `http://localhost:3000` to see your docs live!
-    
-    <Tip>Your preview updates automatically as you edit files.</Tip>
-  </Accordion>
-</AccordionGroup>
+Modern infrastructure generates thousands of alerts. Without proper management:
 
-### Step 2: Deploy your changes
-
-<AccordionGroup>
-  <Accordion icon="github" title="Install our GitHub app">
-    Install the Mintlify GitHub app from your [dashboard](https://dashboard.mintlify.com/settings/organization/github-app).
-    
-    Our GitHub app automatically deploys your changes to your docs site, so you don't need to manage deployments yourself.
-</Accordion>
-<Accordion icon="palette" title="Update your site name and colors">
-    For a first change, let's update the name and colors of your docs site.
-
-    1. Open `docs.json` in your editor.
-    2. Change the `"name"` field to your project name.
-    3. Update the `"colors"` to match your brand.
-    4. Save and see your changes instantly at `http://localhost:3000`.
-
-    <Tip>Try changing the primary color to see an immediate difference!</Tip>
-  </Accordion>
-</AccordionGroup>
-
-### Step 3: Go live
-
-<Accordion icon="rocket" title="Publish your docs">
-  1. Commit and push your changes.
-  2. Your docs will update and be live in moments!
-</Accordion>
-
-## Next steps
-
-Now that you have your docs running, explore these key features:
-
-<CardGroup cols={2}>
-
-<Card title="Write Content" icon="pen-to-square" href="/essentials/markdown">
-  Learn MDX syntax and start writing your documentation.
-</Card>
-
-<Card title="Customize style" icon="palette" href="/essentials/settings">
-  Make your docs match your brand perfectly.
-</Card>
-
-<Card title="Add code examples" icon="square-code" href="/essentials/code">
-  Include syntax-highlighted code blocks.
-</Card>
-
-<Card title="API documentation" icon="code" href="/api-reference/introduction">
-  Auto-generate API docs from OpenAPI specs.
-</Card>
-
+<CardGroup cols={3}>
+  <Card title="Alert Fatigue" icon="bell-slash">
+    Teams become desensitized to constant notifications and miss critical issues
+  </Card>
+  <Card title="Slow Response" icon="hourglass-half">
+    Finding the right person to respond wastes precious minutes during outages
+  </Card>
+  <Card title="Coverage Gaps" icon="user-xmark">
+    Unclear on-call schedules lead to incidents with no responder
+  </Card>
 </CardGroup>
 
-<Note>
-  **Need help?** See our [full documentation](https://mintlify.com/docs) or join our [community](https://mintlify.com/community).
-</Note>
+---
+
+## The Solution
+
+**EasyContact** is the bridge between your monitoring tools and your response team.
+
+<div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 p-8 rounded-xl my-8">
+  <h2 className="text-2xl font-bold text-center mb-6">From Alert to Resolution</h2>
+
+  ```
+  Alert Fired → EasyContact → Right Person → Incident Resolved
+       ↓              ↓              ↓              ↓
+    Seconds      Intelligent     Immediate     Minimal
+                  Routing       Notification    Downtime
+  ```
+</div>
+
+---
+
+## Key Benefits
+
+<AccordionGroup>
+  <Accordion title="Reduce Mean Time to Resolution (MTTR)" icon="bolt">
+    **Cut your response time by up to 70%**
+
+    - Alerts reach the right person immediately, not after multiple escalations
+    - On-call schedules ensure someone is always available
+    - Multi-channel notifications (call, SMS, push) guarantee delivery
+    - Automatic escalation if the first responder doesn't acknowledge
+
+    > "Before EasyContact, it took us 15+ minutes to get someone on an incident. Now it's under 2 minutes." — Platform Engineering Lead
+  </Accordion>
+
+  <Accordion title="Eliminate Alert Fatigue" icon="filter">
+    **Focus on what matters**
+
+    - Suppress noisy alerts from non-production environments
+    - Deduplicate related alerts into single incidents
+    - Set intelligent thresholds with alert rules
+    - Route low-priority alerts to async channels (email) instead of calls
+
+    > "We reduced our actionable alerts by 60% without missing a single critical issue." — SRE Manager
+  </Accordion>
+
+  <Accordion title="Ensure 24/7 Coverage" icon="clock">
+    **Never leave incidents unattended**
+
+    - Flexible rotation schedules (daily, weekly, custom)
+    - Multi-layer coverage for primary and backup
+    - Temporary overrides for vacations and sick days
+    - Gap detection warns you before coverage lapses
+
+    > "Our on-call scheduling used to be a spreadsheet nightmare. Now it runs itself." — DevOps Director
+  </Accordion>
+
+  <Accordion title="Connect Your Existing Stack" icon="plug">
+    **Works with tools you already use**
+
+    - Native integrations with Zabbix, Prometheus, Grafana, Datadog, Dynatrace, AppDynamics, New Relic
+    - Custom webhook support for any HTTP-capable tool
+    - Outbound webhooks to Slack, Teams, Discord, and more
+    - No vendor lock-in — your data stays portable
+
+    > "We integrated our entire monitoring stack in a single afternoon." — Infrastructure Architect
+  </Accordion>
+</AccordionGroup>
+
+---
+
+## Feature Highlights
+
+### Intelligent Alert Routing
+
+Not all alerts are equal. Route them intelligently based on:
+
+| Criteria | Example |
+|----------|---------|
+| **Severity** | Critical → Call, Warning → Email |
+| **Service** | Database alerts → DBA team |
+| **Environment** | Production → 24/7 policy, Staging → Business hours |
+| **Customer** | Premium tier → VIP support |
+| **Region** | EU alerts → EU team, US alerts → US team |
+
+### Multi-Level Escalation
+
+<Steps>
+  <Step title="Level 1: Primary On-Call">
+    Immediate notification via Call + SMS + Push
+
+    *Wait 5 minutes for acknowledgment*
+  </Step>
+  <Step title="Level 2: Secondary On-Call">
+    Notify backup responder with same urgency
+
+    *Wait 5 minutes for acknowledgment*
+  </Step>
+  <Step title="Level 3: Team Lead">
+    Escalate to management
+
+    *Wait 10 minutes for acknowledgment*
+  </Step>
+  <Step title="Level 4: Full Team">
+    Notify entire team in parallel
+
+    *Repeat cycle if still unacknowledged*
+  </Step>
+</Steps>
+
+### Flexible On-Call Schedules
+
+<Tabs>
+  <Tab title="Simple Rotation">
+    ```
+    Week 1: Alice
+    Week 2: Bob
+    Week 3: Carol
+    Week 4: Alice (repeat)
+    ```
+  </Tab>
+  <Tab title="Follow-the-Sun">
+    ```
+    00:00-08:00 UTC: APAC Team (Singapore)
+    08:00-16:00 UTC: EMEA Team (London)
+    16:00-24:00 UTC: Americas Team (New York)
+    ```
+  </Tab>
+  <Tab title="Multi-Layer">
+    ```
+    Primary Layer: Daily rotation (24/7)
+    Weekend Layer: Senior engineers (Sat-Sun only)
+    Holiday Layer: Volunteer coverage (specific dates)
+    ```
+  </Tab>
+</Tabs>
+
+### Rich Notifications
+
+<CardGroup cols={2}>
+  <Card title="Voice Calls" icon="phone">
+    - Text-to-speech incident details
+    - Press 1 to acknowledge, 2 for more info
+    - Automatic retry on no answer
+    - Voicemail fallback
+  </Card>
+  <Card title="SMS" icon="message">
+    - Instant delivery worldwide
+    - Reply to acknowledge
+    - Link to incident details
+    - Delivery confirmation
+  </Card>
+  <Card title="Push Notifications" icon="mobile">
+    - Mobile app alerts
+    - Rich content with actions
+    - Acknowledge from notification
+    - Works offline (queued)
+  </Card>
+  <Card title="Webhooks" icon="webhook">
+    - Slack, Teams, Discord
+    - Custom HTTP endpoints
+    - Full payload customization
+    - Template variables
+  </Card>
+</CardGroup>
+
+---
+
+## Comparison
+
+<table>
+  <thead>
+    <tr>
+      <th>Capability</th>
+      <th>EasyContact</th>
+      <th>Basic Alerting</th>
+      <th>Email Only</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Multi-channel notifications</td>
+      <td>Call, SMS, Email, Push, Webhooks</td>
+      <td>Email, Webhook</td>
+      <td>Email only</td>
+    </tr>
+    <tr>
+      <td>On-call scheduling</td>
+      <td>Full rotation management</td>
+      <td>Manual assignment</td>
+      <td>None</td>
+    </tr>
+    <tr>
+      <td>Escalation policies</td>
+      <td>Multi-level with retries</td>
+      <td>Single level</td>
+      <td>None</td>
+    </tr>
+    <tr>
+      <td>Alert routing</td>
+      <td>Intelligent rule-based</td>
+      <td>Static assignment</td>
+      <td>Broadcast to all</td>
+    </tr>
+    <tr>
+      <td>Integration support</td>
+      <td>8+ native + custom</td>
+      <td>1-2 tools</td>
+      <td>Native only</td>
+    </tr>
+    <tr>
+      <td>Setup time</td>
+      <td>Minutes</td>
+      <td>Hours</td>
+      <td>Built-in</td>
+    </tr>
+  </tbody>
+</table>
+
+---
+
+## Use Cases
+
+<AccordionGroup>
+  <Accordion title="SRE / Platform Engineering" icon="server">
+    **Challenge:** Managing alerts from Kubernetes, cloud infrastructure, and dozens of microservices
+
+    **Solution:**
+    - Connect Prometheus, Grafana, and cloud provider alerts
+    - Route by namespace, cluster, or service
+    - Build follow-the-sun schedules for global teams
+    - Suppress known issues during maintenance windows
+  </Accordion>
+
+  <Accordion title="DevOps / Infrastructure" icon="network-wired">
+    **Challenge:** Ensuring critical infrastructure alerts don't get lost in the noise
+
+    **Solution:**
+    - Integrate Zabbix, Datadog, or custom monitoring
+    - Escalate database and network alerts to specialists
+    - Set up dedicated on-call rotations per infrastructure domain
+    - Auto-resolve transient issues with alert rules
+  </Accordion>
+
+  <Accordion title="MSP / Managed Services" icon="building">
+    **Challenge:** Managing incidents for multiple customers with different SLAs
+
+    **Solution:**
+    - Create customer-specific escalation policies
+    - Route by customer tag to dedicated support teams
+    - Use initial delay for flapping alerts
+    - Send webhook notifications to customer portals
+  </Accordion>
+
+  <Accordion title="Enterprise IT" icon="briefcase">
+    **Challenge:** Coordinating incident response across multiple teams and time zones
+
+    **Solution:**
+    - Centralize alerts from all monitoring tools
+    - Define clear escalation paths per application
+    - Integrate with ITSM tools via webhooks
+    - Maintain audit trails for compliance
+  </Accordion>
+</AccordionGroup>
+
+---
+
+## Security & Compliance
+
+<CardGroup cols={2}>
+  <Card title="Data Protection" icon="shield-halved">
+    - End-to-end encryption in transit
+    - Data encrypted at rest
+    - EU data residency options
+    - Regular security audits
+  </Card>
+  <Card title="Access Control" icon="lock">
+    - Role-based permissions
+    - Two-factor authentication
+    - SSO integration (SAML/OIDC)
+    - Audit logging
+  </Card>
+  <Card title="Compliance" icon="certificate">
+    - SOC 2 Type II
+    - GDPR compliant
+    - ISO 27001
+    - HIPAA ready
+  </Card>
+  <Card title="Reliability" icon="server">
+    - 99.99% uptime SLA
+    - Multi-region deployment
+    - Automatic failover
+    - 24/7 monitoring
+  </Card>
+</CardGroup>
+
+---
+
+## Get Started Today
+
+<CardGroup cols={3}>
+  <Card title="Free Trial" icon="rocket" href="https://app.easycontact.ai/signup">
+    Start your 14-day free trial. No credit card required.
+  </Card>
+  <Card title="Book a Demo" icon="calendar" href="https://easycontact.ai/demo">
+    See EasyContact in action with a personalized demo.
+  </Card>
+  <Card title="Documentation" icon="book" href="/introduction">
+    Explore our guides and get started on your own.
+  </Card>
+</CardGroup>
+
+---
+
+<div className="text-center mt-12">
+  <h2 className="text-3xl font-bold">Ready to never miss a critical alert?</h2>
+  <p className="text-lg text-gray-600 mt-4 mb-8">
+    Join thousands of teams who trust EasyContact for their incident management.
+  </p>
+  <a href="https://app.easycontact.ai/signup" className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-lg text-lg">
+    Start Free Trial
+  </a>
+</div>
