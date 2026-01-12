@@ -1,86 +1,369 @@
 ---
-title: "Prometheus"
-description: "The navigation field in docs.json defines the pages that go in the navigation menu"
-icon: "map"
+title: 'Prometheus'
+description: 'Receive alerts from Prometheus Alertmanager'
+icon: 'fire'
 ---
 
-The navigation menu is the list of links on every website.
+## Overview
 
-You will likely update `docs.json` every time you add a new page. Pages do not show up automatically.
+Prometheus is a leading open-source monitoring and alerting toolkit. EasyContact integrates with Prometheus via Alertmanager webhooks, receiving alert notifications when your alerting rules fire.
 
-## Navigation syntax
+<Info>
+  This integration receives webhooks from Alertmanager, not directly from Prometheus. Make sure you have Alertmanager configured.
+</Info>
 
-Our navigation syntax is recursive which means you can make nested navigation groups. You don't need to include `.mdx` in page names.
+---
 
-<CodeGroup>
+## Setup Instructions
 
-```json Regular Navigation
-"navigation": {
-  "tabs": [
-    {
-      "tab": "Docs",
-      "groups": [
-        {
-          "group": "Getting Started",
-          "pages": ["quickstart"]
-        }
-      ]
-    }
-  ]
+<Steps>
+  <Step title="Create Integration in EasyContact">
+    1. Go to **Configuration** → **Integrations**
+    2. Click **Add Integration**
+    3. Select **Prometheus** as the type
+    4. Enter a name (e.g., "Production Alertmanager")
+    5. Save and copy the webhook URL
+  </Step>
+  <Step title="Configure Alertmanager">
+    Add a webhook receiver to your `alertmanager.yml`:
+
+    ```yaml
+    receivers:
+      - name: 'easycontact'
+        webhook_configs:
+          - url: 'YOUR_WEBHOOK_URL'
+            send_resolved: true
+    ```
+  </Step>
+  <Step title="Create Route">
+    Route alerts to the EasyContact receiver:
+
+    ```yaml
+    route:
+      receiver: 'easycontact'
+      # Or use as a sub-route for specific alerts
+      routes:
+        - match:
+            severity: critical
+          receiver: 'easycontact'
+    ```
+  </Step>
+  <Step title="Reload Alertmanager">
+    Apply the configuration:
+    ```bash
+    curl -X POST http://alertmanager:9093/-/reload
+    ```
+  </Step>
+  <Step title="Test the Integration">
+    Trigger a test alert and verify it appears in EasyContact
+  </Step>
+</Steps>
+
+---
+
+## Alertmanager Configuration
+
+### Basic Configuration
+
+```yaml
+global:
+  resolve_timeout: 5m
+
+route:
+  group_by: ['alertname', 'job']
+  group_wait: 30s
+  group_interval: 5m
+  repeat_interval: 4h
+  receiver: 'easycontact'
+
+receivers:
+  - name: 'easycontact'
+    webhook_configs:
+      - url: 'https://api.easycontact.ai/api/v1/webhooks/ingest/YOUR_TOKEN'
+        send_resolved: true
+        http_config:
+          follow_redirects: true
+```
+
+### With Multiple Receivers
+
+```yaml
+route:
+  receiver: 'default'
+  routes:
+    - match:
+        severity: critical
+      receiver: 'easycontact-critical'
+    - match:
+        severity: warning
+      receiver: 'easycontact-warning'
+
+receivers:
+  - name: 'easycontact-critical'
+    webhook_configs:
+      - url: 'YOUR_CRITICAL_WEBHOOK_URL'
+        send_resolved: true
+
+  - name: 'easycontact-warning'
+    webhook_configs:
+      - url: 'YOUR_WARNING_WEBHOOK_URL'
+        send_resolved: true
+```
+
+---
+
+## Field Mapping
+
+EasyContact automatically maps Alertmanager fields:
+
+| Alertmanager Field | EasyContact Field |
+|--------------------|-------------------|
+| `labels.alertname` | Title |
+| `annotations.summary` | Title (fallback) |
+| `annotations.description` | Description |
+| `status` | Status (firing → problem, resolved → ok) |
+| `labels.severity` | Severity |
+| `labels.instance` | Host |
+| `labels.job` | Service |
+| `fingerprint` | Event ID |
+| All labels | Tags |
+
+---
+
+## Severity Mapping
+
+Standard Prometheus/Alertmanager severity labels:
+
+| Prometheus Severity | EasyContact Severity |
+|--------------------|---------------------|
+| critical | Critical |
+| error | High |
+| warning | Warning |
+| info | Info |
+
+### Custom Mapping
+
+If your alerts use different severity labels:
+
+```json
+{
+  "severityMapping": {
+    "sourceField": "severity",
+    "mappings": {
+      "page": "critical",
+      "ticket": "warning",
+      "notify": "info"
+    },
+    "default": "warning"
+  }
 }
 ```
 
+---
 
-```json Nested Navigation
-"navigation": {
-  "tabs": [
+## Status Handling
+
+| Alertmanager Status | EasyContact Status | Action |
+|--------------------|-------------------|--------|
+| firing | Problem | Creates/updates incident |
+| resolved | OK | Resolves incident |
+
+<Tip>
+  Set `send_resolved: true` in your webhook config to automatically resolve incidents when alerts clear.
+</Tip>
+
+---
+
+## Example Payload
+
+Alertmanager sends payloads in this format:
+
+```json
+{
+  "version": "4",
+  "groupKey": "{}:{alertname=\"HighCPU\"}",
+  "status": "firing",
+  "receiver": "easycontact",
+  "alerts": [
     {
-      "tab": "Docs",
-      "groups": [
-        {
-          "group": "Getting Started",
-          "pages": [
-            "quickstart",
-            {
-              "group": "Nested Reference Pages",
-              "pages": ["nested-reference-page"]
-            }
-          ]
-        }
-      ]
+      "status": "firing",
+      "labels": {
+        "alertname": "HighCPU",
+        "severity": "critical",
+        "instance": "web-01:9090",
+        "job": "node-exporter",
+        "environment": "production"
+      },
+      "annotations": {
+        "summary": "High CPU usage detected",
+        "description": "CPU usage is above 90% for more than 5 minutes"
+      },
+      "startsAt": "2024-01-15T10:30:00.000Z",
+      "endsAt": "0001-01-01T00:00:00Z",
+      "fingerprint": "abc123def456"
     }
-  ]
+  ],
+  "commonLabels": {
+    "alertname": "HighCPU"
+  }
 }
 ```
 
-</CodeGroup>
+---
 
-## Folders
+## Labels as Tags
 
-Simply put your MDX files in folders and update the paths in `docs.json`.
+All Prometheus labels (except internal `__` prefixed ones) are captured as tags:
 
-For example, to have a page at `https://yoursite.com/your-folder/your-page` you would make a folder called `your-folder` containing an MDX file called `your-page.mdx`.
+```yaml
+labels:
+  alertname: HighCPU
+  severity: critical
+  environment: production
+  team: platform
+  service: api
+```
 
-<Warning>
-  You cannot use `api` for the name of a folder unless you nest it inside another folder. Mintlify uses Next.js which reserves the top-level `api` folder for internal server calls. A folder name such as `api-reference` would be accepted.
-</Warning>
+Results in tags:
+- `alertname: HighCPU`
+- `severity: critical`
+- `environment: production`
+- `team: platform`
+- `service: api`
 
-```json Navigation With Folder
-"navigation": {
-  "tabs": [
-    {
-      "tab": "Docs",
-      "groups": [
-        {
-          "group": "Group Name",
-          "pages": ["your-folder/your-page"]
-        }
-      ]
-    }
-  ]
+These tags can be used in escalation routing rules.
+
+---
+
+## Host Extraction
+
+EasyContact looks for host information in these labels (in order):
+
+1. `instance`
+2. `host`
+3. `hostname`
+4. `node`
+5. `pod`
+6. `container`
+
+The first non-empty value is used as the host.
+
+---
+
+## Service Extraction
+
+Service/application is extracted from:
+
+1. `job`
+2. `service`
+3. `app`
+4. `application`
+
+---
+
+## Enrichment Examples
+
+Add context to all Prometheus alerts:
+
+```json
+{
+  "enrichment": {
+    "tags.monitoring_tool": "prometheus",
+    "tags.cluster": "production-k8s",
+    "tags.region": "eu-west-1"
+  }
 }
 ```
 
-## Hidden pages
+---
 
-MDX files not included in `docs.json` will not show up in the sidebar but are accessible through the search bar and by linking directly to them.
+## Alert Rule Examples
+
+### CPU Alert
+
+```yaml
+- alert: HighCPU
+  expr: 100 - (avg by(instance) (rate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 90
+  for: 5m
+  labels:
+    severity: critical
+  annotations:
+    summary: "High CPU usage on {{ $labels.instance }}"
+    description: "CPU usage is {{ $value }}%"
+```
+
+### Memory Alert
+
+```yaml
+- alert: HighMemory
+  expr: (node_memory_MemTotal_bytes - node_memory_MemAvailable_bytes) / node_memory_MemTotal_bytes * 100 > 90
+  for: 5m
+  labels:
+    severity: warning
+  annotations:
+    summary: "High memory usage on {{ $labels.instance }}"
+    description: "Memory usage is {{ $value }}%"
+```
+
+### Disk Alert
+
+```yaml
+- alert: DiskSpaceLow
+  expr: node_filesystem_avail_bytes / node_filesystem_size_bytes * 100 < 10
+  for: 5m
+  labels:
+    severity: critical
+  annotations:
+    summary: "Low disk space on {{ $labels.instance }}"
+    description: "Only {{ $value }}% disk space remaining"
+```
+
+---
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Alerts not being received">
+    1. Check Alertmanager logs for webhook errors
+    2. Verify the webhook URL is accessible from Alertmanager
+    3. Test connectivity: `curl -X POST YOUR_WEBHOOK_URL -d '{}'`
+    4. Check firewall rules between Alertmanager and internet
+  </Accordion>
+  <Accordion title="Resolved alerts not clearing incidents">
+    1. Verify `send_resolved: true` in webhook config
+    2. Check that fingerprint matches between firing and resolved
+    3. Review Alertmanager routing to ensure resolved alerts reach webhook
+  </Accordion>
+  <Accordion title="Missing labels/annotations">
+    1. Verify alert rules include required labels
+    2. Check that labels aren't being dropped by Alertmanager routes
+    3. Review `group_by` settings
+  </Accordion>
+  <Accordion title="Duplicate incidents">
+    1. Check `group_by` configuration
+    2. Verify fingerprint is consistent
+    3. Review `group_interval` and `repeat_interval` settings
+  </Accordion>
+</AccordionGroup>
+
+---
+
+## Best Practices
+
+<AccordionGroup>
+  <Accordion title="Use Consistent Severity Labels">
+    Standardize on `severity: critical|warning|info` across all alert rules for consistent mapping.
+  </Accordion>
+  <Accordion title="Include Good Annotations">
+    Add meaningful `summary` and `description` annotations to help responders understand the alert.
+  </Accordion>
+  <Accordion title="Group Related Alerts">
+    Use `group_by` to prevent notification storms from related alerts.
+  </Accordion>
+  <Accordion title="Enable Resolved Notifications">
+    Always set `send_resolved: true` to automatically resolve incidents.
+  </Accordion>
+  <Accordion title="Add Runbook Links">
+    Include `runbook_url` annotation for quick access to remediation steps.
+  </Accordion>
+</AccordionGroup>
