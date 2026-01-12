@@ -1,4 +1,556 @@
 ---
-title: "Escalation Routing"
+title: 'Escalation Routing'
+description: 'Route incidents to the right escalation policy based on alert attributes'
+icon: 'route'
 ---
 
+## Overview
+
+Escalation Routing allows you to automatically direct incoming alerts to specific escalation policies based on their attributes. Instead of using a single default policy for all incidents, you can create rules that match alert properties like severity, host, service, or custom tags to ensure the right team gets notified.
+
+<CardGroup cols={2}>
+  <Card title="Smart Routing" icon="brain">
+    Route alerts based on severity, service, environment, or any custom field
+  </Card>
+  <Card title="Priority-Based" icon="list-ol">
+    Rules are evaluated in priority order - first match wins
+  </Card>
+  <Card title="Flexible Conditions" icon="filter">
+    Use AND/OR logic with 13 different operators for precise matching
+  </Card>
+  <Card title="Delayed Escalation" icon="clock">
+    Add delay to allow alerts to auto-resolve before escalating
+  </Card>
+</CardGroup>
+
+---
+
+## How Escalation Routing Works
+
+```
+Alert Received
+      ↓
+Build Evaluation Context
+(severity, host, service, tags, source, etc.)
+      ↓
+Evaluate Rules (by priority, lowest first)
+      ↓
+┌─────────────────┬─────────────────┐
+│                 │                 │
+Rule Matches      No Match
+      ↓                 ↓
+Use Rule's        Use Default
+Policy            Policy
+      ↓                 ↓
+Apply Initial     Start Escalation
+Delay (if set)    Immediately
+      ↓
+Start Escalation
+```
+
+**Key Points:**
+- Rules are evaluated in **priority order** (lower number = evaluated first)
+- The **first matching rule** determines the escalation policy
+- If **no rules match**, the tenant's default escalation policy is used
+- Inactive rules can still match but will **suppress notifications**
+
+---
+
+## Viewing Routing Rules
+
+The Escalation Routing page displays all your configured rules:
+
+| Column | Description |
+|--------|-------------|
+| **Rule** | Name and description |
+| **Priority** | Evaluation order (lower = first) |
+| **Conditions** | Number of conditions and logic type (AND/OR) |
+| **Policy** | Target escalation policy |
+| **Delay** | Initial delay before escalation starts |
+| **Status** | Active or Inactive |
+
+<Tip>
+  Use the search bar and status filter to quickly find specific rules.
+</Tip>
+
+---
+
+## Creating Routing Rules
+
+<Steps>
+  <Step title="Open Create Dialog">
+    Click the **Add Rule** button in the toolbar
+  </Step>
+  <Step title="Enter Basic Info">
+    - **Name** — Descriptive rule name
+    - **Description** — Explain what this rule does and when it should match
+  </Step>
+  <Step title="Configure Conditions">
+    Add conditions that must match for the rule to trigger:
+    - Select a **field** (event property or custom tag)
+    - Choose an **operator** (equals, contains, regex, etc.)
+    - Enter the **value** to match
+    - Add more conditions as needed
+    - Select **AND** or **OR** logic
+  </Step>
+  <Step title="Select Escalation Policy">
+    Choose which escalation policy to use when this rule matches, or select "Use Default Policy"
+  </Step>
+  <Step title="Set Priority and Status">
+    - **Priority** — Lower values evaluate first (default: 100)
+    - **Status** — Active or Inactive
+  </Step>
+  <Step title="Configure Initial Delay (Optional)">
+    Set a delay in seconds before escalation begins
+  </Step>
+  <Step title="Save Rule">
+    Click **Create Rule** to save
+  </Step>
+</Steps>
+
+---
+
+## Understanding Conditions
+
+Conditions determine when a routing rule triggers. Each condition compares an event field against a value using an operator.
+
+### Available Fields
+
+<Tabs>
+  <Tab title="Event Fields">
+    | Field | Description |
+    |-------|-------------|
+    | `event.severity` | Alert severity level |
+    | `event.priority` | Alert priority (P1-P5) |
+    | `event.host` | Affected hostname |
+    | `event.hostIp` | Host IP address |
+    | `event.service` | Service or application name |
+    | `event.environment` | Environment (production, staging, etc.) |
+    | `event.region` | Geographic region |
+    | `event.title` | Alert title |
+    | `event.description` | Alert description |
+  </Tab>
+  <Tab title="Source Fields">
+    | Field | Description |
+    |-------|-------------|
+    | `source.type` | Integration type (prometheus, zabbix, datadog, etc.) |
+    | `source.id` | Integration identifier |
+  </Tab>
+  <Tab title="Custom Fields">
+    Use the **Custom Field** option to match on any tag or extra field:
+
+    | Pattern | Example |
+    |---------|---------|
+    | `tags.{key}` | `tags.team`, `tags.customer`, `tags.tier` |
+    | `extra.{key}` | `extra.customField`, `extra.runbookUrl` |
+
+    <Info>
+      Any field from the incoming webhook payload can be accessed using dot notation.
+    </Info>
+  </Tab>
+</Tabs>
+
+### Condition Operators
+
+| Operator | Description | Example |
+|----------|-------------|---------|
+| `equals` | Exact match (case-insensitive) | `event.severity equals "critical"` |
+| `not_equals` | Does not match | `event.environment not_equals "development"` |
+| `contains` | Contains substring | `event.title contains "database"` |
+| `not_contains` | Does not contain | `event.host not_contains "test"` |
+| `starts_with` | Starts with prefix | `event.host starts_with "prod-"` |
+| `ends_with` | Ends with suffix | `event.service ends_with "-api"` |
+| `in` | Value in list | `event.severity in "critical,high"` |
+| `not_in` | Value not in list | `event.environment not_in "dev,test,staging"` |
+| `regex` | Regex pattern match | `event.host regex "^web-[0-9]+$"` |
+| `exists` | Field exists | `tags.customer exists` |
+| `not_exists` | Field does not exist | `tags.team not_exists` |
+| `greater_than` | Numeric greater than | `extra.errorCount greater_than 100` |
+| `less_than` | Numeric less than | `extra.responseTime less_than 5000` |
+
+### Condition Logic
+
+<Tabs>
+  <Tab title="AND Logic">
+    **All conditions must match** for the rule to trigger.
+
+    **Example:** Route to DBA team only for critical database alerts in production
+
+    ```
+    Conditions (AND):
+      - event.severity equals "critical"
+      - event.service contains "database"
+      - event.environment equals "production"
+    ```
+
+    All three conditions must be true.
+  </Tab>
+  <Tab title="OR Logic">
+    **At least one condition must match** for the rule to trigger.
+
+    **Example:** Route high-priority alerts regardless of type
+
+    ```
+    Conditions (OR):
+      - event.severity equals "critical"
+      - event.priority equals "P1"
+      - tags.escalate equals "true"
+    ```
+
+    Any single condition being true triggers the rule.
+  </Tab>
+</Tabs>
+
+<Tip>
+  For complex routing with both AND and OR requirements, create multiple rules with different priorities.
+</Tip>
+
+---
+
+## Initial Escalation Delay
+
+The initial delay feature allows you to pause before starting escalation, giving alerts time to auto-resolve.
+
+### How It Works
+
+1. Alert matches a routing rule with initial delay configured
+2. Incident is created but escalation is **not started immediately**
+3. During the delay period:
+   - If the alert **auto-resolves** → Incident closes, no escalation occurs
+   - If the delay **expires** → Escalation begins normally
+
+### Delay Configuration
+
+| Setting | Description |
+|---------|-------------|
+| **0 seconds** | Immediate escalation (default) |
+| **30+ seconds** | Minimum delay (values 1-29 auto-correct to 30) |
+| **Variance** | Actual delay may vary by ±15 seconds |
+
+<Warning>
+  The delay adds latency before responders are notified. Only use this for alerts that frequently auto-resolve within your monitoring system.
+</Warning>
+
+### Use Cases
+
+- **Flapping alerts** — Alerts that trigger and resolve rapidly
+- **Self-healing systems** — Infrastructure with auto-remediation
+- **Transient issues** — Network blips, temporary resource spikes
+
+---
+
+## Rule Priority
+
+Rules are evaluated in **priority order** (lower number = higher priority):
+
+| Priority | Evaluation Order | Typical Use |
+|----------|------------------|-------------|
+| 1-10 | First | Critical routing, VIP customers |
+| 11-50 | Second | High-priority specific matches |
+| 51-100 | Third | Standard routing rules |
+| 101-500 | Fourth | General category rules |
+| 501+ | Last | Catch-all rules |
+
+<Info>
+  When multiple rules could match the same alert, only the highest-priority (lowest number) matching rule is used.
+</Info>
+
+### Priority Example
+
+```
+Rule 1 (Priority 10): Premium customers → VIP Support Policy
+Rule 2 (Priority 50): Critical severity → Critical Response Policy
+Rule 3 (Priority 100): Database service → DBA On-Call Policy
+Rule 4 (Priority 500): Everything else → Default Policy
+```
+
+A critical alert for a premium customer's database would route to **VIP Support Policy** (Rule 1) because it has the highest priority.
+
+---
+
+## Common Use Cases
+
+<AccordionGroup>
+  <Accordion title="Route by Customer Tier">
+    **Goal:** Premium customers get faster response
+
+    **Conditions:**
+    ```
+    AND:
+      - tags.tier equals "premium"
+    ```
+
+    **Policy:** Premium Support (24/7)
+
+    **Priority:** 10 (evaluate first)
+  </Accordion>
+  <Accordion title="Route by Severity">
+    **Goal:** Critical alerts go to senior engineers
+
+    **Conditions:**
+    ```
+    AND:
+      - event.severity in "critical,high"
+      - event.environment equals "production"
+    ```
+
+    **Policy:** Critical Response Team
+
+    **Priority:** 20
+  </Accordion>
+  <Accordion title="Route by Service">
+    **Goal:** Database alerts go to DBA team
+
+    **Conditions:**
+    ```
+    OR:
+      - event.service contains "database"
+      - event.service contains "postgres"
+      - event.service contains "mysql"
+      - event.service contains "redis"
+    ```
+
+    **Policy:** DBA On-Call
+
+    **Priority:** 50
+  </Accordion>
+  <Accordion title="Route by Region">
+    **Goal:** Regional teams handle their own infrastructure
+
+    **Rule 1 (Priority 100):**
+    - Condition: `event.region equals "eu-west-1"`
+    - Policy: EU Support Team
+
+    **Rule 2 (Priority 100):**
+    - Condition: `event.region equals "us-east-1"`
+    - Policy: US East Support Team
+
+    **Rule 3 (Priority 100):**
+    - Condition: `event.region equals "ap-southeast-1"`
+    - Policy: APAC Support Team
+  </Accordion>
+  <Accordion title="Route by Integration Source">
+    **Goal:** Different tools route to different teams
+
+    **Conditions:**
+    ```
+    AND:
+      - source.type equals "prometheus"
+      - event.service starts_with "k8s-"
+    ```
+
+    **Policy:** Platform Engineering
+
+    **Priority:** 75
+  </Accordion>
+  <Accordion title="Delayed Escalation for Flapping Alerts">
+    **Goal:** Avoid noise from self-healing issues
+
+    **Conditions:**
+    ```
+    AND:
+      - event.service contains "autoscaling"
+      - event.severity equals "warning"
+    ```
+
+    **Policy:** Infrastructure Team
+
+    **Initial Delay:** 300 seconds (5 minutes)
+
+    **Priority:** 80
+  </Accordion>
+  <Accordion title="Suppress Non-Production Alerts">
+    **Goal:** Create incidents but don't notify for dev/test
+
+    **Conditions:**
+    ```
+    OR:
+      - event.environment equals "development"
+      - event.environment equals "staging"
+      - event.environment equals "test"
+    ```
+
+    **Policy:** Any (won't be used)
+
+    **Status:** Inactive (creates incident, suppresses notification)
+
+    **Priority:** 1 (evaluate first)
+  </Accordion>
+</AccordionGroup>
+
+---
+
+## Testing Rules
+
+Before activating a rule, you can test how it would evaluate against sample data:
+
+1. Use the test endpoint to evaluate your rules
+2. Send sample event data matching expected alerts
+3. Review which rule matched and why
+4. Adjust conditions or priorities as needed
+
+<Info>
+  The test feature shows you exactly which rule would match and which policy would be selected, helping you validate your routing logic before it affects real incidents.
+</Info>
+
+---
+
+## Managing Rules
+
+### Editing Rules
+
+1. Click the **three-dot menu** (⋮) on a rule
+2. Select **Edit**
+3. Modify conditions, policy, or settings
+4. Save changes
+
+### Duplicating Rules
+
+Create a copy of an existing rule:
+
+1. Click the three-dot menu
+2. Select **Duplicate**
+3. Modify the copy as needed
+4. Save as a new rule
+
+<Tip>
+  Duplicating is useful when you need similar rules for different teams or environments.
+</Tip>
+
+### Activating/Deactivating Rules
+
+Toggle rule status without deleting:
+
+- **Active** — Rule is evaluated and routes to its policy
+- **Inactive** — Rule still matches but **suppresses notifications** (useful for testing or maintenance)
+
+### Deleting Rules
+
+1. Click the three-dot menu
+2. Select **Delete**
+3. Confirm deletion
+
+<Warning>
+  Deleted rules cannot be recovered. Alerts that would have matched will fall through to other rules or the default policy.
+</Warning>
+
+---
+
+## Best Practices
+
+<AccordionGroup>
+  <Accordion title="Start with Specific Rules">
+    Create specific high-priority rules first (VIP customers, critical services), then add broader rules with lower priority.
+  </Accordion>
+  <Accordion title="Use Meaningful Priorities">
+    Leave gaps between priorities (10, 20, 50, 100) so you can insert new rules later without renumbering.
+  </Accordion>
+  <Accordion title="Document Your Rules">
+    Use the description field to explain why each rule exists and what scenario it handles.
+  </Accordion>
+  <Accordion title="Test Before Activating">
+    Create rules as inactive first, then test with sample alerts before activating in production.
+  </Accordion>
+  <Accordion title="Use Tags for Flexibility">
+    Configure your integrations to send meaningful tags (team, tier, environment) that you can use in routing conditions.
+  </Accordion>
+  <Accordion title="Review Rules Periodically">
+    Audit routing rules when teams change, services are deprecated, or escalation policies are updated.
+  </Accordion>
+  <Accordion title="Avoid Overlapping Rules">
+    When rules have similar conditions, ensure priorities are set correctly so the intended rule matches first.
+  </Accordion>
+</AccordionGroup>
+
+---
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Rule not matching expected alerts">
+    1. Verify rule is **Active**
+    2. Check condition field names match your alert data exactly
+    3. Test with sample data to see actual field values
+    4. Check if a higher-priority rule is matching first
+    5. Verify condition logic (AND vs OR)
+  </Accordion>
+  <Accordion title="Wrong policy being used">
+    1. Check rule priorities — lower numbers evaluate first
+    2. Look for other rules that might match the same alerts
+    3. Verify the correct policy is selected in the rule
+    4. Test to see which rule actually matches
+  </Accordion>
+  <Accordion title="Alerts going to default policy">
+    1. Verify at least one rule should match the alert
+    2. Check all conditions in matching rule are satisfied
+    3. Ensure rule is active
+    4. Review actual alert field values in webhook samples
+  </Accordion>
+  <Accordion title="Notifications not being sent">
+    1. Check if matched rule is **Inactive** (suppresses notifications)
+    2. Verify the escalation policy has active targets
+    3. Check if initial delay is still pending
+    4. Review escalation policy configuration
+  </Accordion>
+  <Accordion title="Delay not working as expected">
+    1. Verify initialDelaySeconds is set correctly
+    2. Remember values 1-29 auto-correct to 30
+    3. Actual delay may vary by ±15 seconds
+    4. Check if alert resolved before delay expired
+  </Accordion>
+  <Accordion title="Regex conditions not matching">
+    1. Test regex pattern separately
+    2. Patterns are case-insensitive
+    3. Escape special characters properly
+    4. Check for leading/trailing whitespace in values
+  </Accordion>
+</AccordionGroup>
+
+---
+
+## Quick Reference
+
+### Condition Operators
+
+| Operator | Type | Description |
+|----------|------|-------------|
+| `equals` | String | Exact match |
+| `not_equals` | String | Not equal |
+| `contains` | String | Substring match |
+| `not_contains` | String | No substring |
+| `starts_with` | String | Prefix match |
+| `ends_with` | String | Suffix match |
+| `in` | List | Value in list |
+| `not_in` | List | Value not in list |
+| `regex` | Regex | Pattern match |
+| `exists` | Boolean | Field exists |
+| `not_exists` | Boolean | Field missing |
+| `greater_than` | Numeric | Greater than |
+| `less_than` | Numeric | Less than |
+
+### Event Fields
+
+| Field | Source |
+|-------|--------|
+| `event.severity` | Alert severity |
+| `event.priority` | Alert priority |
+| `event.host` | Hostname |
+| `event.hostIp` | IP address |
+| `event.service` | Service name |
+| `event.environment` | Environment |
+| `event.region` | Region |
+| `event.title` | Alert title |
+| `event.description` | Alert description |
+| `source.type` | Integration type |
+| `source.id` | Integration ID |
+| `tags.*` | Any tag value |
+
+### Priority Guidelines
+
+| Range | Use Case |
+|-------|----------|
+| 1-10 | VIP/Premium routing |
+| 11-50 | Critical overrides |
+| 51-100 | Standard routing |
+| 101-500 | General categories |
+| 501+ | Catch-all rules |
