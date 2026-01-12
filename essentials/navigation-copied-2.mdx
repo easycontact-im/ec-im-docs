@@ -1,86 +1,267 @@
 ---
-title: "AppDynamics"
-description: "The navigation field in docs.json defines the pages that go in the navigation menu"
-icon: "map"
+title: 'AppDynamics'
+description: 'Receive alerts from AppDynamics APM'
+icon: 'a'
 ---
 
-The navigation menu is the list of links on every website.
+## Overview
 
-You will likely update `docs.json` every time you add a new page. Pages do not show up automatically.
+AppDynamics is a business and application performance monitoring platform. EasyContact integrates with AppDynamics via HTTP Request Actions, receiving health rule violations and policy events.
 
-## Navigation syntax
+---
 
-Our navigation syntax is recursive which means you can make nested navigation groups. You don't need to include `.mdx` in page names.
+## Setup Instructions
 
-<CodeGroup>
+<Steps>
+  <Step title="Create Integration in EasyContact">
+    1. Go to **Configuration** → **Integrations**
+    2. Click **Add Integration**
+    3. Select **AppDynamics** as the type
+    4. Enter a name (e.g., "Production AppDynamics")
+    5. Save and copy the webhook URL
+  </Step>
+  <Step title="Create HTTP Request Template">
+    1. Go to **Alert & Respond** → **HTTP Request Templates**
+    2. Click **New**
+    3. Configure the template (see below)
+  </Step>
+  <Step title="Create Policy Action">
+    1. Go to **Alert & Respond** → **Actions**
+    2. Click **Create**
+    3. Select **HTTP Request**
+    4. Choose your template
+  </Step>
+  <Step title="Add Action to Policies">
+    1. Edit your health rule policies
+    2. Add the HTTP action to trigger on violations
+  </Step>
+</Steps>
 
-```json Regular Navigation
-"navigation": {
-  "tabs": [
-    {
-      "tab": "Docs",
-      "groups": [
-        {
-          "group": "Getting Started",
-          "pages": ["quickstart"]
-        }
-      ]
-    }
-  ]
+---
+
+## HTTP Request Template
+
+### Basic Configuration
+
+| Field | Value |
+|-------|-------|
+| **Name** | EasyContact Webhook |
+| **Method** | POST |
+| **Raw URL** | Your EasyContact webhook URL |
+| **Content-Type** | application/json |
+
+### Payload Template
+
+```json
+{
+  "event_type": "${latestEvent.eventType}",
+  "event_id": "${latestEvent.id}",
+  "event_guid": "${latestEvent.guid}",
+  "event_name": "${latestEvent.displayName}",
+  "severity": "${latestEvent.severity}",
+  "summary": "${latestEvent.summaryMessage}",
+  "incident_id": "${latestEvent.incident.id}",
+  "app_name": "${latestEvent.application.name}",
+  "app_id": "${latestEvent.application.id}",
+  "tier_name": "${latestEvent.tier.name}",
+  "tier_id": "${latestEvent.tier.id}",
+  "node_name": "${latestEvent.node.name}",
+  "node_id": "${latestEvent.node.id}",
+  "health_rule_name": "${latestEvent.healthRule.name}",
+  "health_rule_id": "${latestEvent.healthRule.id}",
+  "policy_name": "${policy.name}",
+  "event_time": "${latestEvent.eventTime}",
+  "deep_link": "${latestEvent.deepLink}",
+  "controller_url": "${controllerUrl}",
+  "account_name": "${account.name}"
 }
 ```
 
+---
 
-```json Nested Navigation
-"navigation": {
-  "tabs": [
-    {
-      "tab": "Docs",
-      "groups": [
-        {
-          "group": "Getting Started",
-          "pages": [
-            "quickstart",
-            {
-              "group": "Nested Reference Pages",
-              "pages": ["nested-reference-page"]
-            }
-          ]
-        }
-      ]
-    }
-  ]
+## Template Variables
+
+AppDynamics uses Apache Velocity syntax:
+
+| Variable | Description |
+|----------|-------------|
+| `${latestEvent.eventType}` | Event type (POLICY_OPEN_*, etc.) |
+| `${latestEvent.id}` | Event ID |
+| `${latestEvent.severity}` | Severity (INFO, WARN, ERROR) |
+| `${latestEvent.summaryMessage}` | Event summary |
+| `${latestEvent.application.name}` | Application name |
+| `${latestEvent.tier.name}` | Tier name |
+| `${latestEvent.node.name}` | Node name |
+| `${latestEvent.healthRule.name}` | Health rule name |
+| `${policy.name}` | Policy name |
+| `${latestEvent.deepLink}` | Link to event in AppDynamics |
+| `${controllerUrl}` | Controller URL |
+| `${account.name}` | Account name |
+
+---
+
+## Field Mapping
+
+| AppDynamics Field | EasyContact Field |
+|-------------------|-------------------|
+| `incident_id` / `event_id` | Event ID |
+| `event_name` / `summary` | Title |
+| `summary` | Description |
+| `event_type` | Event type tag |
+| `severity` | Severity |
+| `node_name` / `tier_name` | Host |
+| `app_name` | Service |
+| `deep_link` | URL |
+| `health_rule_name` | Health rule tag |
+
+---
+
+## Event Types
+
+| Event Type | Description | Status |
+|------------|-------------|--------|
+| POLICY_OPEN_WARNING | Warning threshold violated | Problem |
+| POLICY_OPEN_CRITICAL | Critical threshold violated | Problem |
+| POLICY_CLOSE | Policy condition cleared | OK |
+| POLICY_UPGRADED | Warning escalated to critical | Problem |
+| POLICY_DOWNGRADED | Critical downgraded to warning | Problem |
+| POLICY_CONTINUES_WARNING | Warning continues | Problem |
+| POLICY_CONTINUES_CRITICAL | Critical continues | Problem |
+| POLICY_CANCELED | Policy canceled | OK |
+
+---
+
+## Severity Mapping
+
+| AppDynamics Severity | EasyContact Severity |
+|---------------------|---------------------|
+| ERROR | Critical |
+| WARN | Warning |
+| INFO | Info |
+
+### Custom Mapping
+
+```json
+{
+  "severityMapping": {
+    "sourceField": "severity",
+    "mappings": {
+      "ERROR": "critical",
+      "WARN": "high",
+      "INFO": "info"
+    },
+    "default": "warning"
+  }
 }
 ```
 
-</CodeGroup>
+---
 
-## Folders
+## Example Payload
 
-Simply put your MDX files in folders and update the paths in `docs.json`.
-
-For example, to have a page at `https://yoursite.com/your-folder/your-page` you would make a folder called `your-folder` containing an MDX file called `your-page.mdx`.
-
-<Warning>
-  You cannot use `api` for the name of a folder unless you nest it inside another folder. Mintlify uses Next.js which reserves the top-level `api` folder for internal server calls. A folder name such as `api-reference` would be accepted.
-</Warning>
-
-```json Navigation With Folder
-"navigation": {
-  "tabs": [
-    {
-      "tab": "Docs",
-      "groups": [
-        {
-          "group": "Group Name",
-          "pages": ["your-folder/your-page"]
-        }
-      ]
-    }
-  ]
+```json
+{
+  "event_type": "POLICY_OPEN_CRITICAL",
+  "event_id": "12345",
+  "event_guid": "abc-123-def",
+  "event_name": "Business Transaction Error Rate is Critical",
+  "severity": "ERROR",
+  "summary": "Error rate exceeded 5% threshold",
+  "incident_id": "67890",
+  "app_name": "E-Commerce Application",
+  "app_id": "111",
+  "tier_name": "Web Tier",
+  "tier_id": "222",
+  "node_name": "web-server-01",
+  "node_id": "333",
+  "health_rule_name": "Business Transaction Error Rate",
+  "health_rule_id": "444",
+  "policy_name": "Production Critical Policy",
+  "event_time": "1705315800000",
+  "deep_link": "https://controller.example.com/controller/#/location=APP_EVENT_VIEWER&eventId=12345",
+  "controller_url": "https://controller.example.com",
+  "account_name": "mycompany"
 }
 ```
 
-## Hidden pages
+---
 
-MDX files not included in `docs.json` will not show up in the sidebar but are accessible through the search bar and by linking directly to them.
+## Enrichment Examples
+
+```json
+{
+  "enrichment": {
+    "tags.source": "appdynamics",
+    "tags.environment": "production",
+    "tags.monitoring_type": "apm"
+  }
+}
+```
+
+---
+
+## Policy Configuration
+
+### Creating a Policy
+
+1. Go to **Alert & Respond** → **Policies**
+2. Click **Create Policy**
+3. Configure triggers:
+   - Health Rule Violation events
+   - Specific health rules or all
+4. Add your HTTP Request action
+
+### Health Rule Integration
+
+Link policies to specific health rules:
+- Application health rules
+- Business transaction rules
+- Backend rules
+- Custom rules
+
+---
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Webhook not being triggered">
+    1. Verify HTTP Request Template is configured correctly
+    2. Check that action is added to the policy
+    3. Verify health rule is enabled and triggering
+    4. Test template from AppDynamics UI
+  </Accordion>
+  <Accordion title="Missing node/tier information">
+    1. Ensure variables include node and tier
+    2. Some events may not have node-level data
+    3. Use tier as fallback when node is empty
+  </Accordion>
+  <Accordion title="Events not resolving">
+    1. Include POLICY_CLOSE event type in policy
+    2. Verify event_id/incident_id matches between open and close
+    3. Check policy action triggers on all event states
+  </Accordion>
+  <Accordion title="Template errors">
+    1. Test template with "Test" button
+    2. Check variable syntax (Apache Velocity)
+    3. Ensure all referenced fields exist
+  </Accordion>
+</AccordionGroup>
+
+---
+
+## Best Practices
+
+<AccordionGroup>
+  <Accordion title="Include Deep Links">
+    Always include `${latestEvent.deepLink}` so responders can quickly navigate to AppDynamics.
+  </Accordion>
+  <Accordion title="Use Incident ID">
+    Use `incident_id` for event correlation to properly group and resolve related alerts.
+  </Accordion>
+  <Accordion title="Configure All Event Types">
+    Include close/cancel events in your policy to automatically resolve incidents.
+  </Accordion>
+  <Accordion title="Leverage Business Transactions">
+    Monitor business transaction health for business-impact visibility.
+  </Accordion>
+</AccordionGroup>
