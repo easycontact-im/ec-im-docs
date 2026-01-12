@@ -1,0 +1,405 @@
+---
+title: 'Overview'
+description: 'Connect your monitoring tools to receive alerts and create incidents automatically'
+icon: 'plug'
+---
+
+## Overview
+
+Integrations connect EasyContact to your monitoring and observability tools. When an alert fires in your monitoring system, it's sent to EasyContact via webhook, automatically creating an incident and triggering the appropriate escalation policy.
+
+<CardGroup cols={2}>
+  <Card title="Automatic Detection" icon="wand-magic-sparkles">
+    EasyContact automatically detects the source type and extracts relevant fields
+  </Card>
+  <Card title="Custom Mapping" icon="arrows-rotate">
+    Map severity levels and enrich alerts with additional context
+  </Card>
+  <Card title="Real-Time Processing" icon="bolt">
+    Alerts are processed instantly and trigger escalations immediately
+  </Card>
+  <Card title="Sample Analysis" icon="magnifying-glass-chart">
+    View and analyze incoming webhooks to fine-tune your configuration
+  </Card>
+</CardGroup>
+
+---
+
+## Supported Integrations
+
+EasyContact supports the following monitoring tools out of the box:
+
+<CardGroup cols={3}>
+  <Card title="Zabbix" icon="z" href="/configuration/integrations/zabbix">
+    Open-source enterprise monitoring
+  </Card>
+  <Card title="Prometheus" icon="fire" href="/configuration/integrations/prometheus">
+    Cloud-native monitoring with Alertmanager
+  </Card>
+  <Card title="Grafana" icon="chart-line" href="/configuration/integrations/grafana">
+    Unified alerting and legacy alerts
+  </Card>
+  <Card title="Datadog" icon="dog" href="/configuration/integrations/datadog">
+    Cloud-scale monitoring and security
+  </Card>
+  <Card title="Dynatrace" icon="d" href="/configuration/integrations/dynatrace">
+    AI-powered observability platform
+  </Card>
+  <Card title="AppDynamics" icon="a" href="/configuration/integrations/appdynamics">
+    Business and application performance
+  </Card>
+  <Card title="New Relic" icon="n" href="/configuration/integrations/newrelic">
+    Full-stack observability platform
+  </Card>
+  <Card title="Custom Webhook" icon="code" href="/configuration/integrations/custom">
+    Any tool that can send HTTP webhooks
+  </Card>
+</CardGroup>
+
+---
+
+## How Integrations Work
+
+<Steps>
+  <Step title="Create Integration">
+    Add a new integration in EasyContact and select the source type
+  </Step>
+  <Step title="Copy Webhook URL">
+    Get the unique webhook URL generated for this integration
+  </Step>
+  <Step title="Configure Source">
+    Set up your monitoring tool to send alerts to the webhook URL
+  </Step>
+  <Step title="Test & Verify">
+    Send a test alert and verify it appears in EasyContact
+  </Step>
+  <Step title="Configure Mappings">
+    Optionally customize severity mapping and add enrichment data
+  </Step>
+</Steps>
+
+---
+
+## Creating an Integration
+
+<Steps>
+  <Step title="Navigate to Integrations">
+    Go to **Configuration** → **Integrations**
+  </Step>
+  <Step title="Click Add Integration">
+    Click the **Add Integration** button
+  </Step>
+  <Step title="Select Type">
+    Choose the integration type that matches your monitoring tool
+  </Step>
+  <Step title="Enter Details">
+    - **Name** — Descriptive name (e.g., "Production Prometheus")
+    - **Description** — Optional explanation
+  </Step>
+  <Step title="Save and Copy URL">
+    Save the integration and copy the webhook URL from the dialog
+  </Step>
+</Steps>
+
+<Info>
+  Each integration gets a unique webhook URL. Keep this URL secure as anyone with access can send alerts to your account.
+</Info>
+
+---
+
+## Webhook URL Structure
+
+Your webhook URL follows this format:
+
+```
+https://api.easycontact.ai/api/v1/webhooks/ingest/{webhookToken}
+```
+
+The `webhookToken` is a unique identifier for your integration. If compromised, you can regenerate it from the integration settings.
+
+---
+
+## Viewing Integrations
+
+The Integrations page shows all your configured integrations:
+
+| Column | Description |
+|--------|-------------|
+| **Name** | Integration name and description |
+| **Type** | Source type badge (Zabbix, Prometheus, etc.) |
+| **Events** | Total number of events received |
+| **Last Event** | When the last event was received |
+| **Status** | Active or Inactive |
+| **Actions** | View URL, configure, edit, delete |
+
+### Integration Statistics
+
+Each integration tracks:
+- **Event Count** — Total alerts received
+- **Last Event** — Timestamp of most recent alert
+- **Last Error** — Most recent processing error (if any)
+- **Consecutive Errors** — Count of sequential failures
+
+---
+
+## Managing Integrations
+
+### View Webhook URL
+
+1. Click the **three-dot menu** (⋮)
+2. Select **View Webhook URL**
+3. Copy the URL to your clipboard
+
+### Regenerate Token
+
+If your webhook URL is compromised:
+
+1. Click the three-dot menu
+2. Select **Regenerate Token**
+3. Confirm the action
+
+<Warning>
+  Regenerating the token invalidates the old URL immediately. Update your monitoring tool configuration with the new URL.
+</Warning>
+
+### Activate/Deactivate
+
+Toggle integration status without deleting:
+
+1. Click the three-dot menu
+2. Select **Activate** or **Deactivate**
+
+Inactive integrations ignore incoming webhooks.
+
+### Delete Integration
+
+1. Click the three-dot menu
+2. Select **Delete**
+3. Confirm deletion
+
+<Warning>
+  Deleting an integration permanently invalidates its webhook URL and removes all configuration.
+</Warning>
+
+---
+
+## Configuring Severity Mapping
+
+Map source severity values to EasyContact's standard levels.
+
+### Standard Severity Levels
+
+| Level | Description | Color |
+|-------|-------------|-------|
+| **Critical** | Requires immediate attention | Red |
+| **High** | Serious issue, respond quickly | Orange |
+| **Warning** | Potential issue, investigate | Yellow |
+| **Info** | Informational alert | Blue |
+| **OK** | Recovery/resolved state | Green |
+
+### Setting Up Mappings
+
+<Steps>
+  <Step title="Open Configuration">
+    Click three-dot menu → **Configure Mappings**
+  </Step>
+  <Step title="Set Source Field">
+    Enter the field name your tool uses for severity (e.g., "priority", "level")
+  </Step>
+  <Step title="Add Mappings">
+    Map each source value to a standard severity:
+    - "P1" → Critical
+    - "P2" → High
+    - "P3" → Warning
+  </Step>
+  <Step title="Set Default">
+    Choose the fallback severity for unmapped values
+  </Step>
+</Steps>
+
+<Accordion title="Example: Datadog Priority Mapping">
+  ```json
+  {
+    "sourceField": "alert_priority",
+    "mappings": {
+      "P1": "critical",
+      "P2": "high",
+      "P3": "warning",
+      "P4": "info",
+      "P5": "info"
+    },
+    "default": "warning"
+  }
+  ```
+</Accordion>
+
+---
+
+## Configuring Enrichment
+
+Add static metadata to all alerts from an integration.
+
+### Use Cases
+
+- Add environment tags (production, staging, dev)
+- Identify the team responsible
+- Add region or datacenter information
+- Tag for routing rules
+
+### Adding Enrichment
+
+<Steps>
+  <Step title="Open Configuration">
+    Click three-dot menu → **Configure Mappings** → **Enrichment** tab
+  </Step>
+  <Step title="Add Key-Value Pairs">
+    Enter the key and value for each enrichment field
+  </Step>
+  <Step title="Save Changes">
+    Click **Save** to apply
+  </Step>
+</Steps>
+
+<Accordion title="Example: Production Environment Enrichment">
+  ```json
+  {
+    "enrichment": {
+      "tags.environment": "production",
+      "tags.team": "platform",
+      "tags.region": "eu-west-1",
+      "tags.tier": "critical"
+    }
+  }
+  ```
+</Accordion>
+
+<Tip>
+  Enrichment fields can be used in escalation routing rules to direct alerts to the appropriate policy.
+</Tip>
+
+---
+
+## Webhook Samples
+
+EasyContact stores samples of incoming webhooks for debugging and configuration.
+
+### Viewing Samples
+
+1. Navigate to **Configuration** → **Webhook Samples**
+2. Filter by integration
+3. View raw and transformed payloads
+
+### Sample Analysis
+
+The analysis feature helps you understand:
+- Which fields are present in your alerts
+- Common values for key fields
+- How to configure severity mappings
+
+---
+
+## Auto-Detection
+
+EasyContact automatically detects the source type based on payload characteristics:
+
+| Source | Detection Signals |
+|--------|-------------------|
+| Zabbix | `event_id`, `trigger_name`, `trigger_severity` |
+| Prometheus | `alerts` array, `status: firing/resolved` |
+| Grafana | `ruleId`, `orgId`, `dashboardURL` |
+| Datadog | `alert_id`, `datadoghq.com` in URLs |
+| Dynatrace | `PID`, `ProblemID`, `State: OPEN/RESOLVED` |
+| AppDynamics | `event_type: POLICY_*`, `health_rule_name` |
+| New Relic | `issueId`, `newrelic.com` in URLs |
+
+If no specific source is detected, the **Custom** transformer handles the webhook.
+
+---
+
+## Alert Processing Pipeline
+
+```
+Webhook Received
+       ↓
+Token Validation
+       ↓
+Auto-Detect Source Type
+       ↓
+Transform to Canonical Format
+       ↓
+Apply Severity Mapping
+       ↓
+Apply Enrichment
+       ↓
+Create/Update Incident
+       ↓
+Trigger Escalation
+```
+
+---
+
+## Best Practices
+
+<AccordionGroup>
+  <Accordion title="Use Descriptive Names">
+    Name integrations clearly: "Production Prometheus - EU", "Staging Datadog"
+  </Accordion>
+  <Accordion title="Test Before Production">
+    Send test alerts to verify configuration before relying on the integration
+  </Accordion>
+  <Accordion title="Configure Severity Mapping">
+    Map severities to ensure proper prioritization of incidents
+  </Accordion>
+  <Accordion title="Add Enrichment for Routing">
+    Use enrichment to add tags that routing rules can match against
+  </Accordion>
+  <Accordion title="Monitor Integration Health">
+    Check event counts and error statistics regularly
+  </Accordion>
+  <Accordion title="Secure Webhook URLs">
+    Treat webhook URLs like passwords—don't commit them to public repositories
+  </Accordion>
+</AccordionGroup>
+
+---
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Alerts not appearing">
+    1. Verify the integration is **Active**
+    2. Check the webhook URL is correct in your monitoring tool
+    3. Look for errors in the integration statistics
+    4. Verify your monitoring tool can reach the webhook URL
+  </Accordion>
+  <Accordion title="Wrong severity assigned">
+    1. Check severity mapping configuration
+    2. Verify the source field name matches your payload
+    3. View webhook samples to see actual field values
+    4. Set appropriate default severity
+  </Accordion>
+  <Accordion title="Duplicate incidents">
+    1. Verify your monitoring tool sends unique event IDs
+    2. Check deduplication settings
+    3. Review the event ID field mapping
+  </Accordion>
+  <Accordion title="Integration showing errors">
+    1. Check the last error message
+    2. Verify payload format matches expected structure
+    3. Look at webhook samples for malformed data
+    4. Regenerate token if authentication issues
+  </Accordion>
+</AccordionGroup>
+
+---
+
+## Rate Limits
+
+| Limit | Value |
+|-------|-------|
+| Requests per minute | 1,000 per webhook |
+| Payload size | 1 MB maximum |
+
+<Warning>
+  Exceeding rate limits returns HTTP 429. Implement backoff in your monitoring tool if needed.
+</Warning>

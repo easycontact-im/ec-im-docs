@@ -35,6 +35,7 @@
               {
                 "group": "Integrations",
                 "pages": [
+                  "guides/configuration/integrations/overview",
                   "essentials/settings",
                   "essentials/navigation",
                   "essentials/navigation-copied-1",
