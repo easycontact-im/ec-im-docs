@@ -4,17 +4,6 @@ description: 'Welcome to EasyContact - Modern Incident Management for Reliable O
 icon: 'house'
 ---
 
-<img
-  className="block dark:hidden"
-  src="/images/hero-light.svg"
-  alt="EasyContact Hero"
-/>
-<img
-  className="hidden dark:block"
-  src="/images/hero-dark.svg"
-  alt="EasyContact Hero"
-/>
-
 ## What is EasyContact?
 
 EasyContact is a modern incident management platform that ensures the right people are notified when things go wrong. Connect your monitoring tools, define escalation workflows, and never miss a critical alert again.
@@ -40,100 +29,107 @@ EasyContact is a modern incident management platform that ensures the right peop
 
 EasyContact sits between your monitoring tools and your response team, ensuring alerts reach the right people through the right channels.
 
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                     YOUR MONITORING STACK                        │
-├──────────┬──────────┬──────────┬──────────┬──────────┬──────────┤
-│ Zabbix   │Prometheus│ Grafana  │ Datadog  │Dynatrace │ Custom   │
-└────┬─────┴────┬─────┴────┬─────┴────┬─────┴────┬─────┴────┬─────┘
-     │          │          │          │          │          │
-     └──────────┴──────────┴────┬─────┴──────────┴──────────┘
-                                │
-                         ┌──────▼──────┐
-                         │ EasyContact │
-                         │             │
-                         │ • Routing   │
-                         │ • Rules     │
-                         │ • Schedules │
-                         │ • Policies  │
-                         └──────┬──────┘
-                                │
-     ┌──────────┬───────────────┼───────────────┬──────────┐
-     │          │               │               │          │
-     ▼          ▼               ▼               ▼          ▼
-  ┌─────┐   ┌─────┐        ┌─────────┐     ┌─────┐   ┌─────────┐
-  │Call │   │ SMS │        │  Email  │     │Push │   │Webhooks │
-  └─────┘   └─────┘        └─────────┘     └─────┘   └─────────┘
-```
+<Steps>
+  <Step title="Alert Triggered" icon="bell">
+    Your monitoring tools (Zabbix, Prometheus, Grafana, Datadog, etc.) detect an issue and send an alert to EasyContact via webhook
+  </Step>
+  <Step title="Intelligent Processing" icon="brain">
+    EasyContact evaluates alert rules to filter noise, then applies escalation routing to determine the right policy
+  </Step>
+  <Step title="Find On-Call Responder" icon="calendar-check">
+    The escalation policy checks who is currently on-call based on your schedules
+  </Step>
+  <Step title="Multi-Channel Notification" icon="tower-broadcast">
+    Responders are notified via their preferred channels: Call, SMS, Email, Push, or Webhooks (Slack/Teams)
+  </Step>
+  <Step title="Escalate if Needed" icon="arrow-up">
+    If no one acknowledges, EasyContact automatically escalates to the next level until someone responds
+  </Step>
+</Steps>
+
+---
+
+## Supported Integrations
+
+Connect your existing monitoring tools in minutes. EasyContact automatically detects the source type and extracts relevant fields.
+
+<CardGroup cols={4}>
+  <Card title="Zabbix" icon="z" href="/configuration/integrations/zabbix" />
+  <Card title="Prometheus" icon="fire" href="/configuration/integrations/prometheus" />
+  <Card title="Grafana" icon="chart-line" href="/configuration/integrations/grafana" />
+  <Card title="Datadog" icon="dog" href="/configuration/integrations/datadog" />
+  <Card title="Dynatrace" icon="d" href="/configuration/integrations/dynatrace" />
+  <Card title="AppDynamics" icon="a" href="/configuration/integrations/appdynamics" />
+  <Card title="New Relic" icon="n" href="/configuration/integrations/newrelic" />
+  <Card title="Custom" icon="code" href="/configuration/integrations/custom" />
+</CardGroup>
 
 ---
 
 ## Core Capabilities
 
-### Receive Alerts from Anywhere
-
-Connect your existing monitoring tools in minutes. EasyContact automatically detects the source type and extracts relevant fields.
-
-<CardGroup cols={4}>
-  <Card title="Zabbix" icon="z" />
-  <Card title="Prometheus" icon="fire" />
-  <Card title="Grafana" icon="chart-line" />
-  <Card title="Datadog" icon="dog" />
-  <Card title="Dynatrace" icon="d" />
-  <Card title="AppDynamics" icon="a" />
-  <Card title="New Relic" icon="n" />
-  <Card title="Custom" icon="code" />
-</CardGroup>
-
-### Route to the Right Team
-
-Use alert rules and escalation routing to ensure incidents reach the appropriate team based on severity, service, environment, or custom tags.
-
-<Tabs>
-  <Tab title="Alert Rules">
+<AccordionGroup>
+  <Accordion title="Alert Rules" icon="filter">
     Filter, transform, and control incoming alerts before they become incidents.
-    - Suppress noisy alerts from development environments
-    - Normalize severity levels across different tools
-    - Add tags for routing and categorization
-  </Tab>
-  <Tab title="Escalation Routing">
+
+    - **Suppress noise** — Drop alerts from development or staging environments
+    - **Normalize severity** — Standardize severity levels across different tools
+    - **Enrich alerts** — Add tags for routing and categorization
+    - **Transform fields** — Modify alert properties before incident creation
+  </Accordion>
+
+  <Accordion title="Escalation Routing" icon="route">
     Route incidents to specific escalation policies based on alert attributes.
-    - Match on severity, host, service, environment
-    - Use custom tags for customer-specific routing
-    - Support 13 different condition operators
-  </Tab>
-</Tabs>
 
-### Build On-Call Schedules
+    - **Match on any field** — Severity, host, service, environment, custom tags
+    - **Flexible conditions** — 13 operators including regex, in, exists
+    - **Priority-based** — First matching rule wins
+    - **Initial delay** — Allow time for auto-resolution before escalating
+  </Accordion>
 
-Create rotation schedules to ensure 24/7 coverage with automatic handoffs.
+  <Accordion title="On-Call Schedules" icon="calendar-days">
+    Create rotation schedules to ensure 24/7 coverage with automatic handoffs.
 
-- **Daily or weekly rotations** with configurable handoff times
-- **Multiple layers** for primary, secondary, and specialized coverage
-- **Time restrictions** for business hours, nights, or weekends
-- **Temporary overrides** for vacations and shift swaps
+    - **Daily or weekly rotations** — Configurable handoff times
+    - **Multiple layers** — Primary, secondary, and specialized coverage
+    - **Time restrictions** — Business hours, nights, or weekends
+    - **Temporary overrides** — Handle vacations and shift swaps
+  </Accordion>
 
-### Escalate Until Acknowledged
+  <Accordion title="Escalation Policies" icon="stairs">
+    Define multi-level escalation policies that notify the right people in sequence.
 
-Define multi-level escalation policies that notify the right people in sequence until someone responds.
+    - **Multiple levels** — Escalate through teams until acknowledged
+    - **Flexible targeting** — Users, contacts, schedules, or teams
+    - **Parallel or sequential** — Notify all at once or one by one
+    - **Automatic retries** — Retry calls if not answered
+    - **Repeat cycles** — Keep escalating until resolved
+  </Accordion>
+</AccordionGroup>
 
-- **Multiple escalation levels** with configurable delays
-- **Parallel or sequential** target notification
-- **Multiple channels**: Call, SMS, Email, Push, Webhooks
-- **Automatic retries** for missed calls
-- **Repeat cycles** if no one responds
+---
 
-### Notify via Any Channel
+## Notification Channels
 
 Reach your team through their preferred channels with smart notifications.
 
-| Channel | Use Case |
-|---------|----------|
-| **Voice Call** | Critical alerts requiring immediate attention |
-| **SMS** | Quick notifications when on the go |
-| **Email** | Detailed alerts with full context |
-| **Push** | Mobile app notifications |
-| **Webhooks** | Slack, Teams, Discord, and custom integrations |
+<CardGroup cols={5}>
+  <Card title="Voice Call" icon="phone">
+    Immediate attention for critical alerts
+  </Card>
+  <Card title="SMS" icon="message">
+    Quick notifications on the go
+  </Card>
+  <Card title="Email" icon="envelope">
+    Detailed context and history
+  </Card>
+  <Card title="Push" icon="mobile">
+    Mobile app notifications
+  </Card>
+  <Card title="Webhooks" icon="webhook">
+    Slack, Teams, Discord
+  </Card>
+</CardGroup>
 
 ---
 
@@ -164,27 +160,33 @@ Reach your team through their preferred channels with smart notifications.
 
 ## Documentation Structure
 
-<AccordionGroup>
-  <Accordion title="Access Management" icon="users">
-    Manage users, roles, groups, and permissions.
-    - [Users](/access-management/users) — Add team members and contacts
-    - [Roles](/access-management/roles) — Define permission sets
-    - [Groups](/access-management/groups) — Organize users into groups
-  </Accordion>
-  <Accordion title="Management" icon="sitemap">
-    Configure teams, schedules, and escalation policies.
-    - [Teams](/management/teams) — Create and manage teams
-    - [Schedules](/management/schedules) — Set up on-call rotations
-    - [Escalation Policies](/management/escalation-policies) — Define notification workflows
-  </Accordion>
-  <Accordion title="Configuration" icon="gear">
-    Set up integrations, routing rules, and notification channels.
-    - [Integrations](/configuration/integrations/overview) — Connect monitoring tools
-    - [Alert Rules](/configuration/alert-rules) — Filter and transform alerts
-    - [Escalation Routing](/configuration/escalation-routing) — Route to the right policy
-    - [Settings](/configuration/settings) — Configure webhook channels
-  </Accordion>
-</AccordionGroup>
+<CardGroup cols={3}>
+  <Card title="Access Management" icon="users" href="/access-management/users">
+    Manage users, roles, groups, and permissions
+  </Card>
+  <Card title="Management" icon="sitemap" href="/management/teams">
+    Configure teams, schedules, and escalation policies
+  </Card>
+  <Card title="Configuration" icon="gear" href="/configuration/integrations/overview">
+    Set up integrations, routing rules, and notification channels
+  </Card>
+</CardGroup>
+
+### Access Management
+- [Users](/access-management/users) — Add team members and contacts
+- [Roles](/access-management/roles) — Define permission sets
+- [Groups](/access-management/groups) — Organize users into groups
+
+### Management
+- [Teams](/management/teams) — Create and manage teams
+- [Schedules](/management/schedules) — Set up on-call rotations
+- [Escalation Policies](/management/escalation-policies) — Define notification workflows
+
+### Configuration
+- [Integrations](/configuration/integrations/overview) — Connect monitoring tools
+- [Alert Rules](/configuration/alert-rules) — Filter and transform alerts
+- [Escalation Routing](/configuration/escalation-routing) — Route to the right policy
+- [Settings](/configuration/settings) — Configure webhook channels
 
 ---
 
