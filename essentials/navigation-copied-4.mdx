@@ -1,86 +1,344 @@
 ---
-title: "New Relic"
-description: "The navigation field in docs.json defines the pages that go in the navigation menu"
-icon: "map"
+title: 'New Relic'
+description: 'Receive alerts from New Relic observability platform'
+icon: 'n'
 ---
 
-The navigation menu is the list of links on every website.
+## Overview
 
-You will likely update `docs.json` every time you add a new page. Pages do not show up automatically.
+New Relic is a full-stack observability platform. EasyContact supports both New Relic **Workflows** (recommended) and **Classic Alerts** formats for receiving incident notifications.
 
-## Navigation syntax
+<Info>
+  New Relic Workflows is the recommended method for new integrations. Classic Alerts is deprecated but still supported.
+</Info>
 
-Our navigation syntax is recursive which means you can make nested navigation groups. You don't need to include `.mdx` in page names.
+---
 
-<CodeGroup>
+## Setup Instructions (Workflows)
 
-```json Regular Navigation
-"navigation": {
-  "tabs": [
-    {
-      "tab": "Docs",
-      "groups": [
-        {
-          "group": "Getting Started",
-          "pages": ["quickstart"]
-        }
-      ]
-    }
-  ]
+<Steps>
+  <Step title="Create Integration in EasyContact">
+    1. Go to **Configuration** → **Integrations**
+    2. Click **Add Integration**
+    3. Select **New Relic** as the type
+    4. Enter a name (e.g., "Production New Relic")
+    5. Save and copy the webhook URL
+  </Step>
+  <Step title="Create Destination in New Relic">
+    1. Go to **Alerts & AI** → **Destinations**
+    2. Click **Add destination**
+    3. Select **Webhook**
+    4. Enter your EasyContact webhook URL
+    5. Save the destination
+  </Step>
+  <Step title="Create Workflow">
+    1. Go to **Alerts & AI** → **Workflows**
+    2. Click **Add workflow**
+    3. Configure filter (which issues to send)
+    4. Add your webhook destination
+    5. Configure the payload template
+  </Step>
+  <Step title="Test the Integration">
+    Use the **Send test notification** feature
+  </Step>
+</Steps>
+
+---
+
+## Workflow Configuration
+
+### Destination Setup
+
+| Field | Value |
+|-------|-------|
+| **Type** | Webhook |
+| **Endpoint URL** | Your EasyContact webhook URL |
+| **Method** | POST |
+
+### Recommended Payload Template
+
+```json
+{
+  "issueId": {{ json issueId }},
+  "issueUrl": {{ json issuePageUrl }},
+  "title": {{ json annotations.title.[0] }},
+  "description": {{ json annotations.description.[0] }},
+  "priority": {{ json priority }},
+  "state": {{ json state }},
+  "triggerEvent": {{ json triggerEvent }},
+  "createdAt": {{ json createdAt }},
+  "updatedAt": {{ json updatedAt }},
+  "closedAt": {{ json closedAt }},
+  "totalIncidents": {{ json totalIncidents }},
+  "impactedEntities": {{ json entitiesData.names }},
+  "policyNames": {{ json accumulations.policyName }},
+  "conditionNames": {{ json accumulations.conditionName }},
+  "sources": {{ json accumulations.source }},
+  "tags": {{ json accumulations.tag }}
 }
 ```
 
+---
 
-```json Nested Navigation
-"navigation": {
-  "tabs": [
-    {
-      "tab": "Docs",
-      "groups": [
-        {
-          "group": "Getting Started",
-          "pages": [
-            "quickstart",
-            {
-              "group": "Nested Reference Pages",
-              "pages": ["nested-reference-page"]
-            }
-          ]
-        }
-      ]
-    }
-  ]
+## Handlebars Variables
+
+New Relic Workflows use Handlebars syntax:
+
+| Variable | Description |
+|----------|-------------|
+| `{{ issueId }}` | Unique issue identifier |
+| `{{ issuePageUrl }}` | Link to issue in New Relic |
+| `{{ annotations.title.[0] }}` | Issue title |
+| `{{ annotations.description.[0] }}` | Issue description |
+| `{{ priority }}` | CRITICAL, HIGH, MEDIUM, LOW |
+| `{{ state }}` | ACTIVATED, ACKNOWLEDGED, CLOSED |
+| `{{ triggerEvent }}` | STATE_CHANGE, INCIDENT_ADDED, etc. |
+| `{{ createdAt }}` | Creation timestamp |
+| `{{ updatedAt }}` | Last update timestamp |
+| `{{ totalIncidents }}` | Number of incidents |
+| `{{ entitiesData.names }}` | Impacted entity names |
+| `{{ accumulations.policyName }}` | Alert policy names |
+| `{{ accumulations.conditionName }}` | Alert condition names |
+| `{{ accumulations.source }}` | Alert sources |
+| `{{ accumulations.tag.* }}` | Custom tags |
+
+---
+
+## Field Mapping
+
+### Workflows Format
+
+| New Relic Field | EasyContact Field |
+|-----------------|-------------------|
+| `issueId` | Event ID |
+| `annotations.title[0]` | Title |
+| `annotations.description[0]` | Description |
+| `priority` | Severity |
+| `state` | Status |
+| `entitiesData.names` | Host/Service |
+| `issuePageUrl` | URL |
+| `accumulations.tag.*` | Tags |
+
+### Classic Alerts Format
+
+| New Relic Field | EasyContact Field |
+|-----------------|-------------------|
+| `incident_id` | Event ID |
+| `condition_name` | Title |
+| `details` | Description |
+| `severity` | Severity |
+| `current_state` | Status |
+| `targets[0].name` | Host |
+| `incident_url` | URL |
+
+---
+
+## Severity Mapping
+
+### Workflows Priority Mapping
+
+| New Relic Priority | EasyContact Severity |
+|-------------------|---------------------|
+| CRITICAL | Critical |
+| HIGH | High |
+| MEDIUM | Warning |
+| LOW | Info |
+
+### Classic Severity Mapping
+
+| New Relic State | EasyContact Severity |
+|-----------------|---------------------|
+| critical | Critical |
+| warning | Warning |
+
+---
+
+## Status Handling
+
+### Workflows States
+
+| New Relic State | EasyContact Status |
+|-----------------|-------------------|
+| ACTIVATED | Problem |
+| CREATED | Problem |
+| ACKNOWLEDGED | Problem (acknowledged) |
+| CLOSED | OK |
+| DEACTIVATED | OK |
+
+### Trigger Events
+
+| Trigger Event | Description |
+|---------------|-------------|
+| STATE_CHANGE | Issue state changed |
+| INCIDENT_ADDED | New incident added to issue |
+| INCIDENT_CLOSED | Incident closed |
+| PRIORITY_CHANGED | Priority updated |
+| ACKNOWLEDGED | Issue acknowledged |
+
+---
+
+## Example Payloads
+
+### Workflows Payload
+
+```json
+{
+  "issueId": "abc123-456-def",
+  "issueUrl": "https://one.newrelic.com/alerts/issues/abc123",
+  "title": "High CPU utilization",
+  "description": "CPU usage exceeded 90% threshold",
+  "priority": "CRITICAL",
+  "state": "ACTIVATED",
+  "triggerEvent": "STATE_CHANGE",
+  "createdAt": "2024-01-15T10:30:00Z",
+  "updatedAt": "2024-01-15T10:30:00Z",
+  "totalIncidents": 1,
+  "impactedEntities": ["web-server-01", "web-server-02"],
+  "policyNames": ["Production Policy"],
+  "conditionNames": ["High CPU Alert"],
+  "sources": ["Infrastructure"],
+  "tags": {
+    "environment": ["production"],
+    "team": ["platform"]
+  }
 }
 ```
 
-</CodeGroup>
+### Classic Alerts Payload
 
-## Folders
-
-Simply put your MDX files in folders and update the paths in `docs.json`.
-
-For example, to have a page at `https://yoursite.com/your-folder/your-page` you would make a folder called `your-folder` containing an MDX file called `your-page.mdx`.
-
-<Warning>
-  You cannot use `api` for the name of a folder unless you nest it inside another folder. Mintlify uses Next.js which reserves the top-level `api` folder for internal server calls. A folder name such as `api-reference` would be accepted.
-</Warning>
-
-```json Navigation With Folder
-"navigation": {
-  "tabs": [
+```json
+{
+  "incident_id": "12345678",
+  "account_id": "1234567",
+  "account_name": "MyCompany",
+  "condition_id": "11111",
+  "condition_name": "High CPU Alert",
+  "current_state": "open",
+  "details": "CPU usage is above 90%",
+  "event_type": "INCIDENT",
+  "incident_acknowledge_url": "https://alerts.newrelic.com/accounts/1234567/incidents/12345678/acknowledge",
+  "incident_url": "https://alerts.newrelic.com/accounts/1234567/incidents/12345678",
+  "owner": "",
+  "policy_name": "Production Policy",
+  "policy_url": "https://alerts.newrelic.com/accounts/1234567/policies/22222",
+  "runbook_url": "https://wiki.example.com/runbooks/high-cpu",
+  "severity": "CRITICAL",
+  "targets": [
     {
-      "tab": "Docs",
-      "groups": [
-        {
-          "group": "Group Name",
-          "pages": ["your-folder/your-page"]
-        }
-      ]
+      "id": "33333",
+      "name": "web-server-01",
+      "type": "Host"
     }
-  ]
+  ],
+  "timestamp": 1705315800000
 }
 ```
 
-## Hidden pages
+---
 
-MDX files not included in `docs.json` will not show up in the sidebar but are accessible through the search bar and by linking directly to them.
+## Classic Alerts Setup
+
+For legacy New Relic alerts:
+
+<Steps>
+  <Step title="Create Notification Channel">
+    1. Go to **Alerts** → **Notification channels**
+    2. Click **New notification channel**
+    3. Select **Webhook**
+  </Step>
+  <Step title="Configure Webhook">
+    - **Channel name**: EasyContact
+    - **Base URL**: Your EasyContact webhook URL
+  </Step>
+  <Step title="Add to Policies">
+    1. Go to your alert policy
+    2. Add the webhook channel to notification settings
+  </Step>
+</Steps>
+
+---
+
+## Enrichment Examples
+
+```json
+{
+  "enrichment": {
+    "tags.source": "newrelic",
+    "tags.environment": "production",
+    "tags.platform": "apm"
+  }
+}
+```
+
+---
+
+## Workflow Filter Examples
+
+### Critical Issues Only
+
+```
+priority = 'CRITICAL'
+```
+
+### Specific Policies
+
+```
+accumulations.policyName LIKE '%Production%'
+```
+
+### Specific Entity Types
+
+```
+entitiesData.types = 'HOST'
+```
+
+---
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Webhooks not being received">
+    1. Test destination from New Relic UI
+    2. Verify workflow filter matches your issues
+    3. Check workflow is enabled
+    4. Verify destination URL is correct
+  </Accordion>
+  <Accordion title="Missing fields in payload">
+    1. Verify Handlebars template syntax
+    2. Check field names match New Relic schema
+    3. Use `{{ json fieldName }}` for proper formatting
+    4. Test with simplified payload first
+  </Accordion>
+  <Accordion title="Issues not auto-resolving">
+    1. Verify CLOSED state triggers workflow
+    2. Check `issueId` matches between states
+    3. Ensure workflow sends on all state changes
+  </Accordion>
+  <Accordion title="Wrong priority mapping">
+    1. Check priority field in payload
+    2. Configure custom severity mapping
+    3. Verify priority is set on alert conditions
+  </Accordion>
+</AccordionGroup>
+
+---
+
+## Best Practices
+
+<AccordionGroup>
+  <Accordion title="Use Workflows">
+    Migrate to Workflows for better control and flexibility over Classic Alerts.
+  </Accordion>
+  <Accordion title="Include Entity Data">
+    Add `entitiesData.names` to identify affected infrastructure or services.
+  </Accordion>
+  <Accordion title="Set Proper Priorities">
+    Configure priority on your alert conditions for accurate severity mapping.
+  </Accordion>
+  <Accordion title="Include Runbook URLs">
+    Add runbook links in alert conditions for quick remediation access.
+  </Accordion>
+  <Accordion title="Use Tags">
+    Leverage `accumulations.tag.*` for routing and filtering in EasyContact.
+  </Accordion>
+</AccordionGroup>
