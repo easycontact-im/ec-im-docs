@@ -1,4 +1,357 @@
 ---
-title: 'Users'
+title: 'User Management'
+description: 'Add team members, manage roles, and configure notification preferences for your organization'
+icon: 'users'
 ---
 
+## Overview
+
+The Users page is your central hub for managing everyone who interacts with your incident management system. Whether they're responders who need full access or stakeholders who only need to receive notifications, you can configure exactly how each person participates in your incident workflow.
+
+<CardGroup cols={2}>
+  <Card title="Full Users" icon="user-check">
+    Team members who can log in, respond to incidents, and manage the platform
+  </Card>
+  <Card title="Contacts" icon="bell">
+    Stakeholders who receive notifications but don't need login access
+  </Card>
+</CardGroup>
+
+---
+
+## Understanding User Types
+
+EasyContact supports two distinct user types to give you flexibility in how you structure your incident response team.
+
+<Tabs>
+  <Tab title="Full Users">
+    Full users are active team members who need to interact with the platform directly.
+
+    **Capabilities:**
+    - Log in to the platform
+    - Acknowledge and resolve incidents
+    - Create and manage incidents
+    - Access dashboards and analytics
+    - Configure personal notification preferences
+    - Participate in on-call schedules
+    - Enable two-factor authentication
+
+    **Best for:** Engineers, on-call responders, team leads, administrators
+  </Tab>
+  <Tab title="Contacts">
+    Contacts are notification-only users who stay informed without needing platform access.
+
+    **Capabilities:**
+    - Receive incident notifications via email, SMS, or voice call
+    - Be included in escalation policies
+    - Appear in notification groups
+
+    **Best for:** Executives, stakeholders, external vendors, on-call managers who only need awareness
+  </Tab>
+</Tabs>
+
+---
+
+## Adding Users
+
+<Steps>
+  <Step title="Navigate to Users">
+    Go to **Settings** → **Users** in the main navigation
+  </Step>
+  <Step title="Click Add User">
+    Click the **Add User** button in the top right corner
+  </Step>
+  <Step title="Choose User Type">
+    Select whether you're adding a **Full User** or a **Contact Only**
+  </Step>
+  <Step title="Enter User Details">
+    Fill in the required information:
+    - **Email address** (required)
+    - **First name** and **Last name**
+    - **Phone number** (required for SMS and voice notifications)
+  </Step>
+  <Step title="Configure Contact Methods">
+    Select how this user can be reached:
+    - **Email** — Always available
+    - **SMS** — Requires phone number
+    - **Voice** — Requires phone number
+  </Step>
+  <Step title="Assign Roles">
+    For full users, assign one or more roles that define their permissions
+  </Step>
+  <Step title="Send Invitation">
+    Click **Send Invitation** to complete the process
+  </Step>
+</Steps>
+
+<Info>
+  Full users will receive an email invitation with a link to set up their account. The invitation expires after **7 days**.
+</Info>
+
+---
+
+## Managing Invitations
+
+The **Invitations** tab shows all pending, accepted, and expired invitations.
+
+### Invitation Statuses
+
+| Status | Description |
+|--------|-------------|
+| **Pending** | Invitation sent, waiting for user to accept |
+| **Accepted** | User has created their account |
+| **Expired** | 7-day window has passed without acceptance |
+| **Cancelled** | Invitation was manually revoked |
+
+### Resending Invitations
+
+If a user hasn't received their invitation or it has expired:
+
+1. Find the invitation in the **Invitations** tab
+2. Click the **three-dot menu** (⋮) on the right
+3. Select **Resend Invitation**
+
+<Tip>
+  You can also copy the invitation link directly and share it through your preferred channel.
+</Tip>
+
+---
+
+## Editing User Details
+
+To modify an existing user's information:
+
+<Steps>
+  <Step title="Find the User">
+    Use the search bar or scroll through the user list
+  </Step>
+  <Step title="Open Edit Dialog">
+    Click the **three-dot menu** (⋮) and select **Edit**
+  </Step>
+  <Step title="Update Information">
+    Modify any of the following:
+    - Personal details (name, phone)
+    - Contact methods
+    - Notification preferences
+    - Role assignments
+    - Timezone and language
+  </Step>
+  <Step title="Save Changes">
+    Click **Save** to apply your changes
+  </Step>
+</Steps>
+
+---
+
+## Notification Preferences
+
+Each user can have customized notification rules based on incident urgency.
+
+### Urgency Levels
+
+<CardGroup cols={2}>
+  <Card title="High Urgency" icon="triangle-exclamation">
+    Critical incidents that require immediate attention. Typically configured with no delay and multiple notification channels.
+  </Card>
+  <Card title="Low Urgency" icon="circle-info">
+    Informational alerts or non-critical issues. Can be configured with delays and fewer channels.
+  </Card>
+</CardGroup>
+
+### Notification Channels
+
+| Channel | Description | Requirements |
+|---------|-------------|--------------|
+| **Push** | Mobile app notifications | EasyContact mobile app installed |
+| **Email** | Email alerts | Valid email address |
+| **SMS** | Text messages | Phone number configured |
+| **Voice** | Phone calls | Phone number configured |
+
+### Configuring Notification Rules
+
+For each urgency level, you can set:
+
+- **Delay** — Wait time before sending (0-60 minutes)
+- **Channels** — Which notification methods to use
+
+<Accordion title="Example Configuration">
+  **High Urgency:**
+  - Delay: 0 minutes (immediate)
+  - Channels: Push, SMS, Voice
+
+  **Low Urgency:**
+  - Delay: 15 minutes
+  - Channels: Email only
+</Accordion>
+
+---
+
+## Role Management
+
+Roles define what actions a user can perform within the platform.
+
+### Assigning Roles
+
+1. Edit the user's profile
+2. In the **Roles** section, check the roles you want to assign
+3. Save your changes
+
+<Warning>
+  Removing all roles from a user will restrict their access to basic read-only functionality.
+</Warning>
+
+### Multiple Roles
+
+Users can have multiple roles assigned simultaneously. Their effective permissions are the **union** of all assigned role permissions.
+
+---
+
+## Security Features
+
+### Two-Factor Authentication (2FA)
+
+Administrators can manage 2FA settings for users:
+
+- **Enable 2FA** — Require the user to set up an authenticator app
+- **Disable 2FA** — Remove the 2FA requirement (use with caution)
+
+<Steps>
+  <Step title="Select User">
+    Find the user in the list and click the menu (⋮)
+  </Step>
+  <Step title="Manage 2FA">
+    Select **Manage 2FA** from the dropdown
+  </Step>
+  <Step title="Toggle Setting">
+    Enable or disable the 2FA requirement
+  </Step>
+</Steps>
+
+### Password Reset
+
+If a user is locked out or needs a new password:
+
+1. Click the user's menu (⋮)
+2. Select **Reset Password**
+3. Choose to either:
+   - Send a reset email to the user
+   - Generate a temporary password to share manually
+
+<Note>
+  Temporary passwords must be changed on the user's next login.
+</Note>
+
+---
+
+## Deactivating Users
+
+Instead of deleting users, you can deactivate them to preserve historical data.
+
+### To Deactivate a User:
+
+1. Edit the user's profile
+2. Uncheck the **Active** toggle
+3. Save changes
+
+**Deactivated users:**
+- Cannot log in
+- Won't receive notifications
+- Are preserved in incident history
+- Can be reactivated at any time
+
+### To Remove a User Completely:
+
+1. Click the user's menu (⋮)
+2. Select **Remove User**
+3. Confirm the deletion
+
+<Warning>
+  Removing a user is permanent. Consider deactivating instead to maintain audit trails.
+</Warning>
+
+---
+
+## Filtering and Search
+
+### Search
+
+Use the search bar to find users by:
+- Name
+- Email address
+
+### Filter by Type
+
+Use the filter dropdown to show:
+- **All Users** — Everyone in your organization
+- **Full Users** — Only users with login access
+- **Contacts Only** — Only notification-only users
+
+---
+
+## Best Practices
+
+<AccordionGroup>
+  <Accordion title="Start with Contacts for Stakeholders">
+    For executives, managers, or external parties who only need visibility, create them as Contacts. You can always upgrade them to Full Users later if needed.
+  </Accordion>
+  <Accordion title="Configure Notification Preferences Early">
+    Set up notification rules during user creation to ensure they receive alerts through their preferred channels from day one.
+  </Accordion>
+  <Accordion title="Use Role-Based Access">
+    Assign the minimum necessary roles to each user. This follows the principle of least privilege and keeps your organization secure.
+  </Accordion>
+  <Accordion title="Require 2FA for Critical Roles">
+    Enable two-factor authentication for administrators and users with elevated permissions.
+  </Accordion>
+  <Accordion title="Regular Access Reviews">
+    Periodically review your user list and deactivate accounts that are no longer needed.
+  </Accordion>
+</AccordionGroup>
+
+---
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="User didn't receive invitation email">
+    1. Check the spam/junk folder
+    2. Verify the email address is correct
+    3. Resend the invitation
+    4. If still not received, copy the invite link and share it directly
+  </Accordion>
+  <Accordion title="Invitation link expired">
+    Invitations expire after 7 days. Simply resend the invitation to generate a new link.
+  </Accordion>
+  <Accordion title="User can't log in after accepting invite">
+    1. Verify the user's account is active
+    2. Check if 2FA is required but not configured
+    3. Try resetting the user's password
+  </Accordion>
+  <Accordion title="Notifications not being received">
+    1. Verify contact methods are configured
+    2. Check notification rules for the appropriate urgency level
+    3. Ensure the phone number format is correct (include country code)
+    4. Verify the user is active
+  </Accordion>
+</AccordionGroup>
+
+---
+
+## API Reference
+
+For programmatic user management, see our [API Documentation](/api-reference/access-management/users).
+
+<CardGroup cols={2}>
+  <Card title="List Users" icon="list" href="/api-reference/access-management/users#list-users">
+    GET /api/v1/iam/{tenantId}/users
+  </Card>
+  <Card title="Invite User" icon="user-plus" href="/api-reference/access-management/users#invite-user">
+    POST /api/v1/iam/{tenantId}/invites
+  </Card>
+  <Card title="Update User" icon="pen" href="/api-reference/access-management/users#update-user">
+    PUT /api/v1/iam/{tenantId}/users/{userId}
+  </Card>
+  <Card title="Remove User" icon="user-minus" href="/api-reference/access-management/users#remove-user">
+    DELETE /api/v1/iam/{tenantId}/users/{userId}
+  </Card>
+</CardGroup>
