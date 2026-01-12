@@ -1,4 +1,569 @@
 ---
 title: 'Alert Rules'
+description: 'Filter, transform, and control incoming alerts before they become incidents'
+icon: 'filter'
 ---
 
+## Overview
+
+Alert Rules allow you to process incoming alerts before they create incidents. You can suppress noisy alerts, adjust severity levels, add tags for routing, or modify alert fields. Rules are evaluated in real-time as alerts arrive, giving you fine-grained control over your incident pipeline.
+
+<CardGroup cols={2}>
+  <Card title="Suppress Noise" icon="volume-xmark">
+    Drop unwanted alerts from development environments or known issues
+  </Card>
+  <Card title="Normalize Severity" icon="arrows-up-down">
+    Standardize severity levels across different monitoring tools
+  </Card>
+  <Card title="Enrich Alerts" icon="tags">
+    Add tags and metadata for better routing and categorization
+  </Card>
+  <Card title="Transform Fields" icon="wand-magic-sparkles">
+    Modify alert properties before incident creation
+  </Card>
+</CardGroup>
+
+---
+
+## How Alert Rules Work
+
+```
+Alert Received
+       ↓
+Rules Evaluated (by priority)
+       ↓
+┌──────┴──────┐
+│             │
+Suppressed    Modified
+    ↓             ↓
+  Dropped    Create Incident
+              (with changes)
+```
+
+Rules are evaluated in **priority order** (lower number = higher priority). When a rule matches:
+1. Its actions are applied to the alert
+2. If `stopProcessing` is enabled, no more rules are evaluated
+3. If suppressed, the alert is dropped immediately
+
+---
+
+## Viewing Alert Rules
+
+The Alert Rules page displays all your configured rules:
+
+| Column | Description |
+|--------|-------------|
+| **Rule** | Name and description |
+| **Priority** | Evaluation order (lower = first) |
+| **Conditions** | Number of matching conditions |
+| **Actions** | Number of actions to apply |
+| **Stop** | Whether to stop evaluating other rules |
+| **Status** | Active or Inactive |
+
+---
+
+## Creating Alert Rules
+
+<Steps>
+  <Step title="Open Create Dialog">
+    Click the **Add Rule** button
+  </Step>
+  <Step title="Configure Basic Info">
+    In the **Basic Info** tab:
+    - **Name** — Descriptive rule name
+    - **Description** — Explain what this rule does
+    - **Priority** — Lower numbers evaluate first (default: 100)
+    - **Stop Processing** — Stop evaluating other rules if this matches
+  </Step>
+  <Step title="Define Conditions">
+    In the **Conditions** tab:
+    - Add conditions that must match for the rule to trigger
+    - Use ALL (AND) and ANY (OR) logic groups
+  </Step>
+  <Step title="Configure Actions">
+    In the **Actions** tab:
+    - Add actions to apply when conditions match
+    - Actions execute in order
+  </Step>
+  <Step title="Save Rule">
+    Click **Create** to save your rule
+  </Step>
+</Steps>
+
+---
+
+## Understanding Conditions
+
+Conditions determine when a rule triggers. You can combine conditions using AND/OR logic.
+
+### Condition Logic
+
+<Tabs>
+  <Tab title="ALL Conditions (AND)">
+    Every condition in the ALL group must match.
+
+    **Example:** Alert must be from production AND be critical severity
+
+    ```
+    ALL:
+      - environment equals "production"
+      - severity equals "critical"
+    ```
+  </Tab>
+  <Tab title="ANY Conditions (OR)">
+    At least one condition in the ANY group must match.
+
+    **Example:** Alert is about CPU OR memory
+
+    ```
+    ANY:
+      - title contains "CPU"
+      - title contains "memory"
+    ```
+  </Tab>
+  <Tab title="Combined Logic">
+    When both ALL and ANY groups exist, **both must be satisfied**.
+
+    **Example:** Production alert about CPU or memory
+
+    ```
+    ALL:
+      - environment equals "production"
+    ANY:
+      - title contains "CPU"
+      - title contains "memory"
+    ```
+
+    This matches production alerts that mention either CPU or memory.
+  </Tab>
+</Tabs>
+
+<Info>
+  If no conditions are defined, the rule **always matches** every incoming alert.
+</Info>
+
+### Available Fields
+
+| Field | Description |
+|-------|-------------|
+| `severity` | Alert severity level |
+| `host` | Affected hostname |
+| `service` | Service or application name |
+| `title` | Alert title |
+| `description` | Alert description |
+| `source` | Source integration |
+| `status` | Alert status |
+| `environment` | Environment tag |
+| `region` | Region tag |
+| `tags.*` | Any tag value (e.g., `tags.team`) |
+| `extra.*` | Any extra field (e.g., `extra.customField`) |
+
+### Condition Operators
+
+| Operator | Description | Example |
+|----------|-------------|---------|
+| `equals` | Exact match (case-insensitive) | `severity equals "critical"` |
+| `not_equals` | Does not match | `environment not_equals "production"` |
+| `contains` | Contains substring | `title contains "error"` |
+| `not_contains` | Does not contain | `title not_contains "test"` |
+| `matches` | Regex pattern match | `title matches "^ERROR.*"` |
+| `in` | Value in list | `status in "triggered,firing"` |
+| `not_in` | Value not in list | `severity not_in "info,ok"` |
+| `exists` | Field exists | `tags.team exists` |
+| `greater_than` | Numeric greater than | `value greater_than 90` |
+| `less_than` | Numeric less than | `value less_than 10` |
+
+<Tip>
+  Use `tags.*` to match on custom tags from your monitoring tools. For example, `tags.customer equals "acme"` matches alerts tagged with customer=acme.
+</Tip>
+
+---
+
+## Configuring Actions
+
+Actions define what happens when a rule matches.
+
+### Available Actions
+
+<AccordionGroup>
+  <Accordion title="Suppress (Drop Alert)">
+    **Type:** `suppress`
+
+    Drops the alert entirely. No incident is created.
+
+    **Use Case:** Suppress alerts from development environments or known false positives.
+
+    ```
+    Action: suppress
+    Effect: Alert is dropped, no incident created
+    ```
+  </Accordion>
+  <Accordion title="Set Priority">
+    **Type:** `setPriority`
+
+    Overrides the alert's priority level.
+
+    **Options:** P1 (Critical), P2 (High), P3 (Medium), P4 (Low), P5 (Info)
+
+    **Use Case:** Escalate or de-escalate alerts based on context.
+
+    ```
+    Action: setPriority
+    Value: P1
+    Effect: Alert priority set to Critical
+    ```
+  </Accordion>
+  <Accordion title="Add Tags">
+    **Type:** `addTags`
+
+    Adds tags to the alert for routing and categorization.
+
+    **Use Case:** Tag alerts for team routing or tracking.
+
+    ```
+    Action: addTags
+    Tags: team=platform, escalate=true
+    Effect: Tags added to alert
+    ```
+  </Accordion>
+  <Accordion title="Set Field">
+    **Type:** `setField`
+
+    Sets or overrides any alert field value.
+
+    **Use Case:** Normalize field values across different sources.
+
+    ```
+    Action: setField
+    Field: source
+    Value: internal-monitoring
+    Effect: Source field set to "internal-monitoring"
+    ```
+  </Accordion>
+</AccordionGroup>
+
+### Multiple Actions
+
+You can combine multiple actions in a single rule. Actions execute in order.
+
+<Accordion title="Example: Multi-Action Rule">
+  **Rule:** Escalate and tag infrastructure alerts
+
+  **Actions:**
+  1. `setPriority: P1` — Escalate to critical
+  2. `addTags: team=infrastructure` — Route to infrastructure team
+  3. `addTags: auto_escalated=true` — Track automatic escalation
+
+  All three actions apply to matching alerts.
+</Accordion>
+
+---
+
+## Priority and Stop Processing
+
+### Rule Priority
+
+Rules are evaluated in **priority order** (lower number = higher priority):
+
+| Priority | Evaluation Order |
+|----------|------------------|
+| 1 | First |
+| 10 | Second |
+| 100 | Third |
+| 1000 | Last |
+
+<Info>
+  Use priority to control which rules take precedence. For example, a suppression rule at priority 1 will drop alerts before enrichment rules at priority 100 can process them.
+</Info>
+
+### Stop Processing
+
+When **Stop Processing** is enabled:
+- If the rule matches, no subsequent rules are evaluated
+- Useful for definitive actions like suppression
+
+<Accordion title="Example: Stop Processing">
+  **Rule 1** (Priority 1, Stop Processing: ON):
+  - Condition: `environment equals "development"`
+  - Action: `suppress`
+
+  **Rule 2** (Priority 100):
+  - Condition: `severity equals "critical"`
+  - Action: `setPriority: P1`
+
+  **Result:** Development alerts are suppressed immediately. Rule 2 never sees them because Rule 1 stops processing.
+</Accordion>
+
+---
+
+## Common Use Cases
+
+<AccordionGroup>
+  <Accordion title="Suppress Development Alerts">
+    **Goal:** Drop all alerts from non-production environments
+
+    **Conditions:**
+    ```
+    ANY:
+      - environment equals "development"
+      - environment equals "staging"
+      - environment equals "test"
+    ```
+
+    **Actions:**
+    - `suppress`
+
+    **Settings:**
+    - Priority: 1 (evaluate first)
+    - Stop Processing: Yes
+  </Accordion>
+  <Accordion title="Escalate Database Alerts">
+    **Goal:** Make all database alerts critical priority
+
+    **Conditions:**
+    ```
+    ALL:
+      - service contains "database"
+    ANY:
+      - severity equals "critical"
+      - severity equals "high"
+    ```
+
+    **Actions:**
+    - `setPriority: P1`
+    - `addTags: team=dba`
+  </Accordion>
+  <Accordion title="Tag by Customer">
+    **Goal:** Add routing tags based on host prefix
+
+    **Conditions:**
+    ```
+    ALL:
+      - host matches "^acme-.*"
+    ```
+
+    **Actions:**
+    - `addTags: customer=acme`
+    - `addTags: tier=premium`
+  </Accordion>
+  <Accordion title="Normalize Vendor Severities">
+    **Goal:** Standardize severity from specific integration
+
+    **Conditions:**
+    ```
+    ALL:
+      - source equals "datadog"
+      - severity equals "error"
+    ```
+
+    **Actions:**
+    - `setPriority: P2`
+    - `setField: severity = "high"`
+  </Accordion>
+  <Accordion title="Suppress Maintenance Alerts">
+    **Goal:** Drop alerts during known maintenance
+
+    **Conditions:**
+    ```
+    ALL:
+      - tags.maintenance_window exists
+    ```
+
+    **Actions:**
+    - `suppress`
+
+    **Settings:**
+    - Priority: 1
+    - Stop Processing: Yes
+  </Accordion>
+  <Accordion title="Auto-Tag Missing Team">
+    **Goal:** Assign default team when not specified
+
+    **Conditions:**
+    ```
+    ALL:
+      - tags.team not_exists
+      - environment equals "production"
+    ```
+
+    **Actions:**
+    - `addTags: team=on-call`
+  </Accordion>
+</AccordionGroup>
+
+---
+
+## Managing Rules
+
+### Editing Rules
+
+1. Click the **three-dot menu** (⋮) on a rule
+2. Select **Edit**
+3. Modify conditions, actions, or settings
+4. Save changes
+
+### Duplicating Rules
+
+Create a copy of an existing rule:
+
+1. Click the three-dot menu
+2. Select **Duplicate**
+3. Modify the copy as needed
+4. Save as a new rule
+
+<Tip>
+  Duplicating is useful when you need similar rules with minor variations.
+</Tip>
+
+### Activating/Deactivating Rules
+
+Toggle rule status without deleting:
+
+- **Active:** Rule is evaluated on incoming alerts
+- **Inactive:** Rule is skipped during evaluation
+
+Edit the rule and toggle the status, or use the API to change `isActive`.
+
+### Deleting Rules
+
+1. Click the three-dot menu
+2. Select **Delete**
+3. Confirm deletion
+
+<Warning>
+  Deleted rules cannot be recovered. Consider deactivating instead.
+</Warning>
+
+---
+
+## Rule Evaluation Flow
+
+<Steps>
+  <Step title="Alert Received">
+    Webhook processor receives incoming alert
+  </Step>
+  <Step title="Build Context">
+    Alert fields are extracted into evaluation context:
+    - Direct fields (severity, host, service, etc.)
+    - Tags (`tags.*`)
+    - Extra fields (`extra.*`)
+  </Step>
+  <Step title="Get Active Rules">
+    All active rules for the tenant are loaded, ordered by priority
+  </Step>
+  <Step title="Evaluate Each Rule">
+    For each rule (in priority order):
+    - Check ALL conditions (must all match)
+    - Check ANY conditions (at least one must match)
+    - If both groups satisfied → rule matches
+  </Step>
+  <Step title="Apply Actions">
+    For matching rules:
+    - Execute actions in order
+    - If suppressed → drop alert
+    - If stop processing → skip remaining rules
+  </Step>
+  <Step title="Create Incident">
+    If not suppressed, create incident with modifications applied
+  </Step>
+</Steps>
+
+---
+
+## Best Practices
+
+<AccordionGroup>
+  <Accordion title="Use Meaningful Priorities">
+    Reserve low numbers (1-10) for critical rules like suppression. Use higher numbers (100+) for enrichment rules.
+  </Accordion>
+  <Accordion title="Start Specific, Then General">
+    More specific rules should have higher priority (lower number) than general rules.
+  </Accordion>
+  <Accordion title="Test Before Activating">
+    Create rules as inactive first. Review incoming alerts to verify conditions match expected alerts before activating.
+  </Accordion>
+  <Accordion title="Use Stop Processing Wisely">
+    Enable stop processing for definitive actions (suppress). Leave it off for additive rules (add tags) so multiple rules can enhance alerts.
+  </Accordion>
+  <Accordion title="Document Your Rules">
+    Use the description field to explain why the rule exists and what it's meant to catch.
+  </Accordion>
+  <Accordion title="Review Rules Periodically">
+    Audit rules regularly. Remove rules for retired services or outdated conditions.
+  </Accordion>
+</AccordionGroup>
+
+---
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Rule not matching expected alerts">
+    1. Verify rule is **Active**
+    2. Check condition field names match your alert data
+    3. Use webhook samples to see actual field values
+    4. Test regex patterns separately
+    5. Check if a higher-priority rule is stopping processing
+  </Accordion>
+  <Accordion title="Alerts being unexpectedly suppressed">
+    1. Check for active rules with `suppress` action
+    2. Review rules with highest priority (lowest number)
+    3. Look for broad conditions that might match unintended alerts
+    4. Temporarily deactivate suspect rules to identify the culprit
+  </Accordion>
+  <Accordion title="Tags not appearing on incidents">
+    1. Verify rule conditions are matching
+    2. Check action type is `addTags`
+    3. Confirm tag key-value format is correct
+    4. Review rule priority (might be overwritten by later rule)
+  </Accordion>
+  <Accordion title="Priority not being set">
+    1. Verify `setPriority` action is configured
+    2. Check priority value format (P1, P2, etc.)
+    3. Look for conflicting rules that might set different priority
+  </Accordion>
+  <Accordion title="Regex not matching">
+    1. Test regex pattern in a regex tester
+    2. Remember patterns are case-insensitive
+    3. Escape special characters properly
+    4. Check for leading/trailing whitespace in field values
+  </Accordion>
+</AccordionGroup>
+
+---
+
+## Quick Reference
+
+### Condition Operators
+
+| Operator | Type | Description |
+|----------|------|-------------|
+| `equals` | String | Exact match |
+| `not_equals` | String | Not equal |
+| `contains` | String | Substring match |
+| `not_contains` | String | No substring |
+| `matches` | Regex | Pattern match |
+| `in` | List | Value in list |
+| `not_in` | List | Value not in list |
+| `exists` | Boolean | Field exists |
+| `greater_than` | Numeric | Greater than |
+| `less_than` | Numeric | Less than |
+
+### Action Types
+
+| Action | Effect |
+|--------|--------|
+| `suppress` | Drop alert |
+| `setPriority` | Override priority (P1-P5) |
+| `addTags` | Add key-value tags |
+| `setField` | Set/override field value |
+
+### Priority Guidelines
+
+| Range | Use Case |
+|-------|----------|
+| 1-10 | Suppression rules |
+| 11-50 | Critical modifications |
+| 51-100 | Standard processing |
+| 101-500 | Enrichment/tagging |
+| 501+ | Catch-all rules |
