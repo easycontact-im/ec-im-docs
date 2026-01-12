@@ -1,86 +1,306 @@
 ---
-title: "Datadog"
-description: "The navigation field in docs.json defines the pages that go in the navigation menu"
-icon: "map"
+title: 'Datadog'
+description: 'Receive alerts from Datadog monitoring platform'
+icon: 'dog'
 ---
 
-The navigation menu is the list of links on every website.
+## Overview
 
-You will likely update `docs.json` every time you add a new page. Pages do not show up automatically.
+Datadog is a cloud-scale monitoring and security platform. EasyContact integrates with Datadog via webhooks, receiving alerts from monitors and creating incidents automatically.
 
-## Navigation syntax
+---
 
-Our navigation syntax is recursive which means you can make nested navigation groups. You don't need to include `.mdx` in page names.
+## Setup Instructions
 
-<CodeGroup>
+<Steps>
+  <Step title="Create Integration in EasyContact">
+    1. Go to **Configuration** → **Integrations**
+    2. Click **Add Integration**
+    3. Select **Datadog** as the type
+    4. Enter a name (e.g., "Production Datadog")
+    5. Save and copy the webhook URL
+  </Step>
+  <Step title="Create Webhook in Datadog">
+    1. Go to **Integrations** → **Integrations**
+    2. Search for "Webhooks" and click **Configure**
+    3. Click **New Webhook**
+    4. Configure the webhook (see below)
+  </Step>
+  <Step title="Add Webhook to Monitors">
+    1. Edit your monitor
+    2. In **Notify your team**, add `@webhook-easycontact`
+    3. Save the monitor
+  </Step>
+  <Step title="Test the Integration">
+    Trigger a test alert from a monitor
+  </Step>
+</Steps>
 
-```json Regular Navigation
-"navigation": {
-  "tabs": [
-    {
-      "tab": "Docs",
-      "groups": [
-        {
-          "group": "Getting Started",
-          "pages": ["quickstart"]
-        }
-      ]
-    }
-  ]
+---
+
+## Webhook Configuration
+
+### Basic Setup
+
+| Field | Value |
+|-------|-------|
+| **Name** | easycontact |
+| **URL** | Your EasyContact webhook URL |
+| **Payload** | Custom JSON (see below) |
+| **Custom Headers** | `Content-Type: application/json` |
+
+### Recommended Payload
+
+```json
+{
+  "alert_id": "$ALERT_ID",
+  "alert_title": "$EVENT_TITLE",
+  "alert_type": "$ALERT_TYPE",
+  "alert_status": "$ALERT_STATUS",
+  "alert_transition": "$ALERT_TRANSITION",
+  "alert_priority": "$PRIORITY",
+  "hostname": "$HOSTNAME",
+  "org_id": "$ORG_ID",
+  "org_name": "$ORG_NAME",
+  "event_msg": "$EVENT_MSG",
+  "text_only_msg": "$TEXT_ONLY_MSG",
+  "link": "$LINK",
+  "snapshot": "$SNAPSHOT",
+  "date": "$DATE",
+  "last_updated": "$LAST_UPDATED",
+  "aggreg_key": "$AGGREG_KEY",
+  "tags": "$TAGS",
+  "alert_metric": "$ALERT_METRIC",
+  "alert_query": "$ALERT_QUERY",
+  "alert_scope": "$ALERT_SCOPE"
 }
 ```
 
+---
 
-```json Nested Navigation
-"navigation": {
-  "tabs": [
-    {
-      "tab": "Docs",
-      "groups": [
-        {
-          "group": "Getting Started",
-          "pages": [
-            "quickstart",
-            {
-              "group": "Nested Reference Pages",
-              "pages": ["nested-reference-page"]
-            }
-          ]
-        }
-      ]
-    }
-  ]
+## Template Variables
+
+Datadog provides these variables for webhooks:
+
+| Variable | Description |
+|----------|-------------|
+| `$ALERT_ID` | Unique alert identifier |
+| `$EVENT_TITLE` | Alert title |
+| `$ALERT_TYPE` | Type: error, warning, info, success |
+| `$ALERT_STATUS` | Current status |
+| `$ALERT_TRANSITION` | Triggered, Recovered, Re-Triggered, etc. |
+| `$PRIORITY` | P1-P5 priority level |
+| `$HOSTNAME` | Affected host |
+| `$EVENT_MSG` | Full alert message (HTML) |
+| `$TEXT_ONLY_MSG` | Plain text message |
+| `$LINK` | Link to Datadog alert |
+| `$TAGS` | Comma-separated tags |
+| `$DATE` | Alert timestamp |
+| `$ORG_ID` | Datadog organization ID |
+| `$ORG_NAME` | Organization name |
+| `$AGGREG_KEY` | Aggregation key |
+| `$ALERT_METRIC` | Metric that triggered |
+| `$ALERT_QUERY` | Monitor query |
+| `$ALERT_SCOPE` | Alert scope |
+| `$SNAPSHOT` | Snapshot image URL |
+
+---
+
+## Field Mapping
+
+| Datadog Field | EasyContact Field |
+|---------------|-------------------|
+| `alert_id` | Event ID |
+| `alert_title` / `event_title` | Title |
+| `event_msg` / `text_only_msg` | Description |
+| `alert_type` | Severity mapping |
+| `alert_status` / `alert_transition` | Status |
+| `hostname` | Host |
+| `alert_priority` | Priority |
+| `link` | URL |
+| `tags` | Tags (parsed) |
+
+---
+
+## Severity Mapping
+
+### Alert Type Mapping
+
+| Datadog Alert Type | EasyContact Severity |
+|-------------------|---------------------|
+| error | Critical |
+| warning | Warning |
+| info | Info |
+| success | OK |
+
+### Priority Mapping
+
+| Datadog Priority | EasyContact Severity |
+|-----------------|---------------------|
+| P1 | Critical |
+| P2 | High |
+| P3 | Warning |
+| P4 | Info |
+| P5 | Info |
+
+### Custom Mapping
+
+```json
+{
+  "severityMapping": {
+    "sourceField": "alert_priority",
+    "mappings": {
+      "P1": "critical",
+      "P2": "critical",
+      "P3": "high",
+      "P4": "warning",
+      "P5": "info"
+    },
+    "default": "warning"
+  }
 }
 ```
 
-</CodeGroup>
+---
 
-## Folders
+## Status Handling
 
-Simply put your MDX files in folders and update the paths in `docs.json`.
+| Datadog Transition | EasyContact Status |
+|-------------------|-------------------|
+| Triggered | Problem |
+| Re-Triggered | Problem |
+| Recovered | OK |
+| No Data | Problem |
+| No Data Recovered | OK |
 
-For example, to have a page at `https://yoursite.com/your-folder/your-page` you would make a folder called `your-folder` containing an MDX file called `your-page.mdx`.
+---
 
-<Warning>
-  You cannot use `api` for the name of a folder unless you nest it inside another folder. Mintlify uses Next.js which reserves the top-level `api` folder for internal server calls. A folder name such as `api-reference` would be accepted.
-</Warning>
+## Example Payload
 
-```json Navigation With Folder
-"navigation": {
-  "tabs": [
-    {
-      "tab": "Docs",
-      "groups": [
-        {
-          "group": "Group Name",
-          "pages": ["your-folder/your-page"]
-        }
-      ]
-    }
-  ]
+```json
+{
+  "alert_id": "12345678",
+  "alert_title": "[P1] High CPU on web-server-01",
+  "alert_type": "error",
+  "alert_status": "Alert",
+  "alert_transition": "Triggered",
+  "alert_priority": "P1",
+  "hostname": "web-server-01",
+  "org_id": "123456",
+  "org_name": "MyCompany",
+  "event_msg": "<p>CPU usage is above 90%</p>",
+  "text_only_msg": "CPU usage is above 90%",
+  "link": "https://app.datadoghq.com/monitors/12345678",
+  "date": "1705315800000",
+  "tags": "env:production,team:platform,service:api",
+  "alert_metric": "system.cpu.user",
+  "alert_query": "avg(last_5m):avg:system.cpu.user{*} > 90"
 }
 ```
 
-## Hidden pages
+---
 
-MDX files not included in `docs.json` will not show up in the sidebar but are accessible through the search bar and by linking directly to them.
+## Tags Parsing
+
+Datadog tags in `key:value` format are automatically parsed:
+
+```
+env:production,team:platform,service:api
+```
+
+Becomes:
+- `env: production`
+- `team: platform`
+- `service: api`
+
+These can be used in escalation routing rules.
+
+---
+
+## Enrichment Examples
+
+```json
+{
+  "enrichment": {
+    "tags.source": "datadog",
+    "tags.environment": "production",
+    "tags.region": "us-east-1"
+  }
+}
+```
+
+---
+
+## Monitor Configuration Tips
+
+### Adding Webhook to Monitors
+
+In monitor notification settings:
+
+```
+@webhook-easycontact
+```
+
+### Including Specific Tags
+
+Use template variables in your monitor message:
+
+```
+{{#is_alert}}
+Critical alert on {{host.name}}
+{{/is_alert}}
+
+{{#is_recovery}}
+Recovered: {{host.name}} is back to normal
+{{/is_recovery}}
+```
+
+---
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Alerts not being received">
+    1. Verify webhook URL in Datadog integrations
+    2. Check that `@webhook-easycontact` is in monitor notification
+    3. Test the webhook from Datadog UI
+    4. Review Datadog webhook delivery logs
+  </Accordion>
+  <Accordion title="Missing hostname">
+    1. Ensure `$HOSTNAME` is in your webhook payload
+    2. Check that the monitor includes host-level data
+    3. For metrics without hosts, hostname may be empty
+  </Accordion>
+  <Accordion title="Recovery not resolving incidents">
+    1. Verify monitor sends recovery notifications
+    2. Check `alert_transition` includes "Recovered"
+    3. Ensure `alert_id` is consistent between alert and recovery
+  </Accordion>
+  <Accordion title="Tags not appearing">
+    1. Include `$TAGS` in webhook payload
+    2. Verify tags are set on the monitor or metric
+    3. Check tag format (should be `key:value`)
+  </Accordion>
+</AccordionGroup>
+
+---
+
+## Best Practices
+
+<AccordionGroup>
+  <Accordion title="Use Priority Levels">
+    Set P1-P5 priority on monitors to ensure proper severity mapping in EasyContact.
+  </Accordion>
+  <Accordion title="Include All Variables">
+    Use the recommended payload template to capture all useful information.
+  </Accordion>
+  <Accordion title="Tag Your Monitors">
+    Add tags like `env`, `team`, and `service` for better routing and filtering.
+  </Accordion>
+  <Accordion title="Configure Recovery Notifications">
+    Ensure monitors send recovery notifications to automatically resolve incidents.
+  </Accordion>
+  <Accordion title="Use Aggregation Keys">
+    Set `$AGGREG_KEY` to help with incident deduplication.
+  </Accordion>
+</AccordionGroup>
