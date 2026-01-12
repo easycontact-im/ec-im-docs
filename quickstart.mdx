@@ -4,12 +4,9 @@ description: 'Never miss a critical alert. Always reach the right person.'
 icon: 'sparkles'
 ---
 
-<div className="text-center">
-  <h1 className="text-4xl font-bold">Never Miss a Critical Alert</h1>
-  <p className="text-xl text-gray-600 mt-4">
-    Intelligent incident management that ensures the right people are notified at the right time.
-  </p>
-</div>
+## Never Miss a Critical Alert
+
+Intelligent incident management that ensures the right people are notified at the right time.
 
 ---
 
@@ -35,16 +32,20 @@ Modern infrastructure generates thousands of alerts. Without proper management:
 
 **EasyContact** is the bridge between your monitoring tools and your response team.
 
-<div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 p-8 rounded-xl my-8">
-  <h2 className="text-2xl font-bold text-center mb-6">From Alert to Resolution</h2>
-
-  ```
-  Alert Fired → EasyContact → Right Person → Incident Resolved
-       ↓              ↓              ↓              ↓
-    Seconds      Intelligent     Immediate     Minimal
-                  Routing       Notification    Downtime
-  ```
-</div>
+<Steps>
+  <Step title="Alert Fired" icon="bell">
+    Your monitoring tools detect an issue and send an alert — takes **seconds**
+  </Step>
+  <Step title="Intelligent Routing" icon="route">
+    EasyContact evaluates rules and finds the right escalation policy
+  </Step>
+  <Step title="Immediate Notification" icon="tower-broadcast">
+    The on-call responder is notified via Call, SMS, or Push
+  </Step>
+  <Step title="Minimal Downtime" icon="check-circle">
+    Incident is acknowledged and resolved quickly
+  </Step>
+</Steps>
 
 ---
 
@@ -59,7 +60,9 @@ Modern infrastructure generates thousands of alerts. Without proper management:
     - Multi-channel notifications (call, SMS, push) guarantee delivery
     - Automatic escalation if the first responder doesn't acknowledge
 
-    > "Before EasyContact, it took us 15+ minutes to get someone on an incident. Now it's under 2 minutes." — Platform Engineering Lead
+    <Note>
+      "Before EasyContact, it took us 15+ minutes to get someone on an incident. Now it's under 2 minutes." — Platform Engineering Lead
+    </Note>
   </Accordion>
 
   <Accordion title="Eliminate Alert Fatigue" icon="filter">
@@ -70,7 +73,9 @@ Modern infrastructure generates thousands of alerts. Without proper management:
     - Set intelligent thresholds with alert rules
     - Route low-priority alerts to async channels (email) instead of calls
 
-    > "We reduced our actionable alerts by 60% without missing a single critical issue." — SRE Manager
+    <Note>
+      "We reduced our actionable alerts by 60% without missing a single critical issue." — SRE Manager
+    </Note>
   </Accordion>
 
   <Accordion title="Ensure 24/7 Coverage" icon="clock">
@@ -81,7 +86,9 @@ Modern infrastructure generates thousands of alerts. Without proper management:
     - Temporary overrides for vacations and sick days
     - Gap detection warns you before coverage lapses
 
-    > "Our on-call scheduling used to be a spreadsheet nightmare. Now it runs itself." — DevOps Director
+    <Note>
+      "Our on-call scheduling used to be a spreadsheet nightmare. Now it runs itself." — DevOps Director
+    </Note>
   </Accordion>
 
   <Accordion title="Connect Your Existing Stack" icon="plug">
@@ -92,7 +99,9 @@ Modern infrastructure generates thousands of alerts. Without proper management:
     - Outbound webhooks to Slack, Teams, Discord, and more
     - No vendor lock-in — your data stays portable
 
-    > "We integrated our entire monitoring stack in a single afternoon." — Infrastructure Architect
+    <Note>
+      "We integrated our entire monitoring stack in a single afternoon." — Infrastructure Architect
+    </Note>
   </Accordion>
 </AccordionGroup>
 
@@ -141,26 +150,32 @@ Not all alerts are equal. Route them intelligently based on:
 
 <Tabs>
   <Tab title="Simple Rotation">
-    ```
-    Week 1: Alice
-    Week 2: Bob
-    Week 3: Carol
-    Week 4: Alice (repeat)
-    ```
+    Weekly rotation through team members:
+
+    | Week | On-Call |
+    |------|---------|
+    | Week 1 | Alice |
+    | Week 2 | Bob |
+    | Week 3 | Carol |
+    | Week 4 | Alice (repeat) |
   </Tab>
   <Tab title="Follow-the-Sun">
-    ```
-    00:00-08:00 UTC: APAC Team (Singapore)
-    08:00-16:00 UTC: EMEA Team (London)
-    16:00-24:00 UTC: Americas Team (New York)
-    ```
+    Global coverage across time zones:
+
+    | Time (UTC) | Team |
+    |------------|------|
+    | 00:00 - 08:00 | APAC Team (Singapore) |
+    | 08:00 - 16:00 | EMEA Team (London) |
+    | 16:00 - 24:00 | Americas Team (New York) |
   </Tab>
   <Tab title="Multi-Layer">
-    ```
-    Primary Layer: Daily rotation (24/7)
-    Weekend Layer: Senior engineers (Sat-Sun only)
-    Holiday Layer: Volunteer coverage (specific dates)
-    ```
+    Layered coverage for redundancy:
+
+    | Layer | Schedule | Coverage |
+    |-------|----------|----------|
+    | Primary | Daily rotation | 24/7 |
+    | Weekend | Senior engineers | Sat-Sun only |
+    | Holiday | Volunteer coverage | Specific dates |
   </Tab>
 </Tabs>
 
@@ -197,54 +212,14 @@ Not all alerts are equal. Route them intelligently based on:
 
 ## Comparison
 
-<table>
-  <thead>
-    <tr>
-      <th>Capability</th>
-      <th>EasyContact</th>
-      <th>Basic Alerting</th>
-      <th>Email Only</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td>Multi-channel notifications</td>
-      <td>Call, SMS, Email, Push, Webhooks</td>
-      <td>Email, Webhook</td>
-      <td>Email only</td>
-    </tr>
-    <tr>
-      <td>On-call scheduling</td>
-      <td>Full rotation management</td>
-      <td>Manual assignment</td>
-      <td>None</td>
-    </tr>
-    <tr>
-      <td>Escalation policies</td>
-      <td>Multi-level with retries</td>
-      <td>Single level</td>
-      <td>None</td>
-    </tr>
-    <tr>
-      <td>Alert routing</td>
-      <td>Intelligent rule-based</td>
-      <td>Static assignment</td>
-      <td>Broadcast to all</td>
-    </tr>
-    <tr>
-      <td>Integration support</td>
-      <td>8+ native + custom</td>
-      <td>1-2 tools</td>
-      <td>Native only</td>
-    </tr>
-    <tr>
-      <td>Setup time</td>
-      <td>Minutes</td>
-      <td>Hours</td>
-      <td>Built-in</td>
-    </tr>
-  </tbody>
-</table>
+| Capability | EasyContact | Basic Alerting | Email Only |
+|------------|-------------|----------------|------------|
+| **Multi-channel notifications** | Call, SMS, Email, Push, Webhooks | Email, Webhook | Email only |
+| **On-call scheduling** | Full rotation management | Manual assignment | None |
+| **Escalation policies** | Multi-level with retries | Single level | None |
+| **Alert routing** | Intelligent rule-based | Static assignment | Broadcast to all |
+| **Integration support** | 8+ native + custom | 1-2 tools | Native only |
+| **Setup time** | Minutes | Hours | Built-in |
 
 ---
 
@@ -341,12 +316,10 @@ Not all alerts are equal. Route them intelligently based on:
 
 ---
 
-<div className="text-center mt-12">
-  <h2 className="text-3xl font-bold">Ready to never miss a critical alert?</h2>
-  <p className="text-lg text-gray-600 mt-4 mb-8">
-    Join thousands of teams who trust EasyContact for their incident management.
-  </p>
-  <a href="https://app.easycontact.ai/signup" className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-lg text-lg">
-    Start Free Trial
-  </a>
-</div>
+## Ready to never miss a critical alert?
+
+Join thousands of teams who trust EasyContact for their incident management.
+
+<Card title="Start Free Trial" icon="rocket" href="https://app.easycontact.ai/signup">
+  Get started in minutes. No credit card required.
+</Card>
