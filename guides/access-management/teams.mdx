@@ -1,4 +1,381 @@
 ---
-title: 'Teams'
+title: 'Group Management'
+description: 'Organize users into teams and manage permissions collectively'
+icon: 'users-rectangle'
 ---
 
+## Overview
+
+Groups allow you to organize users into logical collections and manage their access collectively. When you assign roles to a group, all members automatically inherit those permissions. This makes it easy to onboard new team members and ensure consistent access across your organization.
+
+<CardGroup cols={2}>
+  <Card title="Team Organization" icon="sitemap">
+    Group users by team, department, or function for easier management
+  </Card>
+  <Card title="Inherited Permissions" icon="arrow-down-to-bracket">
+    Members automatically receive all roles assigned to their groups
+  </Card>
+</CardGroup>
+
+---
+
+## Why Use Groups?
+
+<Tabs>
+  <Tab title="Simplified Onboarding">
+    When a new team member joins:
+
+    **Without Groups:**
+    1. Create user account
+    2. Identify all needed roles
+    3. Assign each role individually
+    4. Hope you didn't miss anything
+
+    **With Groups:**
+    1. Create user account
+    2. Add to appropriate group(s)
+    3. Done — they inherit all necessary permissions
+  </Tab>
+  <Tab title="Consistent Access">
+    Groups ensure everyone on a team has the same access:
+
+    - No forgotten permission assignments
+    - No accidental over-provisioning
+    - Easy to audit who has what access
+    - Changes apply to everyone at once
+  </Tab>
+  <Tab title="Easy Offboarding">
+    When someone leaves or changes teams:
+
+    - Remove from group(s) to revoke access instantly
+    - No need to track individual role assignments
+    - Permissions are automatically cleaned up
+  </Tab>
+</Tabs>
+
+---
+
+## Viewing Groups
+
+The Groups page shows all groups in your organization:
+
+| Column | Description |
+|--------|-------------|
+| **Group** | Group name and unique key identifier |
+| **Description** | Brief explanation of the group's purpose |
+| **Members** | Number of users in the group |
+| **Roles** | Roles assigned to this group |
+| **Created** | When the group was created |
+| **Actions** | Manage members, edit, or delete |
+
+### Quick Actions
+
+From the **three-dot menu** (⋮) on any group:
+
+- **Manage Members** — Add or remove users
+- **Edit** — Update group details and roles
+- **Delete** — Remove the group
+
+---
+
+## Creating Groups
+
+<Steps>
+  <Step title="Open Create Dialog">
+    Click the **Create Group** button in the top right corner
+  </Step>
+  <Step title="Define Group Identity">
+    Enter the group details:
+    - **Group Key** — Unique identifier (lowercase, e.g., `engineering`)
+    - **Group Name** — Display name (e.g., "Engineering Team")
+    - **Description** — Explain the group's purpose
+  </Step>
+  <Step title="Assign Roles">
+    Select roles that all group members should have:
+    - Use the search bar to filter roles
+    - Check the boxes next to desired roles
+    - Both system and custom roles are available
+  </Step>
+  <Step title="Save the Group">
+    Click **Create** to save your new group
+  </Step>
+</Steps>
+
+<Warning>
+  The Group Key cannot be changed after creation. Choose a meaningful, permanent identifier.
+</Warning>
+
+---
+
+## Managing Group Members
+
+### Viewing Members
+
+To see who's in a group:
+
+1. Find the group in the list
+2. Click the **three-dot menu** (⋮)
+3. Select **Manage Members**
+
+The dialog shows two panels:
+- **Left panel** — Current members with option to remove
+- **Right panel** — Available users to add
+
+### Adding Members
+
+<Steps>
+  <Step title="Open Manage Members">
+    Click the three-dot menu and select **Manage Members**
+  </Step>
+  <Step title="Search for Users">
+    Use the search bar in the right panel to find users by name or email
+  </Step>
+  <Step title="Add Users">
+    Click the **+** button next to each user you want to add
+  </Step>
+  <Step title="Verify Addition">
+    The user moves to the left panel and immediately gains group permissions
+  </Step>
+</Steps>
+
+<Info>
+  Users already in the group won't appear in the search results, preventing duplicate additions.
+</Info>
+
+### Removing Members
+
+<Steps>
+  <Step title="Open Manage Members">
+    Click the three-dot menu and select **Manage Members**
+  </Step>
+  <Step title="Find the Member">
+    Locate the user in the left panel (current members)
+  </Step>
+  <Step title="Remove User">
+    Click the **remove** button next to their name
+  </Step>
+  <Step title="Confirm Removal">
+    The user is removed and immediately loses group-inherited permissions
+  </Step>
+</Steps>
+
+<Note>
+  Removing someone from a group only revokes permissions inherited from that group. Any directly assigned roles remain intact.
+</Note>
+
+---
+
+## Editing Groups
+
+To modify an existing group:
+
+<Steps>
+  <Step title="Find the Group">
+    Locate the group in the list
+  </Step>
+  <Step title="Open Edit Dialog">
+    Click the **three-dot menu** (⋮) and select **Edit**
+  </Step>
+  <Step title="Make Changes">
+    Update any of the following:
+    - **Group Name** — Change the display name
+    - **Description** — Update the purpose description
+    - **Assigned Roles** — Add or remove roles
+  </Step>
+  <Step title="Save Changes">
+    Click **Save Changes** to apply modifications
+  </Step>
+</Steps>
+
+<Warning>
+  When you change a group's roles, all members are affected immediately. Their permissions update in real-time.
+</Warning>
+
+---
+
+## Deleting Groups
+
+<Steps>
+  <Step title="Consider the Impact">
+    Deleting a group removes all members' inherited permissions from this group
+  </Step>
+  <Step title="Open Delete Dialog">
+    Click the **three-dot menu** (⋮) and select **Delete**
+  </Step>
+  <Step title="Confirm Deletion">
+    Read the warning and click **Delete** to confirm
+  </Step>
+</Steps>
+
+<Warning>
+  Deleting a group cannot be undone. All members will lose the permissions they inherited from this group.
+</Warning>
+
+---
+
+## How Group Permissions Work
+
+### Permission Inheritance
+
+When a user is added to a group, they automatically inherit all roles assigned to that group.
+
+```
+User joins "Engineering Team" group
+         ↓
+Group has roles: "Incident Editor", "Schedule Viewer"
+         ↓
+User receives: incident:read, incident:write, schedule:read
+```
+
+### Multiple Group Membership
+
+Users can belong to multiple groups. Their effective permissions are the **union** of:
+- Directly assigned roles
+- All roles from all groups they belong to
+
+<Accordion title="Example: Multiple Groups">
+  **User: Alex**
+
+  Direct Roles:
+  - None
+
+  Group Memberships:
+  - **Engineering Team** → Incident Editor
+  - **On-Call Responders** → Incident Admin, Schedule Editor
+
+  **Effective Permissions:**
+  - All Incident Editor permissions ✓
+  - All Incident Admin permissions ✓
+  - All Schedule Editor permissions ✓
+
+  Alex has the combined permissions of both groups.
+</Accordion>
+
+### Permission Resolution
+
+Permissions are additive — you can only gain more access through groups, never less.
+
+| Scenario | Result |
+|----------|--------|
+| User has role A, group adds role B | User has A + B |
+| User is in two groups with same role | No change (role counted once) |
+| User removed from group | Loses only that group's roles |
+
+---
+
+## Common Use Cases
+
+<AccordionGroup>
+  <Accordion title="Team-Based Access">
+    Create groups for each team in your organization:
+
+    - **Engineering** — Incident Editor, Integration Viewer
+    - **Support** — Incident Viewer, User Viewer
+    - **Management** — Full Viewer access
+    - **DevOps** — Incident Admin, Schedule Admin
+
+    New hires just need to be added to their team's group.
+  </Accordion>
+  <Accordion title="On-Call Rotation">
+    Create an "On-Call" group with elevated incident permissions:
+
+    - Add whoever is currently on-call
+    - Remove them when their rotation ends
+    - Permissions automatically adjust
+  </Accordion>
+  <Accordion title="Project Teams">
+    Create temporary groups for project work:
+
+    - **Project Alpha Team** — Specific permissions for the project
+    - Add cross-functional team members
+    - Delete the group when the project ends
+  </Accordion>
+  <Accordion title="External Contractors">
+    Create a limited-access group for contractors:
+
+    - **Contractors** — Read-only access to specific areas
+    - Easy to audit who has external access
+    - Quickly revoke all contractor access if needed
+  </Accordion>
+</AccordionGroup>
+
+---
+
+## Best Practices
+
+<AccordionGroup>
+  <Accordion title="Name Groups by Function">
+    Use clear, descriptive names that indicate the group's purpose:
+
+    **Good:** "Engineering Team", "On-Call Responders", "Support Tier 1"
+
+    **Avoid:** "Group 1", "Admins", "Users"
+  </Accordion>
+  <Accordion title="Document Group Purpose">
+    Use the description field to explain:
+    - What the group is for
+    - What permissions members get
+    - Who should be added
+  </Accordion>
+  <Accordion title="Prefer Groups Over Direct Roles">
+    Assign roles to groups rather than individual users when possible. This makes access management much easier as your team grows.
+  </Accordion>
+  <Accordion title="Keep Groups Focused">
+    Each group should have a clear purpose. If a group needs very different permissions for different members, consider splitting it into multiple groups.
+  </Accordion>
+  <Accordion title="Review Membership Regularly">
+    Periodically audit group membership:
+    - Remove people who've left or changed roles
+    - Verify new team members are in the right groups
+    - Check for users in groups they shouldn't be in
+  </Accordion>
+  <Accordion title="Use Meaningful Group Keys">
+    The group key is permanent, so choose wisely:
+    - Use lowercase letters and underscores
+    - Make it descriptive but concise
+    - Examples: `engineering`, `support_tier_1`, `on_call`
+  </Accordion>
+</AccordionGroup>
+
+---
+
+## Groups vs. Direct Role Assignment
+
+| Factor | Groups | Direct Roles |
+|--------|--------|--------------|
+| **Best for** | Teams, consistent access | Individual exceptions |
+| **Onboarding** | Add to group(s) | Assign each role |
+| **Offboarding** | Remove from group(s) | Remove each role |
+| **Changes** | Update once, affects all | Update each user |
+| **Auditing** | Easy to see who's in what team | Must check each user |
+| **Flexibility** | Same permissions for all members | Individual customization |
+
+<Tip>
+  Use groups for standard team access and direct roles for individual exceptions or elevated permissions.
+</Tip>
+
+---
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="User doesn't have expected permissions">
+    1. Verify the user is in the correct group(s)
+    2. Check that the group has the expected roles assigned
+    3. Confirm the roles include the needed permissions
+    4. Ensure the user's account is active
+  </Accordion>
+  <Accordion title="Can't add a user to a group">
+    1. Verify the user exists in your organization
+    2. Check if they're already in the group (they won't appear in search)
+    3. Ensure you have permission to manage groups
+  </Accordion>
+  <Accordion title="Removed user still has access">
+    1. Check if they have the same role assigned directly
+    2. Check if they're in another group with the same role
+    3. Ask them to log out and back in to refresh their session
+  </Accordion>
+  <Accordion title="Group role changes not taking effect">
+    Members may need to refresh their session. Changes are immediate but cached sessions may show old permissions until refreshed.
+  </Accordion>
+</AccordionGroup>
