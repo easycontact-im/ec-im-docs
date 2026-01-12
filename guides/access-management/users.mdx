@@ -1,7 +1,8 @@
 ---
-title: 'User Management'
-description: 'Add team members, manage roles, and configure notification preferences for your organization'
-icon: 'users'
+title: "User Management"
+description: "Add team members, manage roles, and configure notification preferences for your organization"
+icon: "users"
+mode: "wide"
 ---
 
 ## Overview
@@ -28,6 +29,7 @@ EasyContact supports two distinct user types to give you flexibility in how you 
     Full users are active team members who need to interact with the platform directly.
 
     **Capabilities:**
+
     - Log in to the platform
     - Acknowledge and resolve incidents
     - Create and manage incidents
@@ -42,6 +44,7 @@ EasyContact supports two distinct user types to give you flexibility in how you 
     Contacts are notification-only users who stay informed without needing platform access.
 
     **Capabilities:**
+
     - Receive incident notifications via email, SMS, or voice call
     - Be included in escalation policies
     - Appear in notification groups
@@ -66,12 +69,14 @@ EasyContact supports two distinct user types to give you flexibility in how you 
   </Step>
   <Step title="Enter User Details">
     Fill in the required information:
+
     - **Email address** (required)
     - **First name** and **Last name**
     - **Phone number** (required for SMS and voice notifications)
   </Step>
   <Step title="Configure Contact Methods">
     Select how this user can be reached:
+
     - **Email** — Always available
     - **SMS** — Requires phone number
     - **Voice** — Requires phone number
@@ -96,12 +101,12 @@ The **Invitations** tab shows all pending, accepted, and expired invitations.
 
 ### Invitation Statuses
 
-| Status | Description |
-|--------|-------------|
-| **Pending** | Invitation sent, waiting for user to accept |
-| **Accepted** | User has created their account |
-| **Expired** | 7-day window has passed without acceptance |
-| **Cancelled** | Invitation was manually revoked |
+| Status        | Description                                 |
+| ------------- | ------------------------------------------- |
+| **Pending**   | Invitation sent, waiting for user to accept |
+| **Accepted**  | User has created their account              |
+| **Expired**   | 7-day window has passed without acceptance  |
+| **Cancelled** | Invitation was manually revoked             |
 
 ### Resending Invitations
 
@@ -130,6 +135,7 @@ To modify an existing user's information:
   </Step>
   <Step title="Update Information">
     Modify any of the following:
+
     - Personal details (name, phone)
     - Contact methods
     - Notification preferences
@@ -160,12 +166,12 @@ Each user can have customized notification rules based on incident urgency.
 
 ### Notification Channels
 
-| Channel | Description | Requirements |
-|---------|-------------|--------------|
-| **Push** | Mobile app notifications | EasyContact mobile app installed |
-| **Email** | Email alerts | Valid email address |
-| **SMS** | Text messages | Phone number configured |
-| **Voice** | Phone calls | Phone number configured |
+| Channel   | Description              | Requirements                     |
+| --------- | ------------------------ | -------------------------------- |
+| **Push**  | Mobile app notifications | EasyContact mobile app installed |
+| **Email** | Email alerts             | Valid email address              |
+| **SMS**   | Text messages            | Phone number configured          |
+| **Voice** | Phone calls              | Phone number configured          |
 
 ### Configuring Notification Rules
 
@@ -176,10 +182,12 @@ For each urgency level, you can set:
 
 <Accordion title="Example Configuration">
   **High Urgency:**
+
   - Delay: 0 minutes (immediate)
   - Channels: Push, SMS, Voice
 
   **Low Urgency:**
+
   - Delay: 15 minutes
   - Channels: Email only
 </Accordion>
@@ -254,6 +262,7 @@ Instead of deleting users, you can deactivate them to preserve historical data.
 3. Save changes
 
 **Deactivated users:**
+
 - Cannot log in
 - Won't receive notifications
 - Are preserved in incident history
@@ -276,12 +285,14 @@ Instead of deleting users, you can deactivate them to preserve historical data.
 ### Search
 
 Use the search bar to find users by:
+
 - Name
 - Email address
 
 ### Filter by Type
 
 Use the filter dropdown to show:
+
 - **All Users** — Everyone in your organization
 - **Full Users** — Only users with login access
 - **Contacts Only** — Only notification-only users
@@ -334,4 +345,3 @@ Use the filter dropdown to show:
     4. Verify the user is active
   </Accordion>
 </AccordionGroup>
-
