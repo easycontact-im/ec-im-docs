@@ -6,7 +6,7 @@ icon: "code"
 
 ## Overview
 
-The Custom integration allows you to connect any monitoring tool, script, or application that can send HTTP POST requests. EasyContact automatically extracts common fields and captures additional data as tags.
+The Custom integration allows you to connect any monitoring tool, script, or application that can send HTTP POST requests. Easyalert automatically extracts common fields and captures additional data as tags.
 
 <Info>
   Use Custom integration when your monitoring tool isn't in our supported list, or when you want to send alerts from custom applications.
@@ -17,21 +17,21 @@ The Custom integration allows you to connect any monitoring tool, script, or app
 ## Setup Instructions
 
 <Steps>
-  <Step title="Create Integration in EasyContact">
-    1. Go to **Configuration** → **Integrations**
-    2. Click **Add Integration**
-    3. Select **Custom** as the type
-    4. Enter a name (e.g., "Internal Monitoring")
-    5. Save and copy the webhook URL
+  <Step title="Create Integration in Easyalert">
+    1. Go to **Integrations** page from left menu
+    2. Click **Add Integration** button
+    3. Select **Custom** as **Source Type**
+    4. Enter a name (e.g., `Internal Monitoring`)
+    5. Click **Create** to save
+    6. Copy the generated **Webhook URL**
+
+    > **Example:** `https://easyalert-api.easycontact.ai/api/v1/webhooks/ingest/wh_abc123...`
   </Step>
   <Step title="Configure Your Source">
     Set up your monitoring tool or script to POST JSON to the webhook URL
   </Step>
   <Step title="Send a Test Event">
-    Send a test payload and verify it appears in EasyContact
-  </Step>
-  <Step title="Configure Mappings">
-    Adjust severity mapping and enrichment based on your payload structure
+    Send a test payload and verify it appears in Easyalert
   </Step>
 </Steps>
 
@@ -55,87 +55,54 @@ https://api.easycontact.ai/api/v1/webhooks/ingest/{token}
 
 ---
 
-## Recommended Payload Format
+## Payload Format
 
-Send events in this structure for best results:
+### Standard Fields
 
-```json
-{
-  "eventId": "unique-event-id-123",
-  "title": "Alert title",
-  "description": "Detailed description of the alert",
-  "severity": "critical",
-  "status": "problem",
-  "host": "server-name",
-  "hostIp": "192.168.1.100",
-  "service": "service-name",
-  "environment": "production",
-  "timestamp": "2024-01-15T10:30:00Z",
-  "url": "https://your-monitoring-tool/alert/123",
-  "tags": {
-    "team": "platform",
-    "region": "eu-west-1"
-  }
-}
-```
+| Field | Default | Description |
+|-------|---------|-------------|
+| `eventId` | auto-generated | Unique event identifier |
+| `title` | "Custom Alert" | Alert title |
+| `description` | "" | Detailed description |
+| `severity` | "warning" | critical, error, warning, info, ok |
+| `status` | "problem" | problem, ok |
+| `timestamp` | now | ISO 8601 or Unix timestamp |
+| `host` | - | Hostname |
+| `hostIp` | - | Host IP address |
+| `service` | - | Service name |
+| `environment` | - | Environment |
+| `team` | - | Team name |
+| `customerName` | - | Customer name (for MSP routing) |
 
 ---
 
 ## Field Recognition
 
-EasyContact automatically recognizes these common field names:
+Easyalert automatically recognizes these common field names:
 
 ### Title Fields
-- `title`
-- `name`
-- `subject`
-- `summary`
-- `alert_name`
-- `message_title`
+- `title`, `name`, `subject`, `summary`, `alert_name`, `message_title`
 
 ### Description Fields
-- `description`
-- `message`
-- `body`
-- `text`
-- `details`
+- `description`, `message`, `body`, `text`, `details`
 
 ### Severity Fields
-- `severity`
-- `priority`
-- `level`
-- `criticality`
+- `severity`, `priority`, `level`, `criticality`
 
 ### Status Fields
-- `status`
-- `state`
-- `alert_status`
-- `current_state`
+- `status`, `state`, `alert_status`, `current_state`
 
 ### Host Fields
-- `host`
-- `hostname`
-- `server`
-- `node`
-- `instance`
-- `machine`
+- `host`, `hostname`, `server`, `node`, `instance`, `machine`
 
 ### IP Address Fields
-- `hostIp`
-- `host_ip`
-- `ip`
-- `ip_address`
-- `source_ip`
+- `hostIp`, `host_ip`, `ip`, `ip_address`, `source_ip`
 
 ### Service Fields
-- `service`
-- `application`
-- `app`
-- `component`
+- `service`, `application`, `app`, `component`
 
 ### Environment Fields
-- `environment`
-- `env`
+- `environment`, `env`
 
 ### Other Fields
 - `region`, `datacenter`, `dc`, `location`
@@ -144,47 +111,24 @@ EasyContact automatically recognizes these common field names:
 
 ---
 
-## Severity Values
+## Custom Field → Tag Conversion
 
-These values are automatically mapped:
-
-| Input Value | EasyContact Severity |
-|-------------|---------------------|
-| critical, disaster, fatal, emergency, P1 | Critical |
-| error, high, major, P2 | High |
-| warning, warn, medium, minor, average, P3 | Warning |
-| info, information, low, notice, P4, P5 | Info |
-| ok, resolved, recovery, clear, success | OK |
-
-Values are case-insensitive.
-
----
-
-## Status Values
-
-| Input Value | EasyContact Status |
-|-------------|-------------------|
-| problem, alert, alerting, triggered, firing, open, active | Problem |
-| ok, resolved, recovery, clear, closed, inactive | OK |
-
----
-
-## Tags Handling
-
-All unrecognized fields are captured as tags:
+Any field not in the standard list is automatically captured as a tag:
 
 ```json
 {
+  "eventId": "evt-001",
   "title": "Alert",
-  "severity": "warning",
-  "custom_field_1": "value1",
-  "custom_field_2": "value2"
+  "project_code": "PRJ-001",
+  "datacenter": "EU-West",
+  "cost_center": "CC-1234"
 }
 ```
 
-Results in tags:
-- `custom_field_1: value1`
-- `custom_field_2: value2`
+Result:
+- `tags.project_code = "PRJ-001"`
+- `tags.datacenter = "EU-West"`
+- `tags.cost_center = "CC-1234"`
 
 ### Nested Tags
 
@@ -199,6 +143,31 @@ You can also send structured tags:
   }
 }
 ```
+
+---
+
+## Severity Values
+
+These values are automatically mapped:
+
+| Input Value | Easyalert Severity |
+|-------------|-------------------|
+| critical, disaster, fatal, emergency, P1 | Critical |
+| error, high, major, P2 | High |
+| warning, warn, medium, minor, average, P3 | Warning |
+| info, information, low, notice, P4, P5 | Info |
+| ok, resolved, recovery, clear, success | OK |
+
+Values are case-insensitive.
+
+---
+
+## Status Values
+
+| Input Value | Easyalert Status |
+|-------------|-----------------|
+| problem, alert, alerting, triggered, firing, open, active | Problem |
+| ok, resolved, recovery, clear, closed, inactive | OK |
 
 ---
 
@@ -218,28 +187,19 @@ You can also send structured tags:
 
 ```json
 {
-  "eventId": "evt-12345",
-  "title": "Database connection pool exhausted",
-  "description": "All database connections are in use. New requests are being queued.",
+  "eventId": "cpu-high-server01-20241203-001",
+  "title": "High CPU Usage on server01",
+  "description": "CPU usage exceeded 90%",
   "severity": "critical",
   "status": "problem",
-  "host": "db-server-01",
-  "hostIp": "10.0.1.50",
-  "service": "postgresql",
+  "timestamp": "2024-12-03T10:00:00Z",
+  "host": "server01",
+  "hostIp": "192.168.1.100",
+  "service": "web-application",
   "environment": "production",
-  "region": "us-east-1",
-  "timestamp": "2024-01-15T10:30:00Z",
-  "url": "https://internal-monitoring.example.com/alerts/12345",
-  "tags": {
-    "team": "database",
-    "tier": "critical",
-    "customer": "acme-corp"
-  },
-  "metrics": {
-    "active_connections": 100,
-    "max_connections": 100,
-    "queue_length": 25
-  }
+  "customerName": "AcmeCorp",
+  "project_code": "PRJ-001",
+  "datacenter": "Frankfurt"
 }
 ```
 
@@ -247,74 +207,49 @@ You can also send structured tags:
 
 ```json
 {
-  "eventId": "evt-12345",
-  "title": "Database connection pool exhausted",
+  "eventId": "cpu-high-server01-20241203-001",
+  "title": "High CPU Usage on server01",
   "status": "resolved",
-  "timestamp": "2024-01-15T10:45:00Z"
+  "timestamp": "2024-12-03T10:45:00Z"
 }
 ```
 
 ---
 
-## Custom Severity Mapping
+## Routing for Tags
 
-If your tool uses custom severity values:
+Use custom fields for escalation routing:
 
-```json
-{
-  "severityMapping": {
-    "sourceField": "priority",
-    "mappings": {
-      "urgent": "critical",
-      "high": "high",
-      "medium": "warning",
-      "low": "info"
-    },
-    "default": "warning"
-  }
-}
+```
+tags.customer equals "AcmeCorp" → Acme Policy
+tags.project_code equals "PRJ-001" → Project Policy
+tags.environment equals "production" → Prod Policy
 ```
 
 ---
 
-## Enrichment Examples
-
-Add context to all custom alerts:
-
-```json
-{
-  "enrichment": {
-    "tags.source": "custom-monitoring",
-    "tags.datacenter": "dc1",
-    "owner": "ops-team"
-  }
-}
-```
-
----
-
-## cURL Examples
-
-### Sending an Alert
+## Test
 
 ```bash
 curl -X POST "YOUR_WEBHOOK_URL" \
   -H "Content-Type: application/json" \
   -d '{
+    "eventId": "test-001",
     "title": "Test Alert",
     "severity": "warning",
+    "status": "problem",
     "host": "test-server",
-    "description": "This is a test alert"
+    "project_code": "TEST"
   }'
 ```
 
-### Sending a Recovery
+### Recovery Test
 
 ```bash
 curl -X POST "YOUR_WEBHOOK_URL" \
   -H "Content-Type: application/json" \
   -d '{
-    "eventId": "same-event-id",
+    "eventId": "test-001",
     "status": "resolved"
   }'
 ```
@@ -416,13 +351,23 @@ axios.post(webhookUrl, payload)
   </Accordion>
   <Accordion title="Wrong severity assigned">
     1. Check severity value spelling
-    2. Configure custom severity mapping
-    3. Set appropriate default severity
+    2. Use standard values (critical, warning, info, etc.)
+    3. Set appropriate default severity in integration config
   </Accordion>
   <Accordion title="Recovery not resolving incident">
-    1. Include same `eventId` in recovery
+    1. Include same `eventId` in recovery payload
     2. Set `status` to "resolved" or "ok"
-    3. Verify both payloads reach EasyContact
+    3. Verify both payloads reach Easyalert
+  </Accordion>
+  <Accordion title="Invalid JSON error">
+    1. Validate JSON syntax (use jsonlint.com)
+    2. Ensure proper escaping of special characters
+    3. Check for trailing commas
+  </Accordion>
+  <Accordion title="Event grouped into existing incident">
+    1. Same host alerts within 5 minutes are grouped
+    2. Use unique eventId to create separate incidents
+    3. Check host field value
   </Accordion>
 </AccordionGroup>
 
@@ -445,5 +390,8 @@ axios.post(webhookUrl, payload)
   </Accordion>
   <Accordion title="Include URLs">
     Add links to your monitoring tool or relevant dashboards in the `url` field.
+  </Accordion>
+  <Accordion title="Use Standard Severity Values">
+    Stick to standard values (critical, warning, info) for consistent mapping.
   </Accordion>
 </AccordionGroup>

@@ -6,29 +6,72 @@ icon: "dog"
 
 ## Overview
 
-Datadog is a cloud-scale monitoring and security platform. EasyContact integrates with Datadog via webhooks, receiving alerts from monitors and creating incidents automatically.
+Datadog is a cloud-scale monitoring and security platform. Easyalert integrates with Datadog via webhooks, receiving alerts from monitors and creating incidents automatically.
+
+---
+
+## Requirements
+
+- **Datadog** account
+- **Easyalert account** and active tenant
+- Access to **Integrations → Webhooks** in Datadog
 
 ---
 
 ## Setup Instructions
 
 <Steps>
-  <Step title="Create Integration in EasyContact">
-    1. Go to **Configuration** → **Integrations**
-    2. Click **Add Integration**
-    3. Select **Datadog** as the type
-    4. Enter a name (e.g., "Production Datadog")
-    5. Save and copy the webhook URL
+  <Step title="Create Integration in Easyalert">
+    1. Go to **Integrations** page from left menu
+    2. Click **Add Integration** button
+    3. Select **Datadog** as **Source Type**
+    4. Enter a name (e.g., `Datadog Production`)
+    5. Click **Create** to save
+    6. Copy the generated **Webhook URL**
+
+    > **Example:** `https://easyalert-api.easycontact.ai/api/v1/webhooks/ingest/wh_abc123...`
   </Step>
   <Step title="Create Webhook in Datadog">
-    1. Go to **Integrations** → **Integrations**
-    2. Search for "Webhooks" and click **Configure**
-    3. Click **New Webhook**
-    4. Configure the webhook (see below)
+    Go to **Integrations → Webhooks → New**
+
+    | Field | Value |
+    |-------|-------|
+    | **Name** | `easyalert` |
+    | **URL** | Your Easyalert webhook URL |
+    | **Payload** | Custom JSON (see below) |
+    | **Custom Headers** | `Content-Type: application/json` |
+  </Step>
+  <Step title="Configure Payload Template">
+    Use this recommended payload:
+
+    ```json
+    {
+      "id": "$ID",
+      "title": "$EVENT_TITLE",
+      "hostname": "$HOSTNAME",
+      "alertId": "$ALERT_ID",
+      "alertMetric": "$ALERT_METRIC",
+      "alertQuery": "$ALERT_QUERY",
+      "alertStatus": "$ALERT_STATUS",
+      "alertTransition": "$ALERT_TRANSITION",
+      "alertType": "$ALERT_TYPE",
+      "eventType": "$EVENT_TYPE",
+      "eventMsg": "$EVENT_MSG",
+      "tags": "$TAGS",
+      "link": "$LINK",
+      "date": "$DATE",
+      "orgName": "$ORG_NAME",
+      "customer": "YOUR_CUSTOMER_NAME",
+      "team": "YOUR_TEAM_NAME",
+      "environment": "production"
+    }
+    ```
+
+    > **NOTE:** Datadog uses `$VARIABLE` syntax (uppercase).
   </Step>
   <Step title="Add Webhook to Monitors">
     1. Edit your monitor
-    2. In **Notify your team**, add `@webhook-easycontact`
+    2. In **Notify your team**, add `@webhook-easyalert`
     3. Save the monitor
   </Step>
   <Step title="Test the Integration">
@@ -38,87 +81,42 @@ Datadog is a cloud-scale monitoring and security platform. EasyContact integrate
 
 ---
 
-## Webhook Configuration
-
-### Basic Setup
-
-| Field | Value |
-|-------|-------|
-| **Name** | easycontact |
-| **URL** | Your EasyContact webhook URL |
-| **Payload** | Custom JSON (see below) |
-| **Custom Headers** | `Content-Type: application/json` |
-
-### Recommended Payload
-
-```json
-{
-  "alert_id": "$ALERT_ID",
-  "alert_title": "$EVENT_TITLE",
-  "alert_type": "$ALERT_TYPE",
-  "alert_status": "$ALERT_STATUS",
-  "alert_transition": "$ALERT_TRANSITION",
-  "alert_priority": "$PRIORITY",
-  "hostname": "$HOSTNAME",
-  "org_id": "$ORG_ID",
-  "org_name": "$ORG_NAME",
-  "event_msg": "$EVENT_MSG",
-  "text_only_msg": "$TEXT_ONLY_MSG",
-  "link": "$LINK",
-  "snapshot": "$SNAPSHOT",
-  "date": "$DATE",
-  "last_updated": "$LAST_UPDATED",
-  "aggreg_key": "$AGGREG_KEY",
-  "tags": "$TAGS",
-  "alert_metric": "$ALERT_METRIC",
-  "alert_query": "$ALERT_QUERY",
-  "alert_scope": "$ALERT_SCOPE"
-}
-```
-
----
-
-## Template Variables
+## Datadog Variables
 
 Datadog provides these variables for webhooks:
 
 | Variable | Description |
 |----------|-------------|
-| `$ALERT_ID` | Unique alert identifier |
-| `$EVENT_TITLE` | Alert title |
-| `$ALERT_TYPE` | Type: error, warning, info, success |
-| `$ALERT_STATUS` | Current status |
-| `$ALERT_TRANSITION` | Triggered, Recovered, Re-Triggered, etc. |
-| `$PRIORITY` | P1-P5 priority level |
-| `$HOSTNAME` | Affected host |
-| `$EVENT_MSG` | Full alert message (HTML) |
-| `$TEXT_ONLY_MSG` | Plain text message |
-| `$LINK` | Link to Datadog alert |
-| `$TAGS` | Comma-separated tags |
-| `$DATE` | Alert timestamp |
-| `$ORG_ID` | Datadog organization ID |
-| `$ORG_NAME` | Organization name |
-| `$AGGREG_KEY` | Aggregation key |
-| `$ALERT_METRIC` | Metric that triggered |
+| `$ID` | Event ID |
+| `$EVENT_TITLE` | Event title |
+| `$HOSTNAME` | Host name |
+| `$ALERT_ID` | Monitor ID |
+| `$ALERT_METRIC` | Metric name |
 | `$ALERT_QUERY` | Monitor query |
-| `$ALERT_SCOPE` | Alert scope |
-| `$SNAPSHOT` | Snapshot image URL |
+| `$ALERT_TRANSITION` | Triggered, Recovered |
+| `$ALERT_TYPE` | error, warning, info |
+| `$ALERT_STATUS` | Current status |
+| `$EVENT_TYPE` | Event type |
+| `$EVENT_MSG` | Full alert message (HTML) |
+| `$TAGS` | Tag list (key:value format) |
+| `$LINK` | Datadog UI link |
+| `$DATE` | Alert timestamp |
+| `$ORG_NAME` | Organization name |
 
 ---
 
 ## Field Mapping
 
-| Datadog Field | EasyContact Field |
-|---------------|-------------------|
-| `alert_id` | Event ID |
-| `alert_title` / `event_title` | Title |
-| `event_msg` / `text_only_msg` | Description |
-| `alert_type` | Severity mapping |
-| `alert_status` / `alert_transition` | Status |
-| `hostname` | Host |
-| `alert_priority` | Priority |
-| `link` | URL |
-| `tags` | Tags (parsed) |
+| Datadog Field | Easyalert Field |
+|---------------|-----------------|
+| `$ID` / `alertId` | Event ID |
+| `$EVENT_TITLE` / `title` | Title |
+| `$EVENT_MSG` | Description |
+| `$ALERT_TYPE` | Severity mapping |
+| `$ALERT_TRANSITION` | Status |
+| `$HOSTNAME` | Host |
+| `$LINK` | URL |
+| `$TAGS` | Tags (parsed) |
 
 ---
 
@@ -126,77 +124,35 @@ Datadog provides these variables for webhooks:
 
 ### Alert Type Mapping
 
-| Datadog Alert Type | EasyContact Severity |
-|-------------------|---------------------|
+| Datadog Alert Type | Easyalert Severity |
+|-------------------|-------------------|
 | error | Critical |
 | warning | Warning |
 | info | Info |
-| success | OK |
 
 ### Priority Mapping
 
-| Datadog Priority | EasyContact Severity |
-|-----------------|---------------------|
+If you use Datadog priorities:
+
+| Datadog Priority | Easyalert Severity |
+|-----------------|-------------------|
 | P1 | Critical |
 | P2 | High |
 | P3 | Warning |
 | P4 | Info |
 | P5 | Info |
 
-### Custom Mapping
-
-```json
-{
-  "severityMapping": {
-    "sourceField": "alert_priority",
-    "mappings": {
-      "P1": "critical",
-      "P2": "critical",
-      "P3": "high",
-      "P4": "warning",
-      "P5": "info"
-    },
-    "default": "warning"
-  }
-}
-```
-
 ---
 
 ## Status Handling
 
-| Datadog Transition | EasyContact Status |
-|-------------------|-------------------|
-| Triggered | Problem |
-| Re-Triggered | Problem |
-| Recovered | OK |
-| No Data | Problem |
-| No Data Recovered | OK |
-
----
-
-## Example Payload
-
-```json
-{
-  "alert_id": "12345678",
-  "alert_title": "[P1] High CPU on web-server-01",
-  "alert_type": "error",
-  "alert_status": "Alert",
-  "alert_transition": "Triggered",
-  "alert_priority": "P1",
-  "hostname": "web-server-01",
-  "org_id": "123456",
-  "org_name": "MyCompany",
-  "event_msg": "<p>CPU usage is above 90%</p>",
-  "text_only_msg": "CPU usage is above 90%",
-  "link": "https://app.datadoghq.com/monitors/12345678",
-  "date": "1705315800000",
-  "tags": "env:production,team:platform,service:api",
-  "alert_metric": "system.cpu.user",
-  "alert_query": "avg(last_5m):avg:system.cpu.user{*} > 90"
-}
-```
+| Datadog Transition | Easyalert Status | Action |
+|-------------------|------------------|--------|
+| Triggered | Problem | Creates/updates incident |
+| Re-Triggered | Problem | Updates incident |
+| Recovered | OK | Resolves incident |
+| No Data | Problem | Creates incident |
+| No Data Recovered | OK | Resolves incident |
 
 ---
 
@@ -205,28 +161,60 @@ Datadog provides these variables for webhooks:
 Datadog tags in `key:value` format are automatically parsed:
 
 ```
-env:production,team:platform,service:api
+env:production,service:web,team:backend
 ```
 
 Becomes:
-- `env: production`
-- `team: platform`
-- `service: api`
+- `tags.env = "production"`
+- `tags.service = "web"`
+- `tags.team = "backend"`
 
 These can be used in escalation routing rules.
 
 ---
 
-## Enrichment Examples
+## Custom Field → Tag Mapping
 
+### Datadog Tags ($TAGS)
+
+`$TAGS` variable brings host/monitor tags automatically:
+```
+env:production,service:web,team:backend
+```
+
+### Custom Fields
+
+All custom fields added to the payload template become tags:
 ```json
 {
-  "enrichment": {
-    "tags.source": "datadog",
-    "tags.environment": "production",
-    "tags.region": "us-east-1"
-  }
+  "customer": "AcmeCorp",
+  "datacenter": "EU-West",
+  "cost_center": "CC-1234"
 }
+```
+
+In Easyalert:
+```
+tags.customer = "AcmeCorp"
+tags.datacenter = "EU-West"
+tags.cost_center = "CC-1234"
+```
+
+---
+
+## Routing Examples
+
+**Escalation Routing:**
+```
+tags.customer equals "AcmeCorp" → Acme Policy
+tags.env equals "production" → Production Policy
+tags.team equals "backend" → Backend Team Policy
+```
+
+**Notification Rules:**
+```
+tags.env equals "production" AND severity equals "critical" → call + sms + email
+tags.env equals "staging" → email only
 ```
 
 ---
@@ -238,7 +226,7 @@ These can be used in escalation routing rules.
 In monitor notification settings:
 
 ```
-@webhook-easycontact
+@webhook-easyalert
 ```
 
 ### Including Specific Tags
@@ -257,24 +245,49 @@ Recovered: {{host.name}} is back to normal
 
 ---
 
+## Test
+
+```bash
+curl -X POST "YOUR_WEBHOOK_URL" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "id": "12345",
+    "title": "[Triggered] High CPU",
+    "hostname": "web-server-01",
+    "alertId": "789",
+    "alertTransition": "Triggered",
+    "alertType": "error",
+    "tags": "env:production,service:web",
+    "date": 1733234400,
+    "customer": "TestCustomer"
+  }'
+```
+
+---
+
 ## Troubleshooting
 
 <AccordionGroup>
   <Accordion title="Alerts not being received">
     1. Verify webhook URL in Datadog integrations
-    2. Check that `@webhook-easycontact` is in monitor notification
+    2. Check that `@webhook-easyalert` is in monitor notification
     3. Test the webhook from Datadog UI
     4. Review Datadog webhook delivery logs
   </Accordion>
-  <Accordion title="Missing hostname">
-    1. Ensure `$HOSTNAME` is in your webhook payload
-    2. Check that the monitor includes host-level data
-    3. For metrics without hosts, hostname may be empty
+  <Accordion title="Custom fields not becoming tags">
+    1. Verify field is added to webhook payload template
+    2. Check field name spelling
+    3. View webhook samples in Easyalert
+  </Accordion>
+  <Accordion title="Empty values">
+    1. Ensure `$VARIABLE` is uppercase
+    2. Check if the variable is available for the monitor type
+    3. Some variables may be empty for certain alert types
   </Accordion>
   <Accordion title="Recovery not resolving incidents">
     1. Verify monitor sends recovery notifications
-    2. Check `alert_transition` includes "Recovered"
-    3. Ensure `alert_id` is consistent between alert and recovery
+    2. Check `alertTransition` includes "Recovered"
+    3. Ensure `alertId` is consistent between alert and recovery
   </Accordion>
   <Accordion title="Tags not appearing">
     1. Include `$TAGS` in webhook payload
@@ -289,7 +302,7 @@ Recovered: {{host.name}} is back to normal
 
 <AccordionGroup>
   <Accordion title="Use Priority Levels">
-    Set P1-P5 priority on monitors to ensure proper severity mapping in EasyContact.
+    Set P1-P5 priority on monitors to ensure proper severity mapping in Easyalert.
   </Accordion>
   <Accordion title="Include All Variables">
     Use the recommended payload template to capture all useful information.
@@ -301,6 +314,9 @@ Recovered: {{host.name}} is back to normal
     Ensure monitors send recovery notifications to automatically resolve incidents.
   </Accordion>
   <Accordion title="Use Aggregation Keys">
-    Set `$AGGREG_KEY` to help with incident deduplication.
+    Set aggregation keys to help with incident deduplication.
+  </Accordion>
+  <Accordion title="Add Custom Fields for Routing">
+    Include `customer`, `team`, `environment` in payload for escalation routing.
   </Accordion>
 </AccordionGroup>

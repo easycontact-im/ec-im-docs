@@ -6,173 +6,217 @@ icon: "z"
 
 ## Overview
 
-Zabbix is an open-source enterprise monitoring solution for networks and applications. EasyContact receives alerts from Zabbix via webhook media type, automatically creating incidents from trigger events.
+Zabbix is an open-source enterprise monitoring solution. Easyalert receives alerts from Zabbix via webhook media type, automatically creating incidents from trigger events.
 
 <Info>
-  This integration works with Zabbix 4.4+ which supports native webhook media types.
+  This integration works with Zabbix 5.0+ which supports native webhook media types.
 </Info>
+
+---
+
+## Requirements
+
+- **Zabbix 5.0 or higher** (for Webhook media type support)
+- **Easyalert account** and active tenant
+- **Admin** privileges in Zabbix
 
 ---
 
 ## Setup Instructions
 
 <Steps>
-  <Step title="Create Integration in EasyContact">
-    1. Go to **Configuration** → **Integrations**
-    2. Click **Add Integration**
-    3. Select **Zabbix** as the type
-    4. Enter a name (e.g., "Production Zabbix")
-    5. Save and copy the webhook URL
+  <Step title="Create Integration in Easyalert">
+    1. Go to **Integrations** page from left menu
+    2. Click **Add Integration** button
+    3. Select **Zabbix** as **Source Type**
+    4. Enter a name (e.g., `Zabbix Production`)
+    5. Click **Create** to save
+    6. Copy the generated **Webhook URL**
+
+    > **Example:** `https://easyalert-api.easycontact.ai/api/v1/webhooks/ingest/wh_abc123...`
   </Step>
   <Step title="Create Media Type in Zabbix">
-    1. Go to **Administration** → **Media Types**
-    2. Click **Create media type**
-    3. Set **Type** to **Webhook**
-    4. Enter **Name**: "EasyContact"
+    Go to **Administration → Media types → Create media type**
+
+    | Field | Value |
+    |-------|-------|
+    | **Name** | `Easyalert` |
+    | **Type** | `Webhook` |
   </Step>
-  <Step title="Configure Webhook Parameters">
-    Add the following parameters:
+  <Step title="Add Parameters">
+    Click **Add** link to add each parameter **one by one**:
 
     | Name | Value |
     |------|-------|
-    | `URL` | Your EasyContact webhook URL |
-    | `HTTPProxy` | (optional) Your proxy if needed |
+    | `URL` | `{ALERT.SENDTO}` |
+    | `event_id` | `{EVENT.ID}` |
+    | `trigger_id` | `{TRIGGER.ID}` |
+    | `trigger_name` | `{TRIGGER.NAME}` |
+    | `trigger_description` | `{TRIGGER.DESCRIPTION}` |
+    | `trigger_severity` | `{TRIGGER.SEVERITY}` |
+    | `trigger_status` | `{TRIGGER.STATUS}` |
+    | `host_name` | `{HOST.NAME}` |
+    | `host_ip` | `{HOST.IP}` |
+    | `event_date` | `{EVENT.DATE}` |
+    | `event_time` | `{EVENT.TIME}` |
+    | `event_recovery_date` | `{EVENT.RECOVERY.DATE}` |
+    | `event_recovery_time` | `{EVENT.RECOVERY.TIME}` |
+    | `item_name` | `{ITEM.NAME}` |
+    | `item_value` | `{ITEM.VALUE}` |
+    | `event_tags` | `{EVENT.TAGS}` |
+    | `host_tags` | `{HOST.TAGS}` |
+    | `trigger_tags` | `{TRIGGER.TAGS}` |
+  </Step>
+  <Step title="Add Webhook Script">
+    Copy this script into the **Script** section:
 
-    Set the script (see below)
+    ```javascript
+    var params = JSON.parse(value),
+        req = new HttpRequest(),
+        payload = {};
+
+    payload.event_id = params.event_id;
+    payload.trigger_id = params.trigger_id;
+    payload.trigger_name = params.trigger_name;
+    payload.trigger_description = params.trigger_description;
+    payload.trigger_severity = params.trigger_severity;
+    payload.trigger_status = params.trigger_status;
+    payload.host_name = params.host_name;
+    payload.host_ip = params.host_ip;
+    payload.event_date = params.event_date;
+    payload.event_time = params.event_time;
+    payload.event_recovery_date = params.event_recovery_date;
+    payload.event_recovery_time = params.event_recovery_time;
+    payload.item_name = params.item_name;
+    payload.item_value = params.item_value;
+
+    payload.tags = {};
+
+    function parseTags(tagString) {
+        if (!tagString || tagString.length === 0) return;
+        var pairs = tagString.split(',');
+        for (var i = 0; i < pairs.length; i++) {
+            var pair = pairs[i].trim();
+            var c = pair.indexOf(':');
+            if (c > 0) {
+                payload.tags[pair.substring(0,c).trim()] = pair.substring(c+1).trim();
+            }
+        }
+    }
+
+    parseTags(params.host_tags);
+    parseTags(params.trigger_tags);
+    parseTags(params.event_tags);
+
+    req.addHeader('Content-Type: application/json');
+
+    var resp = req.post(params.URL, JSON.stringify(payload));
+
+    if (req.getStatus() !== 200 && req.getStatus() !== 202) {
+        throw 'Response code: ' + req.getStatus() + ' Response: ' + resp;
+    }
+
+    return resp;
+    ```
+  </Step>
+  <Step title="Add Message Templates (Required)">
+    Switch to **Message templates** tab and add these two templates:
+
+    **Problem:**
+    | Field | Value |
+    |-------|-------|
+    | **Message type** | `Problem` |
+    | **Subject** | `{TRIGGER.NAME}` |
+    | **Message** | `{EVENT.ID}` |
+
+    **Problem Recovery:**
+    | Field | Value |
+    |-------|-------|
+    | **Message type** | `Problem recovery` |
+    | **Subject** | `{TRIGGER.NAME}` |
+    | **Message** | `{EVENT.ID}` |
+  </Step>
+  <Step title="Configure Other Settings">
+    | Field | Value |
+    |-------|-------|
+    | **Timeout** | `30s` |
+    | **Process tags** | Checked |
+    | **Enabled** | Checked |
+  </Step>
+  <Step title="Create Webhook User">
+    Go to **Administration → Users → Create user**
+
+    | Field | Value |
+    |-------|-------|
+    | **Alias** | `Easyalert-webhook` |
+    | **Groups** | `No access to the frontend` |
+    | **Password** | Any password |
+
+    Switch to **Media** tab and click **Add**:
+
+    | Field | Value |
+    |-------|-------|
+    | **Type** | `Easyalert` |
+    | **Send to** | Your copied **Webhook URL** |
+    | **When active** | `1-7,00:00-24:00` |
+    | **Use if severity** | Check all |
   </Step>
   <Step title="Create Action">
-    1. Go to **Configuration** → **Actions**
-    2. Create a new action for trigger events
-    3. Add operation with media type "EasyContact"
-  </Step>
-  <Step title="Test the Integration">
-    Trigger a test alert in Zabbix and verify it appears in EasyContact
+    Go to **Configuration → Actions → Trigger actions → Create action**
+
+    **Action Tab:**
+    | Field | Value |
+    |-------|-------|
+    | **Name** | `Send to Easyalert` |
+    | **Enabled** | Checked |
+
+    **Operations Tab** - Click **Add**:
+    | Field | Value |
+    |-------|-------|
+    | **Send to users** | `Easyalert-webhook` |
+    | **Send only to** | `Easyalert` |
+
+    **Recovery Operations:** Add same settings for resolved alerts.
   </Step>
 </Steps>
 
 ---
 
-## Webhook Script
-
-Use this script in your Zabbix webhook media type:
-
-```javascript
-var params = JSON.parse(value),
-    req = new HttpRequest(),
-    resp;
-
-req.addHeader('Content-Type: application/json');
-
-var payload = {
-    event_id: params.event_id,
-    trigger_id: params.trigger_id,
-    trigger_name: params.trigger_name,
-    trigger_severity: params.trigger_severity,
-    trigger_status: params.trigger_status,
-    host_name: params.host_name,
-    host_ip: params.host_ip,
-    item_name: params.item_name,
-    item_value: params.item_value,
-    event_date: params.event_date,
-    event_time: params.event_time,
-    event_tags: params.event_tags,
-    trigger_description: params.trigger_description,
-    trigger_url: params.trigger_url
-};
-
-resp = req.post(params.URL, JSON.stringify(payload));
-
-if (req.getStatus() !== 200) {
-    throw 'Response code: ' + req.getStatus();
-}
-
-return true;
-```
-
----
-
-## Webhook Parameters
-
-Configure these parameters in the Zabbix media type:
-
-| Parameter | Macro | Description |
-|-----------|-------|-------------|
-| `event_id` | `{EVENT.ID}` | Unique event identifier |
-| `trigger_id` | `{TRIGGER.ID}` | Trigger identifier |
-| `trigger_name` | `{TRIGGER.NAME}` | Trigger name/title |
-| `trigger_severity` | `{TRIGGER.SEVERITY}` | Severity level |
-| `trigger_status` | `{TRIGGER.STATUS}` | PROBLEM or OK |
-| `host_name` | `{HOST.NAME}` | Affected host |
-| `host_ip` | `{HOST.IP}` | Host IP address |
-| `item_name` | `{ITEM.NAME}` | Item that triggered |
-| `item_value` | `{ITEM.VALUE}` | Current value |
-| `event_date` | `{EVENT.DATE}` | Event date |
-| `event_time` | `{EVENT.TIME}` | Event time |
-| `event_tags` | `{EVENT.TAGS}` | Event tags |
-| `trigger_description` | `{TRIGGER.DESCRIPTION}` | Description |
-| `trigger_url` | `{TRIGGER.URL}` | Link to trigger |
-
----
-
 ## Field Mapping
 
-EasyContact automatically maps Zabbix fields:
+Easyalert automatically maps Zabbix fields:
 
-| Zabbix Field | EasyContact Field |
-|--------------|-------------------|
-| `event_id` / `eventid` | Event ID |
+| Zabbix Field | Easyalert Field |
+|--------------|-----------------|
+| `event_id` | Event ID |
 | `trigger_name` | Title |
 | `trigger_description` | Description |
 | `trigger_status` | Status (PROBLEM → problem, OK → ok) |
 | `trigger_severity` | Severity |
-| `host_name` / `hostname` | Host |
+| `host_name` | Host |
 | `host_ip` | Host IP |
-| `item_name` / `application` | Service |
-| `host_group` | Environment |
+| `item_name` | Service |
 | `event_tags` | Tags |
 
 ---
 
 ## Severity Mapping
 
-Zabbix uses numeric and text severity levels:
-
-| Zabbix Value | Zabbix Name | EasyContact Severity |
-|--------------|-------------|---------------------|
-| 5 | Disaster | Critical |
-| 4 | High | High |
-| 3 | Average | Warning |
-| 2 | Warning | Warning |
-| 1 | Information | Info |
-| 0 | Not classified | Info |
-
-### Custom Mapping
-
-Override the default mapping if needed:
-
-```json
-{
-  "severityMapping": {
-    "sourceField": "trigger_severity",
-    "mappings": {
-      "disaster": "critical",
-      "high": "critical",
-      "average": "high",
-      "warning": "warning",
-      "information": "info",
-      "not_classified": "info"
-    },
-    "default": "warning"
-  }
-}
-```
+| Zabbix Severity | Zabbix Code | Easyalert Severity |
+|-----------------|-------------|-------------------|
+| Disaster | 5 | `critical` |
+| High | 4 | `high` |
+| Average | 3 | `warning` |
+| Warning | 2 | `warning` |
+| Information | 1 | `info` |
+| Not classified | 0 | `info` |
 
 ---
 
 ## Status Handling
 
-| Zabbix Status | EasyContact Status | Action |
-|---------------|-------------------|--------|
+| Zabbix Status | Easyalert Status | Action |
+|---------------|------------------|--------|
 | PROBLEM | Problem | Creates/updates incident |
 | OK | OK | Resolves incident |
 
@@ -180,67 +224,61 @@ Recovery events (OK status) automatically resolve the corresponding incident.
 
 ---
 
-## Tags Support
+## Using Tags
 
-Zabbix tags are captured in two formats:
+Zabbix tags are used for routing in Easyalert.
 
-### Native Format (Zabbix 5.0+)
-```json
-{
-  "tags": [
-    {"tag": "environment", "value": "production"},
-    {"tag": "team", "value": "platform"}
-  ]
-}
+### Where to Define Tags
+
+| Location | Menu |
+|----------|------|
+| Host | Configuration → Hosts → [Host] → Tags |
+| Trigger | Configuration → Hosts → [Host] → Triggers → [Trigger] → Tags |
+| Template | Configuration → Templates → [Template] → Tags |
+
+### Example Tags
+
+| Tag | Value | Usage |
+|-----|-------|-------|
+| `customer` | `AcmeCorp` | Customer-based routing |
+| `environment` | `production` | Environment-based routing |
+| `team` | `backend` | Team-based routing |
+
+### Usage in Easyalert
+
+In Escalation Routing:
 ```
-
-### Legacy Format
-```json
-{
-  "event_tags": "environment:production,team:platform"
-}
-```
-
-Both formats are automatically parsed and added to the incident tags.
-
----
-
-## Example Payload
-
-```json
-{
-  "event_id": "12345",
-  "trigger_id": "67890",
-  "trigger_name": "High CPU usage on {HOST.NAME}",
-  "trigger_severity": "high",
-  "trigger_status": "PROBLEM",
-  "host_name": "web-server-01",
-  "host_ip": "192.168.1.100",
-  "item_name": "CPU utilization",
-  "item_value": "95%",
-  "event_date": "2024.01.15",
-  "event_time": "10:30:00",
-  "event_tags": "environment:production,team:platform",
-  "trigger_description": "CPU usage is above 90% for 5 minutes",
-  "trigger_url": "https://zabbix.example.com/triggers/67890"
-}
+tags.customer equals AcmeCorp → Acme Policy
+tags.environment equals production → Production Policy
 ```
 
 ---
 
-## Enrichment Examples
+## Test
 
-Add context to all Zabbix alerts:
+After completing Zabbix setup, you can test manually:
 
-```json
-{
-  "enrichment": {
-    "tags.source": "zabbix",
-    "tags.environment": "production",
-    "tags.datacenter": "dc1",
-    "owner": "infrastructure-team"
-  }
-}
+```bash
+curl -X POST "YOUR_WEBHOOK_URL" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "event_id": "12345",
+    "trigger_id": "100",
+    "trigger_name": "High CPU Usage",
+    "trigger_description": "CPU usage exceeded 90%",
+    "trigger_severity": "4",
+    "trigger_status": "PROBLEM",
+    "host_name": "web-server-01",
+    "host_ip": "192.168.1.10",
+    "event_date": "2024.12.03",
+    "event_time": "10:30:00",
+    "item_name": "CPU utilization",
+    "item_value": "95%",
+    "tags": {
+      "customer": "AcmeCorp",
+      "environment": "production"
+    }
+  }'
 ```
 
 ---
@@ -249,10 +287,15 @@ Add context to all Zabbix alerts:
 
 <AccordionGroup>
   <Accordion title="Alerts not being received">
-    1. Verify the webhook URL is correct in Zabbix media type
-    2. Check Zabbix can reach the EasyContact API (no firewall blocking)
-    3. Test the webhook script manually in Zabbix
+    1. Check if Media Type is active
+    2. Verify media is added to user
+    3. Check if Action is enabled
     4. Review Zabbix action logs for errors
+  </Accordion>
+  <Accordion title="Tags not coming through">
+    1. Verify `event_tags`, `host_tags`, `trigger_tags` are in Parameters
+    2. Check if the script is complete
+    3. Ensure "Process tags" is checked in media type settings
   </Accordion>
   <Accordion title="Wrong severity mapping">
     1. Check if Zabbix sends numeric (0-5) or text severity
@@ -264,9 +307,15 @@ Add context to all Zabbix alerts:
     2. Check the `trigger_status` field is included in payload
     3. Ensure event_id matches between PROBLEM and OK events
   </Accordion>
-  <Accordion title="Missing host information">
-    1. Add `{HOST.NAME}` and `{HOST.IP}` macros to webhook parameters
-    2. Verify the macros resolve correctly in Zabbix
+  <Accordion title="Connection refused">
+    1. Check firewall/network settings
+    2. Verify Zabbix server can reach Easyalert API
+    3. Test connectivity with curl from Zabbix server
+  </Accordion>
+  <Accordion title="401 Unauthorized">
+    1. Verify Webhook URL is correct
+    2. Check if integration is active in Easyalert
+    3. Regenerate webhook token if needed
   </Accordion>
 </AccordionGroup>
 
@@ -276,15 +325,18 @@ Add context to all Zabbix alerts:
 
 <AccordionGroup>
   <Accordion title="Use Event Tags">
-    Add tags in Zabbix for better routing and filtering in EasyContact. Tags like environment, team, and service help with escalation routing.
+    Add tags in Zabbix for better routing and filtering in Easyalert. Tags like environment, team, and service help with escalation routing.
   </Accordion>
   <Accordion title="Include Trigger URL">
-    Add `{TRIGGER.URL}` to help responders quickly navigate to Zabbix for more details.
+    Add `{TRIGGER.URL}` parameter to help responders quickly navigate to Zabbix for more details.
   </Accordion>
   <Accordion title="Configure Recovery">
     Enable recovery operations to automatically resolve incidents when the problem clears.
   </Accordion>
   <Accordion title="Test with Low Severity">
     Use Information or Warning severity triggers for initial testing to avoid unnecessary escalations.
+  </Accordion>
+  <Accordion title="Organize with Host Groups">
+    Use Zabbix host groups to organize hosts and include group info in tags for routing.
   </Accordion>
 </AccordionGroup>
