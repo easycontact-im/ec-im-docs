@@ -6,7 +6,7 @@ icon: "fire"
 
 ## Overview
 
-Prometheus is a leading open-source monitoring and alerting toolkit. EasyContact integrates with Prometheus via Alertmanager webhooks, receiving alert notifications when your alerting rules fire.
+Prometheus is a leading open-source monitoring and alerting toolkit. Easyalert integrates with Prometheus via Alertmanager webhooks, receiving alert notifications when your alerting rules fire.
 
 <Info>
   This integration receives webhooks from Alertmanager, not directly from Prometheus. Make sure you have Alertmanager configured.
@@ -14,38 +14,48 @@ Prometheus is a leading open-source monitoring and alerting toolkit. EasyContact
 
 ---
 
+## Requirements
+
+- **Prometheus** and **AlertManager** installed
+- **Easyalert account** and active tenant
+- Access to AlertManager configuration file
+
+---
+
 ## Setup Instructions
 
 <Steps>
-  <Step title="Create Integration in EasyContact">
-    1. Go to **Configuration** → **Integrations**
-    2. Click **Add Integration**
-    3. Select **Prometheus** as the type
-    4. Enter a name (e.g., "Production Alertmanager")
-    5. Save and copy the webhook URL
+  <Step title="Create Integration in Easyalert">
+    1. Go to **Integrations** page from left menu
+    2. Click **Add Integration** button
+    3. Select **Prometheus** as **Source Type**
+    4. Enter a name (e.g., `Kubernetes Prometheus`)
+    5. Click **Create** to save
+    6. Copy the generated **Webhook URL**
+
+    > **Example:** `https://easyalert-api.easycontact.ai/api/v1/webhooks/ingest/wh_abc123...`
   </Step>
   <Step title="Configure Alertmanager">
-    Add a webhook receiver to your `alertmanager.yml`:
+    Edit your `alertmanager.yml` file:
 
     ```yaml
-    receivers:
-      - name: 'easycontact'
-        webhook_configs:
-          - url: 'YOUR_WEBHOOK_URL'
-            send_resolved: true
-    ```
-  </Step>
-  <Step title="Create Route">
-    Route alerts to the EasyContact receiver:
+    global:
+      resolve_timeout: 5m
 
-    ```yaml
     route:
-      receiver: 'easycontact'
-      # Or use as a sub-route for specific alerts
-      routes:
-        - match:
-            severity: critical
-          receiver: 'easycontact'
+      group_by: ['alertname', 'severity']
+      group_wait: 30s
+      group_interval: 5m
+      repeat_interval: 4h
+      receiver: 'easyalert'
+
+    receivers:
+      - name: 'easyalert'
+        webhook_configs:
+          - url: 'YOUR_WEBHOOK_URL_HERE'
+            send_resolved: true
+            http_config:
+              follow_redirects: true
     ```
   </Step>
   <Step title="Reload Alertmanager">
@@ -55,7 +65,7 @@ Prometheus is a leading open-source monitoring and alerting toolkit. EasyContact
     ```
   </Step>
   <Step title="Test the Integration">
-    Trigger a test alert and verify it appears in EasyContact
+    Trigger a test alert and verify it appears in Easyalert
   </Step>
 </Steps>
 
@@ -63,50 +73,39 @@ Prometheus is a leading open-source monitoring and alerting toolkit. EasyContact
 
 ## Alertmanager Configuration
 
-### Basic Configuration
+### Route Parameters
 
-```yaml
-global:
-  resolve_timeout: 5m
+| Parameter | Description | Recommended Value |
+|-----------|-------------|-------------------|
+| `group_by` | Labels to group by | `['alertname', 'severity']` |
+| `group_wait` | Wait time after first alert | `30s` |
+| `group_interval` | Interval for adding new alerts to group | `5m` |
+| `repeat_interval` | Resend interval for same alert | `4h` |
 
-route:
-  group_by: ['alertname', 'job']
-  group_wait: 30s
-  group_interval: 5m
-  repeat_interval: 4h
-  receiver: 'easycontact'
+### Multi-Tenant Configuration (for MSPs)
 
-receivers:
-  - name: 'easycontact'
-    webhook_configs:
-      - url: 'https://api.easycontact.ai/api/v1/webhooks/ingest/YOUR_TOKEN'
-        send_resolved: true
-        http_config:
-          follow_redirects: true
-```
-
-### With Multiple Receivers
+Route different customers to different webhooks:
 
 ```yaml
 route:
   receiver: 'default'
   routes:
     - match:
-        severity: critical
-      receiver: 'easycontact-critical'
+        customer: 'acme'
+      receiver: 'acme-easyalert'
     - match:
-        severity: warning
-      receiver: 'easycontact-warning'
+        customer: 'beta'
+      receiver: 'beta-easyalert'
 
 receivers:
-  - name: 'easycontact-critical'
+  - name: 'acme-easyalert'
     webhook_configs:
-      - url: 'YOUR_CRITICAL_WEBHOOK_URL'
+      - url: 'https://easyalert-api.easycontact.ai/api/v1/webhooks/ingest/wh_acme...'
         send_resolved: true
 
-  - name: 'easycontact-warning'
+  - name: 'beta-easyalert'
     webhook_configs:
-      - url: 'YOUR_WARNING_WEBHOOK_URL'
+      - url: 'https://easyalert-api.easycontact.ai/api/v1/webhooks/ingest/wh_beta...'
         send_resolved: true
 ```
 
@@ -114,10 +113,10 @@ receivers:
 
 ## Field Mapping
 
-EasyContact automatically maps Alertmanager fields:
+Easyalert automatically maps Alertmanager fields:
 
-| Alertmanager Field | EasyContact Field |
-|--------------------|-------------------|
+| Alertmanager Field | Easyalert Field |
+|--------------------|-----------------|
 | `labels.alertname` | Title |
 | `annotations.summary` | Title (fallback) |
 | `annotations.description` | Description |
@@ -132,39 +131,19 @@ EasyContact automatically maps Alertmanager fields:
 
 ## Severity Mapping
 
-Standard Prometheus/Alertmanager severity labels:
-
-| Prometheus Severity | EasyContact Severity |
-|--------------------|---------------------|
-| critical | Critical |
-| error | High |
-| warning | Warning |
-| info | Info |
-
-### Custom Mapping
-
-If your alerts use different severity labels:
-
-```json
-{
-  "severityMapping": {
-    "sourceField": "severity",
-    "mappings": {
-      "page": "critical",
-      "ticket": "warning",
-      "notify": "info"
-    },
-    "default": "warning"
-  }
-}
-```
+| Prometheus Label | Easyalert Severity |
+|------------------|-------------------|
+| `critical` | `critical` |
+| `error` | `high` |
+| `warning` | `warning` |
+| `info` | `info` |
 
 ---
 
 ## Status Handling
 
-| Alertmanager Status | EasyContact Status | Action |
-|--------------------|-------------------|--------|
+| Alertmanager Status | Easyalert Status | Action |
+|--------------------|------------------|--------|
 | firing | Problem | Creates/updates incident |
 | resolved | OK | Resolves incident |
 
@@ -174,148 +153,203 @@ If your alerts use different severity labels:
 
 ---
 
-## Example Payload
+## Label → Tag Conversion
 
-Alertmanager sends payloads in this format:
+**All labels** from AlertManager are automatically converted to tags. This allows you to use any label for routing.
 
-```json
-{
-  "version": "4",
-  "groupKey": "{}:{alertname=\"HighCPU\"}",
-  "status": "firing",
-  "receiver": "easycontact",
-  "alerts": [
-    {
-      "status": "firing",
-      "labels": {
-        "alertname": "HighCPU",
-        "severity": "critical",
-        "instance": "web-01:9090",
-        "job": "node-exporter",
-        "environment": "production"
-      },
-      "annotations": {
-        "summary": "High CPU usage detected",
-        "description": "CPU usage is above 90% for more than 5 minutes"
-      },
-      "startsAt": "2024-01-15T10:30:00.000Z",
-      "endsAt": "0001-01-01T00:00:00Z",
-      "fingerprint": "abc123def456"
-    }
-  ],
-  "commonLabels": {
-    "alertname": "HighCPU"
-  }
-}
-```
+### Example Conversion
 
----
-
-## Labels as Tags
-
-All Prometheus labels (except internal `__` prefixed ones) are captured as tags:
-
+Labels in alert:
 ```yaml
 labels:
-  alertname: HighCPU
-  severity: critical
+  alertname: HighCPUUsage
+  severity: warning
+  customer: acme
+  team: backend
   environment: production
-  team: platform
-  service: api
 ```
 
-Results in tags:
-- `alertname: HighCPU`
-- `severity: critical`
-- `environment: production`
-- `team: platform`
-- `service: api`
-
-These tags can be used in escalation routing rules.
-
----
-
-## Host Extraction
-
-EasyContact looks for host information in these labels (in order):
-
-1. `instance`
-2. `host`
-3. `hostname`
-4. `node`
-5. `pod`
-6. `container`
-
-The first non-empty value is used as the host.
-
----
-
-## Service Extraction
-
-Service/application is extracted from:
-
-1. `job`
-2. `service`
-3. `app`
-4. `application`
-
----
-
-## Enrichment Examples
-
-Add context to all Prometheus alerts:
-
-```json
-{
-  "enrichment": {
-    "tags.monitoring_tool": "prometheus",
-    "tags.cluster": "production-k8s",
-    "tags.region": "eu-west-1"
-  }
-}
+Available tags in Easyalert:
 ```
+tags.alertname = "HighCPUUsage"
+tags.severity = "warning"
+tags.customer = "acme"
+tags.team = "backend"
+tags.environment = "production"
+```
+
+### Routing Examples
+
+**Escalation Routing:**
+```
+tags.customer equals "acme" → Acme Corp Policy
+tags.team equals "database" → DBA Team Policy
+tags.environment equals "production" → Critical Policy
+```
+
+**Notification Rules:**
+```
+tags.severity equals "critical" → call + sms + email
+tags.environment equals "staging" → email only
+```
+
+---
+
+## Fingerprint and Duplicate Detection
+
+AlertManager generates a unique **fingerprint** for each alert. Easyalert uses this fingerprint to detect duplicate alerts.
+
+### How It Works
+
+1. When alert arrives, fingerprint is checked
+2. Same fingerprint + firing status = duplicate (skip)
+3. Same fingerprint + resolved status = incident is closed
+4. Different fingerprint = new incident
+
+### repeat_interval Setting
+
+`repeat_interval` determines how often AlertManager resends the same alert:
+
+```yaml
+route:
+  repeat_interval: 4h  # Resend every 4 hours
+```
+
+Thanks to duplicate detection, even if AlertManager resends the same alert, a new incident won't be created.
 
 ---
 
 ## Alert Rule Examples
 
-### CPU Alert
+### Host/VM Monitoring
 
 ```yaml
-- alert: HighCPU
-  expr: 100 - (avg by(instance) (rate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 90
-  for: 5m
-  labels:
-    severity: critical
-  annotations:
-    summary: "High CPU usage on {{ $labels.instance }}"
-    description: "CPU usage is {{ $value }}%"
+groups:
+  - name: host-alerts
+    rules:
+      - alert: HighCPUUsage
+        expr: 100 - (avg by(instance) (rate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 80
+        for: 5m
+        labels:
+          severity: warning
+          team: infrastructure
+          customer: acme
+        annotations:
+          summary: "High CPU usage: {{ $labels.instance }}"
+          description: "CPU usage above 80% (current: {{ $value | printf \"%.1f\" }}%)"
+
+      - alert: HighMemoryUsage
+        expr: (1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100 > 85
+        for: 5m
+        labels:
+          severity: warning
+          team: infrastructure
+        annotations:
+          summary: "High memory usage: {{ $labels.instance }}"
+          description: "Memory usage above 85%"
+
+      - alert: DiskSpaceLow
+        expr: (node_filesystem_avail_bytes{mountpoint="/"} / node_filesystem_size_bytes{mountpoint="/"}) * 100 < 15
+        for: 10m
+        labels:
+          severity: critical
+          team: infrastructure
+        annotations:
+          summary: "Critical disk space: {{ $labels.instance }}"
+          description: "Remaining disk space below 15%"
 ```
 
-### Memory Alert
+### Kubernetes Alerts
 
 ```yaml
-- alert: HighMemory
-  expr: (node_memory_MemTotal_bytes - node_memory_MemAvailable_bytes) / node_memory_MemTotal_bytes * 100 > 90
-  for: 5m
-  labels:
-    severity: warning
-  annotations:
-    summary: "High memory usage on {{ $labels.instance }}"
-    description: "Memory usage is {{ $value }}%"
+groups:
+  - name: kubernetes-alerts
+    rules:
+      - alert: PodCrashLooping
+        expr: rate(kube_pod_container_status_restarts_total[15m]) * 60 * 15 > 3
+        for: 5m
+        labels:
+          severity: critical
+          team: platform
+        annotations:
+          summary: "Pod crash loop: {{ $labels.namespace }}/{{ $labels.pod }}"
+          description: "Pod restarted more than 3 times in last 15 minutes"
+
+      - alert: DeploymentReplicasMismatch
+        expr: kube_deployment_status_replicas_available != kube_deployment_spec_replicas
+        for: 10m
+        labels:
+          severity: warning
+          team: platform
+        annotations:
+          summary: "Deployment replica mismatch: {{ $labels.deployment }}"
+          description: "Expected: {{ $value }}, Active: different"
 ```
 
-### Disk Alert
+### Database Alerts
 
 ```yaml
-- alert: DiskSpaceLow
-  expr: node_filesystem_avail_bytes / node_filesystem_size_bytes * 100 < 10
-  for: 5m
-  labels:
-    severity: critical
-  annotations:
-    summary: "Low disk space on {{ $labels.instance }}"
-    description: "Only {{ $value }}% disk space remaining"
+groups:
+  - name: database-alerts
+    rules:
+      - alert: PostgreSQLDown
+        expr: pg_up == 0
+        for: 1m
+        labels:
+          severity: critical
+          team: database
+        annotations:
+          summary: "PostgreSQL down: {{ $labels.instance }}"
+          description: "PostgreSQL instance unreachable"
+
+      - alert: PostgreSQLHighConnections
+        expr: sum(pg_stat_activity_count) > 100
+        for: 5m
+        labels:
+          severity: warning
+          team: database
+        annotations:
+          summary: "High connection count: {{ $labels.instance }}"
+          description: "Active connections: {{ $value }}"
+```
+
+---
+
+## Deployment Examples
+
+### Docker Compose
+
+```yaml
+version: '3.8'
+services:
+  alertmanager:
+    image: prom/alertmanager:latest
+    ports:
+      - "9093:9093"
+    volumes:
+      - ./alertmanager.yml:/etc/alertmanager/alertmanager.yml
+    command:
+      - '--config.file=/etc/alertmanager/alertmanager.yml'
+```
+
+### Kubernetes ConfigMap
+
+```yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: alertmanager-config
+data:
+  alertmanager.yml: |
+    global:
+      resolve_timeout: 5m
+    route:
+      receiver: 'easyalert'
+    receivers:
+      - name: 'easyalert'
+        webhook_configs:
+          - url: 'WEBHOOK_URL'
+            send_resolved: true
 ```
 
 ---
@@ -324,27 +358,52 @@ Add context to all Prometheus alerts:
 
 <AccordionGroup>
   <Accordion title="Alerts not being received">
-    1. Check Alertmanager logs for webhook errors
+    1. Check AlertManager logs for webhook errors
     2. Verify the webhook URL is accessible from Alertmanager
     3. Test connectivity: `curl -X POST YOUR_WEBHOOK_URL -d '{}'`
     4. Check firewall rules between Alertmanager and internet
+    5. Test config with `amtool`
+  </Accordion>
+  <Accordion title="Labels not becoming tags">
+    1. Verify alert rules include required labels
+    2. Check that labels aren't being dropped by Alertmanager routes
+    3. Review `group_by` settings
   </Accordion>
   <Accordion title="Resolved alerts not clearing incidents">
     1. Verify `send_resolved: true` in webhook config
     2. Check that fingerprint matches between firing and resolved
     3. Review Alertmanager routing to ensure resolved alerts reach webhook
   </Accordion>
-  <Accordion title="Missing labels/annotations">
-    1. Verify alert rules include required labels
-    2. Check that labels aren't being dropped by Alertmanager routes
-    3. Review `group_by` settings
-  </Accordion>
   <Accordion title="Duplicate incidents">
     1. Check `group_by` configuration
     2. Verify fingerprint is consistent
     3. Review `group_interval` and `repeat_interval` settings
   </Accordion>
+  <Accordion title="Connection refused">
+    1. Check firewall/network settings
+    2. Verify AlertManager can reach Easyalert API
+    3. Test URL access from AlertManager server
+  </Accordion>
 </AccordionGroup>
+
+### Test Command
+
+```bash
+# Send test alert to AlertManager
+curl -X POST http://localhost:9093/api/v2/alerts \
+  -H "Content-Type: application/json" \
+  -d '[{
+    "labels": {
+      "alertname": "TestAlert",
+      "severity": "warning",
+      "customer": "test"
+    },
+    "annotations": {
+      "summary": "Test alert",
+      "description": "This is a test alert"
+    }
+  }]'
+```
 
 ---
 
@@ -365,5 +424,8 @@ Add context to all Prometheus alerts:
   </Accordion>
   <Accordion title="Add Runbook Links">
     Include `runbook_url` annotation for quick access to remediation steps.
+  </Accordion>
+  <Accordion title="Use Labels for Routing">
+    Add labels like `customer`, `team`, `environment` for escalation routing in Easyalert.
   </Accordion>
 </AccordionGroup>

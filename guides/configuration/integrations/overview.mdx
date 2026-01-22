@@ -6,11 +6,11 @@ icon: 'plug'
 
 ## Overview
 
-Integrations connect EasyContact to your monitoring and observability tools. When an alert fires in your monitoring system, it's sent to EasyContact via webhook, automatically creating an incident and triggering the appropriate escalation policy.
+Integrations connect Easyalert to your monitoring and observability tools. When an alert fires in your monitoring system, it's sent to Easyalert via webhook, automatically creating an incident and triggering the appropriate escalation policy.
 
 <CardGroup cols={2}>
   <Card title="Automatic Detection" icon="wand-magic-sparkles">
-    EasyContact automatically detects the source type and extracts relevant fields
+    Easyalert automatically detects the source type and extracts relevant fields
   </Card>
   <Card title="Custom Mapping" icon="arrows-rotate">
     Map severity levels and enrich alerts with additional context
@@ -27,7 +27,7 @@ Integrations connect EasyContact to your monitoring and observability tools. Whe
 
 ## Supported Integrations
 
-EasyContact supports the following monitoring tools out of the box:
+Easyalert supports the following monitoring tools out of the box:
 
 <CardGroup cols={3}>
   <Card title="Zabbix" icon="z" href="/configuration/integrations/zabbix">
@@ -61,20 +61,20 @@ EasyContact supports the following monitoring tools out of the box:
 ## How Integrations Work
 
 <Steps>
-  <Step title="Create Integration">
-    Add a new integration in EasyContact and select the source type
+  <Step title="Create Integration in Easyalert">
+    Add a new integration and select the source type (Zabbix, Prometheus, Grafana, Datadog, or Custom)
   </Step>
   <Step title="Copy Webhook URL">
-    Get the unique webhook URL generated for this integration
+    Copy the unique webhook URL generated for this integration
   </Step>
-  <Step title="Configure Source">
-    Set up your monitoring tool to send alerts to the webhook URL
+  <Step title="Configure Your Monitoring Tool">
+    Set up your monitoring tool to send alerts to the webhook URL (webhook, notification channel, or media type depending on tool)
   </Step>
-  <Step title="Test & Verify">
-    Send a test alert and verify it appears in EasyContact
+  <Step title="Send a Test Event">
+    Trigger a test alert and verify it appears in Easyalert
   </Step>
-  <Step title="Configure Mappings">
-    Optionally customize severity mapping and add enrichment data
+  <Step title="Configure Routing (Optional)">
+    Set up severity mapping, enrichment, and escalation routing rules
   </Step>
 </Steps>
 
@@ -84,20 +84,20 @@ EasyContact supports the following monitoring tools out of the box:
 
 <Steps>
   <Step title="Navigate to Integrations">
-    Go to **Configuration** → **Integrations**
+    Go to **Integrations** page from left menu
   </Step>
   <Step title="Click Add Integration">
     Click the **Add Integration** button
   </Step>
-  <Step title="Select Type">
-    Choose the integration type that matches your monitoring tool
+  <Step title="Select Source Type">
+    Choose the **Source Type** that matches your monitoring tool (Zabbix, Prometheus, Grafana, Datadog, or Custom)
   </Step>
   <Step title="Enter Details">
-    - **Name** — Descriptive name (e.g., "Production Prometheus")
+    - **Name** — Descriptive name (e.g., "Production Prometheus", "Zabbix DC1")
     - **Description** — Optional explanation
   </Step>
   <Step title="Save and Copy URL">
-    Save the integration and copy the webhook URL from the dialog
+    Click **Create** to save and copy the generated **Webhook URL**
   </Step>
 </Steps>
 
@@ -112,10 +112,12 @@ EasyContact supports the following monitoring tools out of the box:
 Your webhook URL follows this format:
 
 ```
-https://api.easycontact.ai/api/v1/webhooks/ingest/{webhookToken}
+https://easyalert-api.easycontact.ai/api/v1/webhooks/ingest/{token}
 ```
 
-The `webhookToken` is a unique identifier for your integration. If compromised, you can regenerate it from the integration settings.
+> **Example:** `https://easyalert-api.easycontact.ai/api/v1/webhooks/ingest/wh_abc123...`
+
+The `token` is a unique identifier for your integration. If compromised, you can regenerate it from the integration settings.
 
 ---
 
@@ -185,17 +187,21 @@ Inactive integrations ignore incoming webhooks.
 
 ## Configuring Severity Mapping
 
-Map source severity values to EasyContact's standard levels.
+Map source severity values to Easyalert's standard levels.
 
 ### Standard Severity Levels
 
 | Level | Description | Color |
 |-------|-------------|-------|
-| **Critical** | Requires immediate attention | Red |
-| **High** | Serious issue, respond quickly | Orange |
+| **Critical** | Requires immediate attention, service down | Red |
+| **High** | Serious issue, significant degradation | Orange |
 | **Warning** | Potential issue, investigate | Yellow |
-| **Info** | Informational alert | Blue |
+| **Info** | Informational alert, low impact | Blue |
 | **OK** | Recovery/resolved state | Green |
+
+<Info>
+  Easyalert automatically maps common severity values from monitoring tools. See individual integration guides for specific mappings.
+</Info>
 
 ### Setting Up Mappings
 
@@ -279,9 +285,41 @@ Add static metadata to all alerts from an integration.
 
 ---
 
+## Tag-Based Routing
+
+All integrations support tag-based routing for escalation policies and notification rules.
+
+### How Tags Work
+
+1. **From Source**: Tags come from your monitoring tool (Zabbix host tags, Prometheus labels, Datadog tags, etc.)
+2. **From Enrichment**: Static tags added via integration configuration
+3. **From Payload**: Custom fields in the webhook payload automatically become tags
+
+### Routing Examples
+
+**Escalation Routing:**
+```
+tags.customer equals "AcmeCorp" → Acme Corp Policy
+tags.environment equals "production" → Production Policy
+tags.team equals "backend" → Backend Team Policy
+```
+
+**Notification Rules:**
+```
+tags.severity equals "critical" → call + sms + email
+tags.environment equals "staging" → email only
+tags.team equals "database" → Database Team channel
+```
+
+<Info>
+  See individual integration guides for specific tag configuration instructions.
+</Info>
+
+---
+
 ## Webhook Samples
 
-EasyContact stores samples of incoming webhooks for debugging and configuration.
+Easyalert stores samples of incoming webhooks for debugging and configuration.
 
 ### Viewing Samples
 
@@ -300,7 +338,7 @@ The analysis feature helps you understand:
 
 ## Auto-Detection
 
-EasyContact automatically detects the source type based on payload characteristics:
+Easyalert automatically detects the source type based on payload characteristics:
 
 | Source | Detection Signals |
 |--------|-------------------|
