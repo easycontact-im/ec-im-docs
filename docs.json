@@ -29,22 +29,22 @@
             ]
           },
           {
+            "group": "Integrations",
+            "pages": [
+              "guides/configuration/integrations/overview",
+              "guides/configuration/integrations/zabbix",
+              "guides/configuration/integrations/prometheus",
+              "guides/configuration/integrations/grafana",
+              "guides/configuration/integrations/appdynamics",
+              "guides/configuration/integrations/dynatrace",
+              "guides/configuration/integrations/newrelic",
+              "guides/configuration/integrations/datadog",
+              "guides/configuration/integrations/custom"
+            ]
+          },
+          {
             "group": "Configuration",
             "pages": [
-              {
-                "group": "Integrations",
-                "pages": [
-                  "guides/configuration/integrations/overview",
-                  "guides/configuration/integrations/zabbix",
-                  "guides/configuration/integrations/prometheus",
-                  "guides/configuration/integrations/grafana",
-                  "guides/configuration/integrations/appdynamics",
-                  "guides/configuration/integrations/dynatrace",
-                  "guides/configuration/integrations/newrelic",
-                  "guides/configuration/integrations/datadog",
-                  "guides/configuration/integrations/custom"
-                ]
-              },
               "guides/configuration/alert-rules",
               "guides/configuration/escalation-routing",
               "guides/configuration/settings"
