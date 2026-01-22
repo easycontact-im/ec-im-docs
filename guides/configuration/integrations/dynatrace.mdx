@@ -6,60 +6,72 @@ icon: "d"
 
 ## Overview
 
-Dynatrace is an AI-powered software intelligence platform. EasyContact integrates with Dynatrace Problem Notifications, automatically creating incidents when Dynatrace detects problems in your environment.
+Easyalert automatically detects and processes Problem Notification webhooks from Dynatrace.
+
+---
+
+## Requirements
+
+- **Dynatrace** account (SaaS or Managed)
+- **Easyalert account** and active tenant
+- Access to **Settings > Integration > Problem notifications** in Dynatrace
 
 ---
 
 ## Setup Instructions
 
 <Steps>
-  <Step title="Create Integration in EasyContact">
-    1. Go to **Configuration** → **Integrations**
-    2. Click **Add Integration**
-    3. Select **Dynatrace** as the type
-    4. Enter a name (e.g., "Production Dynatrace")
-    5. Save and copy the webhook URL
+  <Step title="Create Integration in Easyalert">
+    1. Go to **Integrations** page from left menu
+    2. Click **Add Integration** button
+    3. Select **Dynatrace** as **Source Type**
+    4. Enter a name (e.g., `Dynatrace Production`)
+    5. Click **Create** to save
+    6. Copy the generated **Webhook URL**
+
+    > **Example:** `https://easyalert-api.easycontact.ai/api/v1/webhooks/ingest/wh_abc123...`
   </Step>
-  <Step title="Configure Problem Notification in Dynatrace">
-    1. Go to **Settings** → **Integration** → **Problem notifications**
-    2. Click **Add notification**
-    3. Select **Custom Integration**
+  <Step title="Create Webhook in Dynatrace">
+    Go to **Settings → Integration → Problem notifications → Add notification**
+
+    | Field | Value |
+    |-------|-------|
+    | **Display name** | `Easyalert` |
+    | **Webhook URL** | Your Webhook URL |
+    | **Notification type** | `Custom integration` |
   </Step>
-  <Step title="Configure Webhook">
-    - **Name**: EasyContact
-    - **Webhook URL**: Your EasyContact webhook URL
-    - **Accept any SSL certificate**: Based on your setup
-    - Configure the payload (see below)
+  <Step title="Configure Payload Template">
+    Use this recommended payload:
+
+    ```json
+    {
+      "PID": "{PID}",
+      "ProblemID": "{ProblemID}",
+      "State": "{State}",
+      "ProblemImpact": "{ProblemImpact}",
+      "ProblemSeverity": "{ProblemSeverity}",
+      "ProblemTitle": "{ProblemTitle}",
+      "ProblemURL": "{ProblemURL}",
+      "ProblemDetailsText": "{ProblemDetailsText}",
+      "ImpactedEntities": {ImpactedEntities},
+      "ImpactedEntityNames": "{ImpactedEntityNames}",
+      "Tags": "{Tags}",
+      "ProblemStartTime": {ProblemStartTime},
+      "ProblemEndTime": {ProblemEndTime},
+      "customer": "YOUR_CUSTOMER_NAME",
+      "team": "YOUR_TEAM_NAME",
+      "environment": "production"
+    }
+    ```
+
+    <Warning>
+      **IMPORTANT:** `{ImpactedEntities}`, `{ProblemStartTime}`, `{ProblemEndTime}` must NOT be in quotes!
+    </Warning>
   </Step>
   <Step title="Test the Integration">
     Use the **Send test notification** button in Dynatrace
   </Step>
 </Steps>
-
----
-
-## Webhook Configuration
-
-### Recommended Payload
-
-```json
-{
-  "PID": "{PID}",
-  "ProblemID": "{ProblemID}",
-  "ProblemTitle": "{ProblemTitle}",
-  "ProblemDetails": "{ProblemDetailsText}",
-  "ProblemSeverity": "{ProblemSeverity}",
-  "ProblemImpact": "{ProblemImpact}",
-  "State": "{State}",
-  "ProblemURL": "{ProblemURL}",
-  "ImpactedEntities": "{ImpactedEntities}",
-  "ImpactedEntityNames": "{ImpactedEntityNames}",
-  "RootCauseEntity": "{RootCauseEntity}",
-  "ProblemStartTime": {ProblemStartTime},
-  "ProblemEndTime": {ProblemEndTime},
-  "Tags": "{Tags}"
-}
-```
 
 ---
 
@@ -72,7 +84,7 @@ Dynatrace is an AI-powered software intelligence platform. EasyContact integrate
 | `{ProblemTitle}` | Problem title |
 | `{ProblemDetailsText}` | Detailed description |
 | `{ProblemSeverity}` | Severity level |
-| `{ProblemImpact}` | Impact type |
+| `{ProblemImpact}` | Impact type (INFRASTRUCTURE, SERVICE, APPLICATION) |
 | `{State}` | OPEN, RESOLVED, or MERGED |
 | `{ProblemURL}` | Link to problem in Dynatrace |
 | `{ImpactedEntities}` | JSON array of affected entities |
@@ -86,79 +98,91 @@ Dynatrace is an AI-powered software intelligence platform. EasyContact integrate
 
 ## Field Mapping
 
-| Dynatrace Field | EasyContact Field |
-|-----------------|-------------------|
+| Dynatrace Field | Easyalert Field |
+|-----------------|-----------------|
 | `PID` / `ProblemID` | Event ID |
 | `ProblemTitle` | Title |
-| `ProblemDetails` / `ProblemDetailsText` | Description |
+| `ProblemDetailsText` | Description |
 | `State` | Status |
 | `ProblemSeverity` | Severity |
 | `ProblemImpact` | Impact tag |
 | `ImpactedEntityNames` | Host/Service |
 | `ProblemURL` | URL |
-| `RootCauseEntity` | Root cause tag |
 
 ---
 
-## Severity Mapping
+## State and Severity Mapping
 
-| Dynatrace Severity | EasyContact Severity |
-|-------------------|---------------------|
-| AVAILABILITY | Critical |
-| ERROR | Critical |
-| PERFORMANCE | High |
-| RESOURCE_CONTENTION | High |
-| CUSTOM_ALERT | Warning |
+### Status Mapping
 
-### Custom Mapping
+| Dynatrace State | Easyalert Status |
+|-----------------|------------------|
+| `OPEN` | Problem |
+| `RESOLVED` | OK |
+| `MERGED` | Problem (linked) |
 
+### Severity Mapping
+
+| Dynatrace Severity | Easyalert Severity |
+|--------------------|-------------------|
+| `AVAILABILITY` | Critical |
+| `ERROR` | Critical |
+| `PERFORMANCE` | High |
+| `RESOURCE_CONTENTION` | Warning |
+| `CUSTOM_ALERT` | Warning |
+
+---
+
+## Custom Field → Tag Conversion
+
+**All custom fields** and tags from `{Tags}` placeholder are automatically captured as tags.
+
+### Dynatrace Tags
+
+`{Tags}` placeholder brings entity tags:
+```
+env:production,team:backend,customer:acme
+```
+
+In Easyalert:
+```
+tags.env = "production"
+tags.team = "backend"
+tags.customer = "acme"
+```
+
+### Custom Field Example
+
+Added to template:
 ```json
 {
-  "severityMapping": {
-    "sourceField": "ProblemSeverity",
-    "mappings": {
-      "AVAILABILITY": "critical",
-      "ERROR": "critical",
-      "PERFORMANCE": "high",
-      "RESOURCE_CONTENTION": "warning",
-      "CUSTOM_ALERT": "warning"
-    },
-    "default": "warning"
-  }
+  ...
+  "datacenter": "EU-West",
+  "project": "ecommerce"
 }
+```
+
+In Easyalert:
+```
+tags.datacenter = "EU-West"
+tags.project = "ecommerce"
 ```
 
 ---
 
-## Status Handling
+## Routing Examples
 
-| Dynatrace State | EasyContact Status |
-|-----------------|-------------------|
-| OPEN | Problem |
-| RESOLVED | OK |
-| MERGED | Problem (linked) |
+**Escalation Routing:**
+```
+tags.customer equals "AcmeCorp" → Acme Corp Policy
+tags.env equals "production" → Production Policy
+tags.team equals "backend" → Backend Team Policy
+```
 
----
-
-## Example Payload
-
-```json
-{
-  "PID": "P-12345",
-  "ProblemID": "-1234567890123456789_1705315800000",
-  "ProblemTitle": "High CPU on host web-server-01",
-  "ProblemDetails": "CPU usage exceeded 90% threshold",
-  "ProblemSeverity": "RESOURCE_CONTENTION",
-  "ProblemImpact": "INFRASTRUCTURE",
-  "State": "OPEN",
-  "ProblemURL": "https://abc12345.live.dynatrace.com/#problems/problemdetails;pid=P-12345",
-  "ImpactedEntities": "[{\"entity\":\"HOST-ABC123\",\"name\":\"web-server-01\"}]",
-  "ImpactedEntityNames": "web-server-01",
-  "RootCauseEntity": "HOST-ABC123",
-  "ProblemStartTime": 1705315800000,
-  "ProblemEndTime": -1,
-  "Tags": "env:production,team:platform"
-}
+**Notification Rules:**
+```
+tags.ProblemSeverity equals "AVAILABILITY" → call + sms + email
+tags.ProblemImpact equals "SERVICE" → Service Team channel
 ```
 
 ---
@@ -169,48 +193,45 @@ Dynatrace categorizes problem impact:
 
 | Impact | Description |
 |--------|-------------|
-| INFRASTRUCTURE | Affects infrastructure components |
-| SERVICE | Affects monitored services |
-| APPLICATION | Affects applications |
-| ENVIRONMENT | Affects entire environment |
+| `INFRASTRUCTURE` | Affects infrastructure components |
+| `SERVICE` | Affects monitored services |
+| `APPLICATION` | Affects applications |
+| `ENVIRONMENT` | Affects entire environment |
 
 Impact is captured as a tag for routing.
 
 ---
 
-## Impacted Entities
+## Test
 
-The `ImpactedEntities` field contains a JSON array:
-
-```json
-[
-  {
-    "entity": "HOST-ABC123",
-    "name": "web-server-01",
-    "type": "HOST"
-  },
-  {
-    "entity": "SERVICE-DEF456",
-    "name": "checkout-service",
-    "type": "SERVICE"
-  }
-]
+```bash
+curl -X POST "YOUR_WEBHOOK_URL" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "PID": "P-123",
+    "ProblemID": "P-123",
+    "State": "OPEN",
+    "ProblemSeverity": "ERROR",
+    "ProblemTitle": "High failure rate",
+    "ProblemURL": "https://abc.dynatrace.com/#problems",
+    "ImpactedEntities": [{"type": "SERVICE", "name": "api-service"}],
+    "Tags": "env:production,team:backend",
+    "ProblemStartTime": 1733234400000,
+    "customer": "TestCustomer"
+  }'
 ```
 
-The first entity's name is used as the host/service.
+### Recovery Test
 
----
-
-## Enrichment Examples
-
-```json
-{
-  "enrichment": {
-    "tags.source": "dynatrace",
-    "tags.environment": "production",
-    "tags.ai_powered": "true"
-  }
-}
+```bash
+curl -X POST "YOUR_WEBHOOK_URL" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "PID": "P-123",
+    "ProblemID": "P-123",
+    "State": "RESOLVED",
+    "ProblemEndTime": 1733238000000
+  }'
 ```
 
 ---
@@ -219,12 +240,12 @@ The first entity's name is used as the host/service.
 
 Configure which problems trigger notifications:
 
-1. Go to **Settings** → **Alerting** → **Alerting profiles**
+1. Go to **Settings → Alerting → Alerting profiles**
 2. Create or edit a profile
 3. Define severity and scope rules
 4. Link to your webhook notification
 
-This allows fine-grained control over which problems reach EasyContact.
+This allows fine-grained control over which problems reach Easyalert.
 
 ---
 
@@ -236,6 +257,18 @@ This allows fine-grained control over which problems reach EasyContact.
     2. Test with "Send test notification" button
     3. Check Dynatrace notification logs
     4. Verify SSL/TLS settings if using HTTPS
+    5. Is notification enabled?
+  </Accordion>
+  <Accordion title="Custom fields not becoming tags">
+    1. Verify field is added to template
+    2. Check field name spelling
+    3. View webhook samples in Easyalert
+  </Accordion>
+  <Accordion title="Invalid JSON error">
+    1. Ensure `{ImpactedEntities}` is NOT in quotes
+    2. Ensure `{ProblemStartTime}` is NOT in quotes
+    3. Ensure `{ProblemEndTime}` is NOT in quotes
+    4. Validate JSON syntax
   </Accordion>
   <Accordion title="Resolved problems not closing incidents">
     1. Ensure `State` field is in payload
@@ -246,11 +279,6 @@ This allows fine-grained control over which problems reach EasyContact.
     1. Include `{ImpactedEntityNames}` in payload
     2. Check that problem has entity association
     3. Use `{ImpactedEntities}` for detailed JSON
-  </Accordion>
-  <Accordion title="Wrong severity mapping">
-    1. Review `ProblemSeverity` values in samples
-    2. Configure custom severity mapping
-    3. Check alerting profile severity filters
   </Accordion>
 </AccordionGroup>
 
@@ -266,9 +294,12 @@ This allows fine-grained control over which problems reach EasyContact.
     Always include `{ProblemURL}` so responders can quickly access Dynatrace for details.
   </Accordion>
   <Accordion title="Tag Your Entities">
-    Use Dynatrace tags (environment, team, service) for better routing in EasyContact.
+    Use Dynatrace tags (environment, team, service) for better routing in Easyalert.
+  </Accordion>
+  <Accordion title="Add Custom Fields for Routing">
+    Include `customer`, `team`, `environment` in payload for escalation routing.
   </Accordion>
   <Accordion title="Configure Problem Detection">
-    Tune Dynatrace's automatic problem detection to reduce false positives before they reach EasyContact.
+    Tune Dynatrace's automatic problem detection to reduce false positives before they reach Easyalert.
   </Accordion>
 </AccordionGroup>
