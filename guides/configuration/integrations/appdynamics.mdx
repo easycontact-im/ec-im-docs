@@ -29,7 +29,8 @@ Easyalert automatically detects and processes HTTP Request Action webhooks from 
     5. Click **Create** to save
     6. Copy the generated **Webhook URL**
 
-    > **Example:** `https://easyalert-api.easycontact.ai/api/v1/webhooks/ingest/wh_abc123...`
+    > **Example:** `https://api.easyalert.io/api/v1/webhooks/ingest/wh_abc123...`
+
   </Step>
   <Step title="Create HTTP Request Template">
     Go to **Alert & Respond → HTTP Request Templates → New**
@@ -40,6 +41,7 @@ Easyalert automatically detects and processes HTTP Request Action webhooks from 
     | **Request URL** | Your Webhook URL |
     | **Method** | `POST` |
     | **MIME Type** | `application/json` |
+
   </Step>
   <Step title="Configure Payload Template">
     Use this recommended payload:
@@ -72,6 +74,7 @@ Easyalert automatically detects and processes HTTP Request Action webhooks from 
       "environment": "production"
     }
     ```
+
   </Step>
   <Step title="Create Action">
     1. Go to **Alert & Respond → Actions → Create**
@@ -96,64 +99,64 @@ Easyalert automatically detects and processes HTTP Request Action webhooks from 
 
 AppDynamics uses Apache Velocity syntax (`${variable}`):
 
-| Variable | Description |
-|----------|-------------|
-| `${latestEvent.eventType}` | Event type (POLICY_OPEN_*, etc.) |
-| `${latestEvent.id}` | Event ID |
-| `${latestEvent.guid}` | Event GUID |
-| `${latestEvent.displayName}` | Event display name |
-| `${latestEvent.severity}` | Severity (INFO, WARN, ERROR) |
-| `${latestEvent.summaryMessage}` | Event summary |
-| `${latestEvent.eventMessage}` | Event message |
-| `${latestEvent.application.name}` | Application name |
-| `${latestEvent.tier.name}` | Tier name |
-| `${latestEvent.node.name}` | Node name |
-| `${latestEvent.healthRule.name}` | Health rule name |
-| `${latestEvent.incident.id}` | Incident ID |
-| `${policy.name}` | Policy name |
-| `${latestEvent.deepLink}` | Link to event in AppDynamics |
-| `${controllerUrl}` | Controller URL |
-| `${account.name}` | Account name |
+| Variable                          | Description                       |
+| --------------------------------- | --------------------------------- |
+| `${latestEvent.eventType}`        | Event type (POLICY*OPEN*\*, etc.) |
+| `${latestEvent.id}`               | Event ID                          |
+| `${latestEvent.guid}`             | Event GUID                        |
+| `${latestEvent.displayName}`      | Event display name                |
+| `${latestEvent.severity}`         | Severity (INFO, WARN, ERROR)      |
+| `${latestEvent.summaryMessage}`   | Event summary                     |
+| `${latestEvent.eventMessage}`     | Event message                     |
+| `${latestEvent.application.name}` | Application name                  |
+| `${latestEvent.tier.name}`        | Tier name                         |
+| `${latestEvent.node.name}`        | Node name                         |
+| `${latestEvent.healthRule.name}`  | Health rule name                  |
+| `${latestEvent.incident.id}`      | Incident ID                       |
+| `${policy.name}`                  | Policy name                       |
+| `${latestEvent.deepLink}`         | Link to event in AppDynamics      |
+| `${controllerUrl}`                | Controller URL                    |
+| `${account.name}`                 | Account name                      |
 
 ---
 
 ## Field Mapping
 
-| AppDynamics Field | Easyalert Field |
-|-------------------|-----------------|
-| `incident_id` / `event_id` | Event ID |
-| `event_name` / `summary` | Title |
-| `summary` / `event_message` | Description |
-| `event_type` | Status mapping |
-| `severity` | Severity |
-| `node_name` / `tier_name` | Host |
-| `app_name` | Service |
-| `event_deep_link` | URL |
+| AppDynamics Field           | Easyalert Field |
+| --------------------------- | --------------- |
+| `incident_id` / `event_id`  | Event ID        |
+| `event_name` / `summary`    | Title           |
+| `summary` / `event_message` | Description     |
+| `event_type`                | Status mapping  |
+| `severity`                  | Severity        |
+| `node_name` / `tier_name`   | Host            |
+| `app_name`                  | Service         |
+| `event_deep_link`           | URL             |
 
 ---
 
 ## Event Types and Status Mapping
 
-| Event Type | Easyalert Status |
-|------------|------------------|
-| `POLICY_OPEN_WARNING` | Problem |
-| `POLICY_OPEN_CRITICAL` | Problem |
-| `POLICY_CONTINUES_WARNING` | Problem |
-| `POLICY_CONTINUES_CRITICAL` | Problem |
-| `POLICY_UPGRADED` | Problem |
-| `POLICY_DOWNGRADED` | Problem |
-| `POLICY_CLOSE_*` | OK |
-| `POLICY_CANCELED_*` | OK |
+| Event Type                  | Easyalert Status |
+| --------------------------- | ---------------- |
+| `POLICY_OPEN_WARNING`       | Problem          |
+| `POLICY_OPEN_CRITICAL`      | Problem          |
+| `POLICY_CONTINUES_WARNING`  | Problem          |
+| `POLICY_CONTINUES_CRITICAL` | Problem          |
+| `POLICY_UPGRADED`           | Problem          |
+| `POLICY_DOWNGRADED`         | Problem          |
+| `POLICY_CLOSE_*`            | OK               |
+| `POLICY_CANCELED_*`         | OK               |
 
 ---
 
 ## Severity Mapping
 
 | AppDynamics Severity | Easyalert Severity |
-|----------------------|-------------------|
-| `ERROR` | Critical |
-| `WARN` | Warning |
-| `INFO` | Info |
+| -------------------- | ------------------ |
+| `ERROR`              | Critical           |
+| `WARN`               | Warning            |
+| `INFO`               | Info               |
 
 ---
 
@@ -164,6 +167,7 @@ AppDynamics uses Apache Velocity syntax (`${variable}`):
 ### Example
 
 Added to template:
+
 ```json
 {
   ...
@@ -175,6 +179,7 @@ Added to template:
 ```
 
 In Easyalert:
+
 ```
 tags.customer = "AcmeCorp"
 tags.team = "backend"
@@ -187,6 +192,7 @@ tags.cost_center = "CC-1234"
 ## Routing Examples
 
 **Escalation Routing:**
+
 ```
 tags.customer equals "AcmeCorp" → Acme Corp Policy
 tags.app_name equals "Payment Service" → Payment Team Policy
@@ -194,6 +200,7 @@ tags.environment equals "production" → Production Policy
 ```
 
 **Notification Rules:**
+
 ```
 tags.severity equals "ERROR" → call + sms + email
 tags.tier_name equals "Database" → DBA Team channel
@@ -227,30 +234,26 @@ curl -X POST "YOUR_WEBHOOK_URL" \
 
 <AccordionGroup>
   <Accordion title="Alerts not being received">
-    1. Verify HTTP Request Template is configured correctly
-    2. Check that action is added to the policy
-    3. Verify health rule is enabled and triggering
-    4. Test template from AppDynamics UI
+    1. Verify HTTP Request Template is configured correctly 2. Check that action
+    is added to the policy 3. Verify health rule is enabled and triggering 4.
+    Test template from AppDynamics UI
   </Accordion>
   <Accordion title="Custom fields not becoming tags">
-    1. Verify field is added to webhook payload template
-    2. Check field name spelling
-    3. View webhook samples in Easyalert
+    1. Verify field is added to webhook payload template 2. Check field name
+    spelling 3. View webhook samples in Easyalert
   </Accordion>
   <Accordion title="Recovery events not resolving incidents">
-    1. Verify "On Policy Close" action is configured in policy
-    2. Check `incident_id` is consistent between open and close events
-    3. Ensure event_type includes POLICY_CLOSE events
+    1. Verify "On Policy Close" action is configured in policy 2. Check
+    `incident_id` is consistent between open and close events 3. Ensure
+    event_type includes POLICY_CLOSE events
   </Accordion>
   <Accordion title="Missing node/tier information">
-    1. Ensure variables include node and tier
-    2. Some events may not have node-level data
-    3. Use tier as fallback when node is empty
+    1. Ensure variables include node and tier 2. Some events may not have
+    node-level data 3. Use tier as fallback when node is empty
   </Accordion>
   <Accordion title="Template errors">
-    1. Test template with "Test" button in AppDynamics
-    2. Check variable syntax (Apache Velocity)
-    3. Ensure all referenced fields exist
+    1. Test template with "Test" button in AppDynamics 2. Check variable syntax
+    (Apache Velocity) 3. Ensure all referenced fields exist
   </Accordion>
 </AccordionGroup>
 
@@ -260,13 +263,16 @@ curl -X POST "YOUR_WEBHOOK_URL" \
 
 <AccordionGroup>
   <Accordion title="Include Deep Links">
-    Always include `${latestEvent.deepLink}` so responders can quickly navigate to AppDynamics for details.
+    Always include `${latestEvent.deepLink}` so responders can quickly navigate
+    to AppDynamics for details.
   </Accordion>
   <Accordion title="Use Incident ID">
-    Use `incident_id` for event correlation to properly group and resolve related alerts.
+    Use `incident_id` for event correlation to properly group and resolve
+    related alerts.
   </Accordion>
   <Accordion title="Configure All Event Types">
-    Include close/cancel events in your policy to automatically resolve incidents in Easyalert.
+    Include close/cancel events in your policy to automatically resolve
+    incidents in Easyalert.
   </Accordion>
   <Accordion title="Add Custom Fields for Routing">
     Include `customer`, `team`, `environment` in payload for escalation routing.

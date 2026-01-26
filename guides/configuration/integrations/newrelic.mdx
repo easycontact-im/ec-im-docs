@@ -9,7 +9,8 @@ icon: "n"
 Easyalert automatically detects and processes webhooks from New Relic Workflows.
 
 <Info>
-  New Relic Workflows is the recommended method for new integrations. Classic Alerts is deprecated but still supported.
+  New Relic Workflows is the recommended method for new integrations. Classic
+  Alerts is deprecated but still supported.
 </Info>
 
 ---
@@ -33,7 +34,8 @@ Easyalert automatically detects and processes webhooks from New Relic Workflows.
     5. Click **Create** to save
     6. Copy the generated **Webhook URL**
 
-    > **Example:** `https://easyalert-api.easycontact.ai/api/v1/webhooks/ingest/wh_abc123...`
+    > **Example:** `https://api.easyalert.io/api/v1/webhooks/ingest/wh_abc123...`
+
   </Step>
   <Step title="Create Workflow in New Relic">
     Go to **Alerts & AI → Workflows → Add a workflow**
@@ -68,6 +70,7 @@ Easyalert automatically detects and processes webhooks from New Relic Workflows.
     ```
 
     > **NOTE:** Handlebars syntax uses `{{ }}`. The `{{ json ... }}` helper produces JSON-safe output.
+
   </Step>
   <Step title="Test the Integration">
     Use the **Send test notification** feature in New Relic
@@ -80,35 +83,35 @@ Easyalert automatically detects and processes webhooks from New Relic Workflows.
 
 New Relic Workflows use Handlebars syntax:
 
-| Variable | Description |
-|----------|-------------|
-| `{{ json issueId }}` | Issue ID |
-| `{{ json issuePageUrl }}` | New Relic UI link |
-| `{{ json annotations.title.[0] }}` | Issue title |
-| `{{ json annotations.description.[0] }}` | Issue description |
-| `{{ json state }}` | ACTIVATED, CLOSED, CREATED, ACKNOWLEDGED |
-| `{{ json priority }}` | CRITICAL, HIGH, MEDIUM, LOW |
-| `{{ json triggerEvent }}` | STATE_CHANGE, INCIDENT_ADDED, etc. |
-| `{{ json entitiesData.names }}` | Impacted entities |
-| `{{ json totalIncidents }}` | Number of incidents |
-| `{{ json accumulations.policyName }}` | Policy names |
-| `{{ json accumulations.conditionName }}` | Condition names |
-| `{{ json accumulations.source }}` | Alert sources |
-| `{{ json workflowName }}` | Workflow name |
+| Variable                                 | Description                              |
+| ---------------------------------------- | ---------------------------------------- |
+| `{{ json issueId }}`                     | Issue ID                                 |
+| `{{ json issuePageUrl }}`                | New Relic UI link                        |
+| `{{ json annotations.title.[0] }}`       | Issue title                              |
+| `{{ json annotations.description.[0] }}` | Issue description                        |
+| `{{ json state }}`                       | ACTIVATED, CLOSED, CREATED, ACKNOWLEDGED |
+| `{{ json priority }}`                    | CRITICAL, HIGH, MEDIUM, LOW              |
+| `{{ json triggerEvent }}`                | STATE_CHANGE, INCIDENT_ADDED, etc.       |
+| `{{ json entitiesData.names }}`          | Impacted entities                        |
+| `{{ json totalIncidents }}`              | Number of incidents                      |
+| `{{ json accumulations.policyName }}`    | Policy names                             |
+| `{{ json accumulations.conditionName }}` | Condition names                          |
+| `{{ json accumulations.source }}`        | Alert sources                            |
+| `{{ json workflowName }}`                | Workflow name                            |
 
 ---
 
 ## Field Mapping
 
-| New Relic Field | Easyalert Field |
-|-----------------|-----------------|
-| `issueId` / `id` | Event ID |
-| `annotations.title[0]` / `title` | Title |
-| `annotations.description[0]` / `description` | Description |
-| `priority` | Severity |
-| `state` | Status |
-| `entitiesData.names` / `impactedEntities` | Host/Service |
-| `issuePageUrl` / `issueUrl` | URL |
+| New Relic Field                              | Easyalert Field |
+| -------------------------------------------- | --------------- |
+| `issueId` / `id`                             | Event ID        |
+| `annotations.title[0]` / `title`             | Title           |
+| `annotations.description[0]` / `description` | Description     |
+| `priority`                                   | Severity        |
+| `state`                                      | Status          |
+| `entitiesData.names` / `impactedEntities`    | Host/Service    |
+| `issuePageUrl` / `issueUrl`                  | URL             |
 
 ---
 
@@ -116,34 +119,34 @@ New Relic Workflows use Handlebars syntax:
 
 ### Status Mapping
 
-| New Relic State | Easyalert Status |
-|-----------------|------------------|
-| `ACTIVATED` | Problem |
-| `CREATED` | Problem |
-| `ACKNOWLEDGED` | Problem (acknowledged) |
-| `CLOSED` | OK |
-| `DEACTIVATED` | OK |
+| New Relic State | Easyalert Status       |
+| --------------- | ---------------------- |
+| `ACTIVATED`     | Problem                |
+| `CREATED`       | Problem                |
+| `ACKNOWLEDGED`  | Problem (acknowledged) |
+| `CLOSED`        | OK                     |
+| `DEACTIVATED`   | OK                     |
 
 ### Severity Mapping
 
 | New Relic Priority | Easyalert Severity |
-|--------------------|-------------------|
-| `CRITICAL` | Critical |
-| `HIGH` | Critical |
-| `MEDIUM` | Warning |
-| `LOW` | Info |
+| ------------------ | ------------------ |
+| `CRITICAL`         | Critical           |
+| `HIGH`             | Critical           |
+| `MEDIUM`           | Warning            |
+| `LOW`              | Info               |
 
 ---
 
 ## Trigger Events
 
-| Trigger Event | Description |
-|---------------|-------------|
-| `STATE_CHANGE` | Issue state changed |
-| `INCIDENT_ADDED` | New incident added to issue |
-| `INCIDENT_CLOSED` | Incident closed |
-| `PRIORITY_CHANGED` | Priority updated |
-| `ACKNOWLEDGED` | Issue acknowledged |
+| Trigger Event      | Description                 |
+| ------------------ | --------------------------- |
+| `STATE_CHANGE`     | Issue state changed         |
+| `INCIDENT_ADDED`   | New incident added to issue |
+| `INCIDENT_CLOSED`  | Incident closed             |
+| `PRIORITY_CHANGED` | Priority updated            |
+| `ACKNOWLEDGED`     | Issue acknowledged          |
 
 ---
 
@@ -154,6 +157,7 @@ New Relic Workflows use Handlebars syntax:
 ### Example
 
 Template:
+
 ```json
 {
   "id": {{ json issueId }},
@@ -164,6 +168,7 @@ Template:
 ```
 
 In Easyalert:
+
 ```
 tags.policy = "Production Policy"
 tags.condition = "High CPU"
@@ -176,6 +181,7 @@ tags.datacenter = "EU-West"
 ## Routing Examples
 
 **Escalation Routing:**
+
 ```
 tags.customer equals "AcmeCorp" → Acme Corp Policy
 tags.environment equals "production" → Production Policy
@@ -183,6 +189,7 @@ tags.alertPolicyNames contains "Critical" → Critical Policy
 ```
 
 **Notification Rules:**
+
 ```
 tags.priority equals "CRITICAL" → call + sms + email
 tags.sources contains "Infrastructure" → Infra Team channel
@@ -251,31 +258,29 @@ For legacy New Relic alerts:
 
 <Steps>
   <Step title="Create Notification Channel">
-    1. Go to **Alerts → Notification channels**
-    2. Click **New notification channel**
-    3. Select **Webhook**
+    1. Go to **Alerts → Notification channels** 2. Click **New notification
+    channel** 3. Select **Webhook**
   </Step>
   <Step title="Configure Webhook">
-    - **Channel name**: Easyalert
-    - **Base URL**: Your Easyalert webhook URL
+    - **Channel name**: Easyalert - **Base URL**: Your Easyalert webhook URL
   </Step>
   <Step title="Add to Policies">
-    1. Go to your alert policy
-    2. Add the webhook channel to notification settings
+    1. Go to your alert policy 2. Add the webhook channel to notification
+    settings
   </Step>
 </Steps>
 
 ### Classic Alerts Field Mapping
 
-| New Relic Field | Easyalert Field |
-|-----------------|-----------------|
-| `incident_id` | Event ID |
-| `condition_name` | Title |
-| `details` | Description |
-| `severity` | Severity |
-| `current_state` | Status |
-| `targets[0].name` | Host |
-| `incident_url` | URL |
+| New Relic Field   | Easyalert Field |
+| ----------------- | --------------- |
+| `incident_id`     | Event ID        |
+| `condition_name`  | Title           |
+| `details`         | Description     |
+| `severity`        | Severity        |
+| `current_state`   | Status          |
+| `targets[0].name` | Host            |
+| `incident_url`    | URL             |
 
 ---
 

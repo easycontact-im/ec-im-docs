@@ -9,7 +9,8 @@ icon: "z"
 Zabbix is an open-source enterprise monitoring solution. Easyalert receives alerts from Zabbix via webhook media type, automatically creating incidents from trigger events.
 
 <Info>
-  This integration works with Zabbix 5.0+ which supports native webhook media types.
+  This integration works with Zabbix 5.0+ which supports native webhook media
+  types.
 </Info>
 
 ---
@@ -33,7 +34,8 @@ Zabbix is an open-source enterprise monitoring solution. Easyalert receives aler
     5. Click **Create** to save
     6. Copy the generated **Webhook URL**
 
-    > **Example:** `https://easyalert-api.easycontact.ai/api/v1/webhooks/ingest/wh_abc123...`
+    > **Example:** `https://api.easyalert.io/api/v1/webhooks/ingest/wh_abc123...`
+
   </Step>
   <Step title="Create Media Type in Zabbix">
     Go to **Administration → Media types → Create media type**
@@ -42,6 +44,7 @@ Zabbix is an open-source enterprise monitoring solution. Easyalert receives aler
     |-------|-------|
     | **Name** | `Easyalert` |
     | **Type** | `Webhook` |
+
   </Step>
   <Step title="Add Parameters">
     Click **Add** link to add each parameter **one by one**:
@@ -66,6 +69,7 @@ Zabbix is an open-source enterprise monitoring solution. Easyalert receives aler
     | `event_tags` | `{EVENT.TAGS}` |
     | `host_tags` | `{HOST.TAGS}` |
     | `trigger_tags` | `{TRIGGER.TAGS}` |
+
   </Step>
   <Step title="Add Webhook Script">
     Copy this script into the **Script** section:
@@ -118,6 +122,7 @@ Zabbix is an open-source enterprise monitoring solution. Easyalert receives aler
 
     return resp;
     ```
+
   </Step>
   <Step title="Add Message Templates (Required)">
     Switch to **Message templates** tab and add these two templates:
@@ -135,6 +140,7 @@ Zabbix is an open-source enterprise monitoring solution. Easyalert receives aler
     | **Message type** | `Problem recovery` |
     | **Subject** | `{TRIGGER.NAME}` |
     | **Message** | `{EVENT.ID}` |
+
   </Step>
   <Step title="Configure Other Settings">
     | Field | Value |
@@ -160,6 +166,7 @@ Zabbix is an open-source enterprise monitoring solution. Easyalert receives aler
     | **Send to** | Your copied **Webhook URL** |
     | **When active** | `1-7,00:00-24:00` |
     | **Use if severity** | Check all |
+
   </Step>
   <Step title="Create Action">
     Go to **Configuration → Actions → Trigger actions → Create action**
@@ -177,6 +184,7 @@ Zabbix is an open-source enterprise monitoring solution. Easyalert receives aler
     | **Send only to** | `Easyalert` |
 
     **Recovery Operations:** Add same settings for resolved alerts.
+
   </Step>
 </Steps>
 
@@ -186,39 +194,39 @@ Zabbix is an open-source enterprise monitoring solution. Easyalert receives aler
 
 Easyalert automatically maps Zabbix fields:
 
-| Zabbix Field | Easyalert Field |
-|--------------|-----------------|
-| `event_id` | Event ID |
-| `trigger_name` | Title |
-| `trigger_description` | Description |
-| `trigger_status` | Status (PROBLEM → problem, OK → ok) |
-| `trigger_severity` | Severity |
-| `host_name` | Host |
-| `host_ip` | Host IP |
-| `item_name` | Service |
-| `event_tags` | Tags |
+| Zabbix Field          | Easyalert Field                     |
+| --------------------- | ----------------------------------- |
+| `event_id`            | Event ID                            |
+| `trigger_name`        | Title                               |
+| `trigger_description` | Description                         |
+| `trigger_status`      | Status (PROBLEM → problem, OK → ok) |
+| `trigger_severity`    | Severity                            |
+| `host_name`           | Host                                |
+| `host_ip`             | Host IP                             |
+| `item_name`           | Service                             |
+| `event_tags`          | Tags                                |
 
 ---
 
 ## Severity Mapping
 
 | Zabbix Severity | Zabbix Code | Easyalert Severity |
-|-----------------|-------------|-------------------|
-| Disaster | 5 | `critical` |
-| High | 4 | `high` |
-| Average | 3 | `warning` |
-| Warning | 2 | `warning` |
-| Information | 1 | `info` |
-| Not classified | 0 | `info` |
+| --------------- | ----------- | ------------------ |
+| Disaster        | 5           | `critical`         |
+| High            | 4           | `high`             |
+| Average         | 3           | `warning`          |
+| Warning         | 2           | `warning`          |
+| Information     | 1           | `info`             |
+| Not classified  | 0           | `info`             |
 
 ---
 
 ## Status Handling
 
-| Zabbix Status | Easyalert Status | Action |
-|---------------|------------------|--------|
-| PROBLEM | Problem | Creates/updates incident |
-| OK | OK | Resolves incident |
+| Zabbix Status | Easyalert Status | Action                   |
+| ------------- | ---------------- | ------------------------ |
+| PROBLEM       | Problem          | Creates/updates incident |
+| OK            | OK               | Resolves incident        |
 
 Recovery events (OK status) automatically resolve the corresponding incident.
 
@@ -230,23 +238,24 @@ Zabbix tags are used for routing in Easyalert.
 
 ### Where to Define Tags
 
-| Location | Menu |
-|----------|------|
-| Host | Configuration → Hosts → [Host] → Tags |
-| Trigger | Configuration → Hosts → [Host] → Triggers → [Trigger] → Tags |
-| Template | Configuration → Templates → [Template] → Tags |
+| Location | Menu                                                         |
+| -------- | ------------------------------------------------------------ |
+| Host     | Configuration → Hosts → [Host] → Tags                        |
+| Trigger  | Configuration → Hosts → [Host] → Triggers → [Trigger] → Tags |
+| Template | Configuration → Templates → [Template] → Tags                |
 
 ### Example Tags
 
-| Tag | Value | Usage |
-|-----|-------|-------|
-| `customer` | `AcmeCorp` | Customer-based routing |
+| Tag           | Value        | Usage                     |
+| ------------- | ------------ | ------------------------- |
+| `customer`    | `AcmeCorp`   | Customer-based routing    |
 | `environment` | `production` | Environment-based routing |
-| `team` | `backend` | Team-based routing |
+| `team`        | `backend`    | Team-based routing        |
 
 ### Usage in Easyalert
 
 In Escalation Routing:
+
 ```
 tags.customer equals AcmeCorp → Acme Policy
 tags.environment equals production → Production Policy
@@ -287,35 +296,30 @@ curl -X POST "YOUR_WEBHOOK_URL" \
 
 <AccordionGroup>
   <Accordion title="Alerts not being received">
-    1. Check if Media Type is active
-    2. Verify media is added to user
-    3. Check if Action is enabled
-    4. Review Zabbix action logs for errors
+    1. Check if Media Type is active 2. Verify media is added to user 3. Check
+    if Action is enabled 4. Review Zabbix action logs for errors
   </Accordion>
   <Accordion title="Tags not coming through">
-    1. Verify `event_tags`, `host_tags`, `trigger_tags` are in Parameters
-    2. Check if the script is complete
-    3. Ensure "Process tags" is checked in media type settings
+    1. Verify `event_tags`, `host_tags`, `trigger_tags` are in Parameters 2.
+    Check if the script is complete 3. Ensure "Process tags" is checked in media
+    type settings
   </Accordion>
   <Accordion title="Wrong severity mapping">
-    1. Check if Zabbix sends numeric (0-5) or text severity
-    2. Configure appropriate severity mapping
-    3. View webhook samples to see actual values
+    1. Check if Zabbix sends numeric (0-5) or text severity 2. Configure
+    appropriate severity mapping 3. View webhook samples to see actual values
   </Accordion>
   <Accordion title="Recovery events not resolving incidents">
-    1. Verify recovery operations are enabled in Zabbix action
-    2. Check the `trigger_status` field is included in payload
-    3. Ensure event_id matches between PROBLEM and OK events
+    1. Verify recovery operations are enabled in Zabbix action 2. Check the
+    `trigger_status` field is included in payload 3. Ensure event_id matches
+    between PROBLEM and OK events
   </Accordion>
   <Accordion title="Connection refused">
-    1. Check firewall/network settings
-    2. Verify Zabbix server can reach Easyalert API
-    3. Test connectivity with curl from Zabbix server
+    1. Check firewall/network settings 2. Verify Zabbix server can reach
+    Easyalert API 3. Test connectivity with curl from Zabbix server
   </Accordion>
   <Accordion title="401 Unauthorized">
-    1. Verify Webhook URL is correct
-    2. Check if integration is active in Easyalert
-    3. Regenerate webhook token if needed
+    1. Verify Webhook URL is correct 2. Check if integration is active in
+    Easyalert 3. Regenerate webhook token if needed
   </Accordion>
 </AccordionGroup>
 
@@ -325,18 +329,23 @@ curl -X POST "YOUR_WEBHOOK_URL" \
 
 <AccordionGroup>
   <Accordion title="Use Event Tags">
-    Add tags in Zabbix for better routing and filtering in Easyalert. Tags like environment, team, and service help with escalation routing.
+    Add tags in Zabbix for better routing and filtering in Easyalert. Tags like
+    environment, team, and service help with escalation routing.
   </Accordion>
   <Accordion title="Include Trigger URL">
-    Add `{TRIGGER.URL}` parameter to help responders quickly navigate to Zabbix for more details.
+    Add `{TRIGGER.URL}` parameter to help responders quickly navigate to Zabbix
+    for more details.
   </Accordion>
   <Accordion title="Configure Recovery">
-    Enable recovery operations to automatically resolve incidents when the problem clears.
+    Enable recovery operations to automatically resolve incidents when the
+    problem clears.
   </Accordion>
   <Accordion title="Test with Low Severity">
-    Use Information or Warning severity triggers for initial testing to avoid unnecessary escalations.
+    Use Information or Warning severity triggers for initial testing to avoid
+    unnecessary escalations.
   </Accordion>
   <Accordion title="Organize with Host Groups">
-    Use Zabbix host groups to organize hosts and include group info in tags for routing.
+    Use Zabbix host groups to organize hosts and include group info in tags for
+    routing.
   </Accordion>
 </AccordionGroup>

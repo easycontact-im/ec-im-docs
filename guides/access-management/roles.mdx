@@ -1,12 +1,12 @@
 ---
-title: 'Roles'
-description: 'Define permissions and access levels for your team members'
-icon: 'shield'
+title: "Roles"
+description: "Define permissions and access levels for your team members"
+icon: "shield"
 ---
 
 ## Overview
 
-Roles are the foundation of access control in EasyContact. Each role contains a set of permissions that determine what actions users can perform. You can use built-in system roles or create custom roles tailored to your organization's needs.
+Roles are the foundation of access control in EasyAlert. Each role contains a set of permissions that determine what actions users can perform. You can use built-in system roles or create custom roles tailored to your organization's needs.
 
 <CardGroup cols={2}>
   <Card title="System Roles" icon="lock">
@@ -25,7 +25,7 @@ Roles are the foundation of access control in EasyContact. Each role contains a 
 
 <Tabs>
   <Tab title="System Roles">
-    System roles are pre-configured by EasyContact and provide standard access patterns.
+    System roles are pre-configured by EasyAlert and provide standard access patterns.
 
     **Characteristics:**
     - Cannot be modified or deleted
@@ -44,6 +44,7 @@ Roles are the foundation of access control in EasyContact. Each role contains a 
     | **IAM Admin** | Manage users, roles, and groups |
     | **IAM Editor** | Add and modify users and groups |
     | **IAM Viewer** | View users, roles, and group information |
+
   </Tab>
   <Tab title="Custom Roles">
     Custom roles allow you to create permission sets specific to your organization.
@@ -59,6 +60,7 @@ Roles are the foundation of access control in EasyContact. Each role contains a 
     - Project-based permissions
     - Compliance requirements
     - Temporary elevated access
+
   </Tab>
 </Tabs>
 
@@ -69,7 +71,7 @@ Roles are the foundation of access control in EasyContact. Each role contains a 
     Permissions apply within your organization only. Most roles use this scope.
   </Card>
   <Card title="Platform Scope" icon="globe">
-    Platform-wide permissions for EasyContact administrators. Rarely used.
+    Platform-wide permissions for EasyAlert administrators. Rarely used.
   </Card>
 </CardGroup>
 
@@ -79,13 +81,13 @@ Roles are the foundation of access control in EasyContact. Each role contains a 
 
 The Roles page displays all available roles with key information:
 
-| Column | Description |
-|--------|-------------|
-| **Role** | Role name and unique key identifier |
-| **Description** | Brief explanation of the role's purpose |
-| **Scope** | Whether the role is tenant or platform scoped |
-| **Type** | System (locked) or Custom (editable) |
-| **Actions** | View permissions, edit, or delete |
+| Column          | Description                                   |
+| --------------- | --------------------------------------------- |
+| **Role**        | Role name and unique key identifier           |
+| **Description** | Brief explanation of the role's purpose       |
+| **Scope**       | Whether the role is tenant or platform scoped |
+| **Type**        | System (locked) or Custom (editable)          |
+| **Actions**     | View permissions, edit, or delete             |
 
 ### Viewing Role Permissions
 
@@ -98,7 +100,8 @@ To see what permissions a role grants:
 The dialog shows all permissions organized by category, making it easy to understand what access the role provides.
 
 <Tip>
-  Wildcard permissions (like `incidents:*:*`) are highlighted with an amber indicator, showing they grant broad access to an entire category.
+  Wildcard permissions (like `incidents:*:*`) are highlighted with an amber
+  indicator, showing they grant broad access to an entire category.
 </Tip>
 
 ---
@@ -110,25 +113,21 @@ The dialog shows all permissions organized by category, making it easy to unders
     Click the **Create Role** button in the top right corner
   </Step>
   <Step title="Define Role Identity">
-    Enter the role details:
-    - **Role Key** — Unique identifier (lowercase, underscores allowed, e.g., `support_lead`)
-    - **Role Name** — Display name (e.g., "Support Team Lead")
-    - **Description** — Explain the role's purpose
+    Enter the role details: - **Role Key** — Unique identifier (lowercase,
+    underscores allowed, e.g., `support_lead`) - **Role Name** — Display name
+    (e.g., "Support Team Lead") - **Description** — Explain the role's purpose
   </Step>
   <Step title="Select Permissions">
-    Choose the permissions this role should have:
-    - Use the search bar to filter permissions
-    - Permissions are grouped by category
-    - Check the boxes next to desired permissions
-    - The badge shows how many permissions are selected
+    Choose the permissions this role should have: - Use the search bar to filter
+    permissions - Permissions are grouped by category - Check the boxes next to
+    desired permissions - The badge shows how many permissions are selected
   </Step>
-  <Step title="Save the Role">
-    Click **Create** to save your new role
-  </Step>
+  <Step title="Save the Role">Click **Create** to save your new role</Step>
 </Steps>
 
 <Warning>
-  The Role Key cannot be changed after creation. Choose a meaningful, permanent identifier.
+  The Role Key cannot be changed after creation. Choose a meaningful, permanent
+  identifier.
 </Warning>
 
 ---
@@ -154,6 +153,7 @@ service:resource:action
     | `incident:delete` | Delete incidents |
     | `incident:acknowledge` | Acknowledge incident alerts |
     | `incident:resolve` | Mark incidents as resolved |
+
   </Accordion>
   <Accordion title="Users & Access (IAM)">
     Control access to user and access management.
@@ -169,6 +169,7 @@ service:resource:action
     | `group:read` | View groups and members |
     | `group:write` | Manage groups and membership |
     | `group:delete` | Delete groups |
+
   </Accordion>
   <Accordion title="Schedules & On-Call">
     Control access to scheduling features.
@@ -178,6 +179,7 @@ service:resource:action
     | `schedule:read` | View on-call schedules |
     | `schedule:write` | Create and modify schedules |
     | `schedule:delete` | Delete schedules |
+
   </Accordion>
   <Accordion title="Integrations">
     Control access to third-party integrations.
@@ -187,6 +189,7 @@ service:resource:action
     | `integration:read` | View configured integrations |
     | `integration:write` | Add and configure integrations |
     | `integration:delete` | Remove integrations |
+
   </Accordion>
 </AccordionGroup>
 
@@ -194,14 +197,15 @@ service:resource:action
 
 Wildcards allow granting broad access without selecting individual permissions:
 
-| Pattern | Meaning |
-|---------|---------|
-| `incident:*` | All incident permissions |
-| `*:read` | Read access to everything |
-| `*:*` | Full access to everything |
+| Pattern      | Meaning                   |
+| ------------ | ------------------------- |
+| `incident:*` | All incident permissions  |
+| `*:read`     | Read access to everything |
+| `*:*`        | Full access to everything |
 
 <Info>
-  Use wildcards carefully. They grant extensive access and should only be assigned to trusted roles.
+  Use wildcards carefully. They grant extensive access and should only be
+  assigned to trusted roles.
 </Info>
 
 ---
@@ -226,7 +230,8 @@ To modify an existing custom role:
 </Steps>
 
 <Note>
-  System roles cannot be edited. If you need different permissions, create a custom role instead.
+  System roles cannot be edited. If you need different permissions, create a
+  custom role instead.
 </Note>
 
 ---
@@ -251,7 +256,8 @@ Before deleting a role, ensure no users or groups are using it.
 </Steps>
 
 <Warning>
-  If the role is still assigned to users or groups, you'll see an error message listing the assignments that need to be removed first.
+  If the role is still assigned to users or groups, you'll see an error message
+  listing the assignments that need to be removed first.
 </Warning>
 
 ---
@@ -279,7 +285,8 @@ Assign roles to groups for bulk access control:
 4. All group members automatically inherit these roles
 
 <Tip>
-  Group-based role assignment is recommended for teams. When someone joins the group, they automatically get the right permissions.
+  Group-based role assignment is recommended for teams. When someone joins the
+  group, they automatically get the right permissions.
 </Tip>
 
 ---
@@ -291,17 +298,21 @@ When a user has multiple roles (directly or through groups), their effective per
 <Accordion title="Example: Combined Permissions">
   **User: Sarah**
 
-  Direct Roles:
-  - Incident Viewer (`incident:read`)
+Direct Roles:
 
-  Group Membership:
-  - Engineering Team → Incident Editor (`incident:read`, `incident:write`)
+- Incident Viewer (`incident:read`)
 
-  **Effective Permissions:**
-  - `incident:read` ✓
-  - `incident:write` ✓
+Group Membership:
 
-  Sarah can both view AND edit incidents because her permissions combine.
+- Engineering Team → Incident Editor (`incident:read`, `incident:write`)
+
+**Effective Permissions:**
+
+- `incident:read` ✓
+- `incident:write` ✓
+
+Sarah can both view AND edit incidents because her permissions combine.
+
 </Accordion>
 
 ---
@@ -310,22 +321,30 @@ When a user has multiple roles (directly or through groups), their effective per
 
 <AccordionGroup>
   <Accordion title="Follow Least Privilege">
-    Give users only the permissions they need. Start with minimal access and add permissions as required rather than starting with full access and restricting.
+    Give users only the permissions they need. Start with minimal access and add
+    permissions as required rather than starting with full access and
+    restricting.
   </Accordion>
   <Accordion title="Use Groups for Team Access">
-    Instead of assigning roles to each user individually, create groups for teams and assign roles to the group. This makes onboarding and offboarding much easier.
+    Instead of assigning roles to each user individually, create groups for
+    teams and assign roles to the group. This makes onboarding and offboarding
+    much easier.
   </Accordion>
   <Accordion title="Create Meaningful Role Names">
-    Use descriptive names that indicate the role's purpose, like "Support Team Lead" rather than "Role 1". Include the team or function in the name.
+    Use descriptive names that indicate the role's purpose, like "Support Team
+    Lead" rather than "Role 1". Include the team or function in the name.
   </Accordion>
   <Accordion title="Document Custom Roles">
-    Use the description field to explain why the role was created and what it's intended for. This helps future administrators understand the access model.
+    Use the description field to explain why the role was created and what it's
+    intended for. This helps future administrators understand the access model.
   </Accordion>
   <Accordion title="Review Roles Periodically">
-    Audit your custom roles regularly. Remove unused roles and verify that permission assignments still match your organization's needs.
+    Audit your custom roles regularly. Remove unused roles and verify that
+    permission assignments still match your organization's needs.
   </Accordion>
   <Accordion title="Avoid Wildcard Overuse">
-    Wildcard permissions are convenient but can grant more access than intended. Use specific permissions when possible.
+    Wildcard permissions are convenient but can grant more access than intended.
+    Use specific permissions when possible.
   </Accordion>
 </AccordionGroup>
 
@@ -335,18 +354,21 @@ When a user has multiple roles (directly or through groups), their effective per
 
 <AccordionGroup>
   <Accordion title="User can't access a feature they should have">
-    1. Check if the user has the correct role assigned
-    2. Verify the role includes the necessary permission
-    3. Check if the user is in a group with the role
-    4. Ensure the user's account is active
+    1. Check if the user has the correct role assigned 2. Verify the role
+    includes the necessary permission 3. Check if the user is in a group with
+    the role 4. Ensure the user's account is active
   </Accordion>
   <Accordion title="Can't edit or delete a role">
-    System roles cannot be modified. Look for the "System" badge next to the role. If you need different permissions, create a new custom role.
+    System roles cannot be modified. Look for the "System" badge next to the
+    role. If you need different permissions, create a new custom role.
   </Accordion>
   <Accordion title="Can't delete a custom role">
-    The role is still assigned to users or groups. Remove all assignments first, then try deleting again. The error message will list which users/groups need to be updated.
+    The role is still assigned to users or groups. Remove all assignments first,
+    then try deleting again. The error message will list which users/groups need
+    to be updated.
   </Accordion>
   <Accordion title="Permission changes aren't taking effect">
-    Users may need to refresh their session. Ask them to log out and back in to pick up the new permissions.
+    Users may need to refresh their session. Ask them to log out and back in to
+    pick up the new permissions.
   </Accordion>
 </AccordionGroup>

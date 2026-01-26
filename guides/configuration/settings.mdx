@@ -338,7 +338,7 @@ Use these templates as starting points for common integrations.
         "service": "{{incident.service}}",
         "environment": "{{incident.environment}}",
         "triggeredAt": "{{incident.triggeredAt}}",
-        "url": "https://app.easycontact.ai/incidents/{{incident.id}}"
+        "url": "https://admin.easyalert.io/incidents/{{incident.id}}"
       },
       "assignee": {
         "name": "{{target.name}}",
@@ -363,7 +363,7 @@ Use these templates as starting points for common integrations.
         "custom_details": {
           "description": "{{incident.description}}",
           "priority": "{{incident.priority}}",
-          "incident_url": "https://app.easycontact.ai/incidents/{{incident.id}}"
+          "incident_url": "https://admin.easyalert.io/incidents/{{incident.id}}"
         }
       }
     }
@@ -540,7 +540,7 @@ Use the switch on each channel card to quickly enable or disable:
     Set a reliable, always-available channel as default to ensure notifications are never lost.
   </Accordion>
   <Accordion title="Include Essential Fields">
-    Always include incident ID, title, severity, and a link back to EasyContact in your templates.
+    Always include incident ID, title, severity, and a link back to EasyAlert in your templates.
   </Accordion>
   <Accordion title="Handle Missing Data">
     Use the `default` filter for optional fields: `{{incident.host|default("Unknown")}}`

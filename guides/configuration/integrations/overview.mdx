@@ -1,7 +1,7 @@
 ---
-title: 'Overview'
-description: 'Connect your monitoring tools to receive alerts and create incidents automatically'
-icon: 'plug'
+title: "Overview"
+description: "Connect your monitoring tools to receive alerts and create incidents automatically"
+icon: "plug"
 ---
 
 ## Overview
@@ -33,10 +33,18 @@ Easyalert supports the following monitoring tools out of the box:
   <Card title="Zabbix" icon="z" href="/configuration/integrations/zabbix">
     Open-source enterprise monitoring
   </Card>
-  <Card title="Prometheus" icon="fire" href="/configuration/integrations/prometheus">
+  <Card
+    title="Prometheus"
+    icon="fire"
+    href="/configuration/integrations/prometheus"
+  >
     Cloud-native monitoring with Alertmanager
   </Card>
-  <Card title="Grafana" icon="chart-line" href="/configuration/integrations/grafana">
+  <Card
+    title="Grafana"
+    icon="chart-line"
+    href="/configuration/integrations/grafana"
+  >
     Unified alerting and legacy alerts
   </Card>
   <Card title="Datadog" icon="dog" href="/configuration/integrations/datadog">
@@ -45,13 +53,21 @@ Easyalert supports the following monitoring tools out of the box:
   <Card title="Dynatrace" icon="d" href="/configuration/integrations/dynatrace">
     AI-powered observability platform
   </Card>
-  <Card title="AppDynamics" icon="a" href="/configuration/integrations/appdynamics">
+  <Card
+    title="AppDynamics"
+    icon="a"
+    href="/configuration/integrations/appdynamics"
+  >
     Business and application performance
   </Card>
   <Card title="New Relic" icon="n" href="/configuration/integrations/newrelic">
     Full-stack observability platform
   </Card>
-  <Card title="Custom Webhook" icon="code" href="/configuration/integrations/custom">
+  <Card
+    title="Custom Webhook"
+    icon="code"
+    href="/configuration/integrations/custom"
+  >
     Any tool that can send HTTP webhooks
   </Card>
 </CardGroup>
@@ -62,13 +78,15 @@ Easyalert supports the following monitoring tools out of the box:
 
 <Steps>
   <Step title="Create Integration in Easyalert">
-    Add a new integration and select the source type (Zabbix, Prometheus, Grafana, Datadog, or Custom)
+    Add a new integration and select the source type (Zabbix, Prometheus,
+    Grafana, Datadog, or Custom)
   </Step>
   <Step title="Copy Webhook URL">
     Copy the unique webhook URL generated for this integration
   </Step>
   <Step title="Configure Your Monitoring Tool">
-    Set up your monitoring tool to send alerts to the webhook URL (webhook, notification channel, or media type depending on tool)
+    Set up your monitoring tool to send alerts to the webhook URL (webhook,
+    notification channel, or media type depending on tool)
   </Step>
   <Step title="Send a Test Event">
     Trigger a test alert and verify it appears in Easyalert
@@ -90,7 +108,8 @@ Easyalert supports the following monitoring tools out of the box:
     Click the **Add Integration** button
   </Step>
   <Step title="Select Source Type">
-    Choose the **Source Type** that matches your monitoring tool (Zabbix, Prometheus, Grafana, Datadog, or Custom)
+    Choose the **Source Type** that matches your monitoring tool (Zabbix,
+    Prometheus, Grafana, Datadog, or Custom)
   </Step>
   <Step title="Enter Details">
     - **Name** — Descriptive name (e.g., "Production Prometheus", "Zabbix DC1")
@@ -102,7 +121,8 @@ Easyalert supports the following monitoring tools out of the box:
 </Steps>
 
 <Info>
-  Each integration gets a unique webhook URL. Keep this URL secure as anyone with access can send alerts to your account.
+  Each integration gets a unique webhook URL. Keep this URL secure as anyone
+  with access can send alerts to your account.
 </Info>
 
 ---
@@ -112,10 +132,10 @@ Easyalert supports the following monitoring tools out of the box:
 Your webhook URL follows this format:
 
 ```
-https://easyalert-api.easycontact.ai/api/v1/webhooks/ingest/{token}
+https://api.easyalert.io/api/v1/webhooks/ingest/{token}
 ```
 
-> **Example:** `https://easyalert-api.easycontact.ai/api/v1/webhooks/ingest/wh_abc123...`
+> **Example:** `https://api.easyalert.io/api/v1/webhooks/ingest/wh_abc123...`
 
 The `token` is a unique identifier for your integration. If compromised, you can regenerate it from the integration settings.
 
@@ -125,18 +145,19 @@ The `token` is a unique identifier for your integration. If compromised, you can
 
 The Integrations page shows all your configured integrations:
 
-| Column | Description |
-|--------|-------------|
-| **Name** | Integration name and description |
-| **Type** | Source type badge (Zabbix, Prometheus, etc.) |
-| **Events** | Total number of events received |
-| **Last Event** | When the last event was received |
-| **Status** | Active or Inactive |
-| **Actions** | View URL, configure, edit, delete |
+| Column         | Description                                  |
+| -------------- | -------------------------------------------- |
+| **Name**       | Integration name and description             |
+| **Type**       | Source type badge (Zabbix, Prometheus, etc.) |
+| **Events**     | Total number of events received              |
+| **Last Event** | When the last event was received             |
+| **Status**     | Active or Inactive                           |
+| **Actions**    | View URL, configure, edit, delete            |
 
 ### Integration Statistics
 
 Each integration tracks:
+
 - **Event Count** — Total alerts received
 - **Last Event** — Timestamp of most recent alert
 - **Last Error** — Most recent processing error (if any)
@@ -161,7 +182,8 @@ If your webhook URL is compromised:
 3. Confirm the action
 
 <Warning>
-  Regenerating the token invalidates the old URL immediately. Update your monitoring tool configuration with the new URL.
+  Regenerating the token invalidates the old URL immediately. Update your
+  monitoring tool configuration with the new URL.
 </Warning>
 
 ### Activate/Deactivate
@@ -180,7 +202,8 @@ Inactive integrations ignore incoming webhooks.
 3. Confirm deletion
 
 <Warning>
-  Deleting an integration permanently invalidates its webhook URL and removes all configuration.
+  Deleting an integration permanently invalidates its webhook URL and removes
+  all configuration.
 </Warning>
 
 ---
@@ -191,16 +214,17 @@ Map source severity values to Easyalert's standard levels.
 
 ### Standard Severity Levels
 
-| Level | Description | Color |
-|-------|-------------|-------|
-| **Critical** | Requires immediate attention, service down | Red |
-| **High** | Serious issue, significant degradation | Orange |
-| **Warning** | Potential issue, investigate | Yellow |
-| **Info** | Informational alert, low impact | Blue |
-| **OK** | Recovery/resolved state | Green |
+| Level        | Description                                | Color  |
+| ------------ | ------------------------------------------ | ------ |
+| **Critical** | Requires immediate attention, service down | Red    |
+| **High**     | Serious issue, significant degradation     | Orange |
+| **Warning**  | Potential issue, investigate               | Yellow |
+| **Info**     | Informational alert, low impact            | Blue   |
+| **OK**       | Recovery/resolved state                    | Green  |
 
 <Info>
-  Easyalert automatically maps common severity values from monitoring tools. See individual integration guides for specific mappings.
+  Easyalert automatically maps common severity values from monitoring tools. See
+  individual integration guides for specific mappings.
 </Info>
 
 ### Setting Up Mappings
@@ -213,10 +237,8 @@ Map source severity values to Easyalert's standard levels.
     Enter the field name your tool uses for severity (e.g., "priority", "level")
   </Step>
   <Step title="Add Mappings">
-    Map each source value to a standard severity:
-    - "P1" → Critical
-    - "P2" → High
-    - "P3" → Warning
+    Map each source value to a standard severity: - "P1" → Critical - "P2" →
+    High - "P3" → Warning
   </Step>
   <Step title="Set Default">
     Choose the fallback severity for unmapped values
@@ -261,9 +283,7 @@ Add static metadata to all alerts from an integration.
   <Step title="Add Key-Value Pairs">
     Enter the key and value for each enrichment field
   </Step>
-  <Step title="Save Changes">
-    Click **Save** to apply
-  </Step>
+  <Step title="Save Changes">Click **Save** to apply</Step>
 </Steps>
 
 <Accordion title="Example: Production Environment Enrichment">
@@ -280,7 +300,8 @@ Add static metadata to all alerts from an integration.
 </Accordion>
 
 <Tip>
-  Enrichment fields can be used in escalation routing rules to direct alerts to the appropriate policy.
+  Enrichment fields can be used in escalation routing rules to direct alerts to
+  the appropriate policy.
 </Tip>
 
 ---
@@ -298,6 +319,7 @@ All integrations support tag-based routing for escalation policies and notificat
 ### Routing Examples
 
 **Escalation Routing:**
+
 ```
 tags.customer equals "AcmeCorp" → Acme Corp Policy
 tags.environment equals "production" → Production Policy
@@ -305,6 +327,7 @@ tags.team equals "backend" → Backend Team Policy
 ```
 
 **Notification Rules:**
+
 ```
 tags.severity equals "critical" → call + sms + email
 tags.environment equals "staging" → email only
@@ -330,6 +353,7 @@ Easyalert stores samples of incoming webhooks for debugging and configuration.
 ### Sample Analysis
 
 The analysis feature helps you understand:
+
 - Which fields are present in your alerts
 - Common values for key fields
 - How to configure severity mappings
@@ -340,15 +364,15 @@ The analysis feature helps you understand:
 
 Easyalert automatically detects the source type based on payload characteristics:
 
-| Source | Detection Signals |
-|--------|-------------------|
-| Zabbix | `event_id`, `trigger_name`, `trigger_severity` |
-| Prometheus | `alerts` array, `status: firing/resolved` |
-| Grafana | `ruleId`, `orgId`, `dashboardURL` |
-| Datadog | `alert_id`, `datadoghq.com` in URLs |
-| Dynatrace | `PID`, `ProblemID`, `State: OPEN/RESOLVED` |
-| AppDynamics | `event_type: POLICY_*`, `health_rule_name` |
-| New Relic | `issueId`, `newrelic.com` in URLs |
+| Source      | Detection Signals                              |
+| ----------- | ---------------------------------------------- |
+| Zabbix      | `event_id`, `trigger_name`, `trigger_severity` |
+| Prometheus  | `alerts` array, `status: firing/resolved`      |
+| Grafana     | `ruleId`, `orgId`, `dashboardURL`              |
+| Datadog     | `alert_id`, `datadoghq.com` in URLs            |
+| Dynatrace   | `PID`, `ProblemID`, `State: OPEN/RESOLVED`     |
+| AppDynamics | `event_type: POLICY_*`, `health_rule_name`     |
+| New Relic   | `issueId`, `newrelic.com` in URLs              |
 
 If no specific source is detected, the **Custom** transformer handles the webhook.
 
@@ -405,27 +429,23 @@ Trigger Escalation
 
 <AccordionGroup>
   <Accordion title="Alerts not appearing">
-    1. Verify the integration is **Active**
-    2. Check the webhook URL is correct in your monitoring tool
-    3. Look for errors in the integration statistics
-    4. Verify your monitoring tool can reach the webhook URL
+    1. Verify the integration is **Active** 2. Check the webhook URL is correct
+    in your monitoring tool 3. Look for errors in the integration statistics 4.
+    Verify your monitoring tool can reach the webhook URL
   </Accordion>
   <Accordion title="Wrong severity assigned">
-    1. Check severity mapping configuration
-    2. Verify the source field name matches your payload
-    3. View webhook samples to see actual field values
-    4. Set appropriate default severity
+    1. Check severity mapping configuration 2. Verify the source field name
+    matches your payload 3. View webhook samples to see actual field values 4.
+    Set appropriate default severity
   </Accordion>
   <Accordion title="Duplicate incidents">
-    1. Verify your monitoring tool sends unique event IDs
-    2. Check deduplication settings
-    3. Review the event ID field mapping
+    1. Verify your monitoring tool sends unique event IDs 2. Check deduplication
+    settings 3. Review the event ID field mapping
   </Accordion>
   <Accordion title="Integration showing errors">
-    1. Check the last error message
-    2. Verify payload format matches expected structure
-    3. Look at webhook samples for malformed data
-    4. Regenerate token if authentication issues
+    1. Check the last error message 2. Verify payload format matches expected
+    structure 3. Look at webhook samples for malformed data 4. Regenerate token
+    if authentication issues
   </Accordion>
 </AccordionGroup>
 
@@ -433,11 +453,12 @@ Trigger Escalation
 
 ## Rate Limits
 
-| Limit | Value |
-|-------|-------|
+| Limit               | Value             |
+| ------------------- | ----------------- |
 | Requests per minute | 1,000 per webhook |
-| Payload size | 1 MB maximum |
+| Payload size        | 1 MB maximum      |
 
 <Warning>
-  Exceeding rate limits returns HTTP 429. Implement backoff in your monitoring tool if needed.
+  Exceeding rate limits returns HTTP 429. Implement backoff in your monitoring
+  tool if needed.
 </Warning>

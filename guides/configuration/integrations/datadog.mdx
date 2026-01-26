@@ -29,7 +29,8 @@ Datadog is a cloud-scale monitoring and security platform. Easyalert integrates 
     5. Click **Create** to save
     6. Copy the generated **Webhook URL**
 
-    > **Example:** `https://easyalert-api.easycontact.ai/api/v1/webhooks/ingest/wh_abc123...`
+    > **Example:** `https://api.easyalert.io/api/v1/webhooks/ingest/wh_abc123...`
+
   </Step>
   <Step title="Create Webhook in Datadog">
     Go to **Integrations → Webhooks → New**
@@ -40,6 +41,7 @@ Datadog is a cloud-scale monitoring and security platform. Easyalert integrates 
     | **URL** | Your Easyalert webhook URL |
     | **Payload** | Custom JSON (see below) |
     | **Custom Headers** | `Content-Type: application/json` |
+
   </Step>
   <Step title="Configure Payload Template">
     Use this recommended payload:
@@ -68,6 +70,7 @@ Datadog is a cloud-scale monitoring and security platform. Easyalert integrates 
     ```
 
     > **NOTE:** Datadog uses `$VARIABLE` syntax (uppercase).
+
   </Step>
   <Step title="Add Webhook to Monitors">
     1. Edit your monitor
@@ -85,38 +88,38 @@ Datadog is a cloud-scale monitoring and security platform. Easyalert integrates 
 
 Datadog provides these variables for webhooks:
 
-| Variable | Description |
-|----------|-------------|
-| `$ID` | Event ID |
-| `$EVENT_TITLE` | Event title |
-| `$HOSTNAME` | Host name |
-| `$ALERT_ID` | Monitor ID |
-| `$ALERT_METRIC` | Metric name |
-| `$ALERT_QUERY` | Monitor query |
-| `$ALERT_TRANSITION` | Triggered, Recovered |
-| `$ALERT_TYPE` | error, warning, info |
-| `$ALERT_STATUS` | Current status |
-| `$EVENT_TYPE` | Event type |
-| `$EVENT_MSG` | Full alert message (HTML) |
-| `$TAGS` | Tag list (key:value format) |
-| `$LINK` | Datadog UI link |
-| `$DATE` | Alert timestamp |
-| `$ORG_NAME` | Organization name |
+| Variable            | Description                 |
+| ------------------- | --------------------------- |
+| `$ID`               | Event ID                    |
+| `$EVENT_TITLE`      | Event title                 |
+| `$HOSTNAME`         | Host name                   |
+| `$ALERT_ID`         | Monitor ID                  |
+| `$ALERT_METRIC`     | Metric name                 |
+| `$ALERT_QUERY`      | Monitor query               |
+| `$ALERT_TRANSITION` | Triggered, Recovered        |
+| `$ALERT_TYPE`       | error, warning, info        |
+| `$ALERT_STATUS`     | Current status              |
+| `$EVENT_TYPE`       | Event type                  |
+| `$EVENT_MSG`        | Full alert message (HTML)   |
+| `$TAGS`             | Tag list (key:value format) |
+| `$LINK`             | Datadog UI link             |
+| `$DATE`             | Alert timestamp             |
+| `$ORG_NAME`         | Organization name           |
 
 ---
 
 ## Field Mapping
 
-| Datadog Field | Easyalert Field |
-|---------------|-----------------|
-| `$ID` / `alertId` | Event ID |
-| `$EVENT_TITLE` / `title` | Title |
-| `$EVENT_MSG` | Description |
-| `$ALERT_TYPE` | Severity mapping |
-| `$ALERT_TRANSITION` | Status |
-| `$HOSTNAME` | Host |
-| `$LINK` | URL |
-| `$TAGS` | Tags (parsed) |
+| Datadog Field            | Easyalert Field  |
+| ------------------------ | ---------------- |
+| `$ID` / `alertId`        | Event ID         |
+| `$EVENT_TITLE` / `title` | Title            |
+| `$EVENT_MSG`             | Description      |
+| `$ALERT_TYPE`            | Severity mapping |
+| `$ALERT_TRANSITION`      | Status           |
+| `$HOSTNAME`              | Host             |
+| `$LINK`                  | URL              |
+| `$TAGS`                  | Tags (parsed)    |
 
 ---
 
@@ -125,34 +128,34 @@ Datadog provides these variables for webhooks:
 ### Alert Type Mapping
 
 | Datadog Alert Type | Easyalert Severity |
-|-------------------|-------------------|
-| error | Critical |
-| warning | Warning |
-| info | Info |
+| ------------------ | ------------------ |
+| error              | Critical           |
+| warning            | Warning            |
+| info               | Info               |
 
 ### Priority Mapping
 
 If you use Datadog priorities:
 
 | Datadog Priority | Easyalert Severity |
-|-----------------|-------------------|
-| P1 | Critical |
-| P2 | High |
-| P3 | Warning |
-| P4 | Info |
-| P5 | Info |
+| ---------------- | ------------------ |
+| P1               | Critical           |
+| P2               | High               |
+| P3               | Warning            |
+| P4               | Info               |
+| P5               | Info               |
 
 ---
 
 ## Status Handling
 
-| Datadog Transition | Easyalert Status | Action |
-|-------------------|------------------|--------|
-| Triggered | Problem | Creates/updates incident |
-| Re-Triggered | Problem | Updates incident |
-| Recovered | OK | Resolves incident |
-| No Data | Problem | Creates incident |
-| No Data Recovered | OK | Resolves incident |
+| Datadog Transition | Easyalert Status | Action                   |
+| ------------------ | ---------------- | ------------------------ |
+| Triggered          | Problem          | Creates/updates incident |
+| Re-Triggered       | Problem          | Updates incident         |
+| Recovered          | OK               | Resolves incident        |
+| No Data            | Problem          | Creates incident         |
+| No Data Recovered  | OK               | Resolves incident        |
 
 ---
 
@@ -165,6 +168,7 @@ env:production,service:web,team:backend
 ```
 
 Becomes:
+
 - `tags.env = "production"`
 - `tags.service = "web"`
 - `tags.team = "backend"`
@@ -178,6 +182,7 @@ These can be used in escalation routing rules.
 ### Datadog Tags ($TAGS)
 
 `$TAGS` variable brings host/monitor tags automatically:
+
 ```
 env:production,service:web,team:backend
 ```
@@ -185,6 +190,7 @@ env:production,service:web,team:backend
 ### Custom Fields
 
 All custom fields added to the payload template become tags:
+
 ```json
 {
   "customer": "AcmeCorp",
@@ -194,6 +200,7 @@ All custom fields added to the payload template become tags:
 ```
 
 In Easyalert:
+
 ```
 tags.customer = "AcmeCorp"
 tags.datacenter = "EU-West"
@@ -205,6 +212,7 @@ tags.cost_center = "CC-1234"
 ## Routing Examples
 
 **Escalation Routing:**
+
 ```
 tags.customer equals "AcmeCorp" → Acme Policy
 tags.env equals "production" → Production Policy
@@ -212,6 +220,7 @@ tags.team equals "backend" → Backend Team Policy
 ```
 
 **Notification Rules:**
+
 ```
 tags.env equals "production" AND severity equals "critical" → call + sms + email
 tags.env equals "staging" → email only
@@ -269,30 +278,26 @@ curl -X POST "YOUR_WEBHOOK_URL" \
 
 <AccordionGroup>
   <Accordion title="Alerts not being received">
-    1. Verify webhook URL in Datadog integrations
-    2. Check that `@webhook-easyalert` is in monitor notification
-    3. Test the webhook from Datadog UI
-    4. Review Datadog webhook delivery logs
+    1. Verify webhook URL in Datadog integrations 2. Check that
+    `@webhook-easyalert` is in monitor notification 3. Test the webhook from
+    Datadog UI 4. Review Datadog webhook delivery logs
   </Accordion>
   <Accordion title="Custom fields not becoming tags">
-    1. Verify field is added to webhook payload template
-    2. Check field name spelling
-    3. View webhook samples in Easyalert
+    1. Verify field is added to webhook payload template 2. Check field name
+    spelling 3. View webhook samples in Easyalert
   </Accordion>
   <Accordion title="Empty values">
-    1. Ensure `$VARIABLE` is uppercase
-    2. Check if the variable is available for the monitor type
-    3. Some variables may be empty for certain alert types
+    1. Ensure `$VARIABLE` is uppercase 2. Check if the variable is available for
+    the monitor type 3. Some variables may be empty for certain alert types
   </Accordion>
   <Accordion title="Recovery not resolving incidents">
-    1. Verify monitor sends recovery notifications
-    2. Check `alertTransition` includes "Recovered"
-    3. Ensure `alertId` is consistent between alert and recovery
+    1. Verify monitor sends recovery notifications 2. Check `alertTransition`
+    includes "Recovered" 3. Ensure `alertId` is consistent between alert and
+    recovery
   </Accordion>
   <Accordion title="Tags not appearing">
-    1. Include `$TAGS` in webhook payload
-    2. Verify tags are set on the monitor or metric
-    3. Check tag format (should be `key:value`)
+    1. Include `$TAGS` in webhook payload 2. Verify tags are set on the monitor
+    or metric 3. Check tag format (should be `key:value`)
   </Accordion>
 </AccordionGroup>
 
@@ -302,7 +307,8 @@ curl -X POST "YOUR_WEBHOOK_URL" \
 
 <AccordionGroup>
   <Accordion title="Use Priority Levels">
-    Set P1-P5 priority on monitors to ensure proper severity mapping in Easyalert.
+    Set P1-P5 priority on monitors to ensure proper severity mapping in
+    Easyalert.
   </Accordion>
   <Accordion title="Include All Variables">
     Use the recommended payload template to capture all useful information.
@@ -311,7 +317,8 @@ curl -X POST "YOUR_WEBHOOK_URL" \
     Add tags like `env`, `team`, and `service` for better routing and filtering.
   </Accordion>
   <Accordion title="Configure Recovery Notifications">
-    Ensure monitors send recovery notifications to automatically resolve incidents.
+    Ensure monitors send recovery notifications to automatically resolve
+    incidents.
   </Accordion>
   <Accordion title="Use Aggregation Keys">
     Set aggregation keys to help with incident deduplication.
