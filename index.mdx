@@ -1,21 +1,33 @@
 ---
-title: 'Introduction'
-description: 'Welcome to EasyContact - Modern Incident Management for Reliable Operations'
-icon: 'house'
+title: "Introduction"
+description: "Welcome to EasyAlert - Modern Incident Management for Reliable Operations"
+icon: "house"
 ---
 
-## What is EasyContact?
+## What is EasyAlert?
 
-EasyContact is a modern incident management platform that ensures the right people are notified when things go wrong. Connect your monitoring tools, define escalation workflows, and never miss a critical alert again.
+EasyAlert is a modern incident management platform that ensures the right people are notified when things go wrong. Connect your monitoring tools, define escalation workflows, and never miss a critical alert again.
 
 <CardGroup cols={2}>
-  <Card title="Integrations" icon="plug" href="/guides/configuration/integrations/overview">
+  <Card
+    title="Integrations"
+    icon="plug"
+    href="/guides/configuration/integrations/overview"
+  >
     Connect Prometheus, Grafana, Datadog, and more
   </Card>
-  <Card title="On-Call Schedules" icon="calendar-days" href="/guides/management/schedules">
+  <Card
+    title="On-Call Schedules"
+    icon="calendar-days"
+    href="/guides/management/schedules"
+  >
     Build rotation schedules for 24/7 coverage
   </Card>
-  <Card title="Escalation Policies" icon="arrow-up-right-dots" href="/guides/management/escalation-policies">
+  <Card
+    title="Escalation Policies"
+    icon="arrow-up-right-dots"
+    href="/guides/management/escalation-policies"
+  >
     Define multi-level notification workflows
   </Card>
 </CardGroup>
@@ -24,23 +36,28 @@ EasyContact is a modern incident management platform that ensures the right peop
 
 ## How It Works
 
-EasyContact sits between your monitoring tools and your response team, ensuring alerts reach the right people through the right channels.
+EasyAlert sits between your monitoring tools and your response team, ensuring alerts reach the right people through the right channels.
 
 <Steps>
   <Step title="Alert Triggered" icon="bell">
-    Your monitoring tools (Zabbix, Prometheus, Grafana, Datadog, etc.) detect an issue and send an alert to EasyContact via webhook
+    Your monitoring tools (Zabbix, Prometheus, Grafana, Datadog, etc.) detect an
+    issue and send an alert to EasyAlert via webhook
   </Step>
   <Step title="Intelligent Processing" icon="brain">
-    EasyContact evaluates alert rules to filter noise, then applies escalation routing to determine the right policy
+    EasyAlert evaluates alert rules to filter noise, then applies escalation
+    routing to determine the right policy
   </Step>
   <Step title="Find On-Call Responder" icon="calendar-check">
-    The escalation policy checks who is currently on-call based on your schedules
+    The escalation policy checks who is currently on-call based on your
+    schedules
   </Step>
   <Step title="Multi-Channel Notification" icon="tower-broadcast">
-    Responders are notified via their preferred channels: Call, SMS, Email, Push, or Webhooks (Slack/Teams)
+    Responders are notified via their preferred channels: Call, SMS, Email,
+    Push, or Webhooks (Slack/Teams)
   </Step>
   <Step title="Escalate if Needed" icon="arrow-up">
-    If no one acknowledges, EasyContact automatically escalates to the next level until someone responds
+    If no one acknowledges, EasyAlert automatically escalates to the next level
+    until someone responds
   </Step>
 </Steps>
 
@@ -48,17 +65,49 @@ EasyContact sits between your monitoring tools and your response team, ensuring 
 
 ## Supported Integrations
 
-Connect your existing monitoring tools in minutes. EasyContact automatically detects the source type and extracts relevant fields.
+Connect your existing monitoring tools in minutes. EasyAlert automatically detects the source type and extracts relevant fields.
 
 <CardGroup cols={4}>
-  <Card title="Zabbix" icon="z" href="/configuration/integrations/zabbix" />
-  <Card title="Prometheus" icon="fire" href="/configuration/integrations/prometheus" />
-  <Card title="Grafana" icon="chart-line" href="/configuration/integrations/grafana" />
-  <Card title="Datadog" icon="dog" href="/configuration/integrations/datadog" />
-  <Card title="Dynatrace" icon="d" href="/configuration/integrations/dynatrace" />
-  <Card title="AppDynamics" icon="a" href="/configuration/integrations/appdynamics" />
-  <Card title="New Relic" icon="n" href="/configuration/integrations/newrelic" />
-  <Card title="Custom" icon="code" href="/configuration/integrations/custom" />
+  <Card
+    title="Zabbix"
+    icon="z"
+    href="/guides/configuration/integrations/zabbix"
+  />
+  <Card
+    title="Prometheus"
+    icon="fire"
+    href="/guides/configuration/integrations/prometheus"
+  />
+  <Card
+    title="Grafana"
+    icon="chart-line"
+    href="/guides/configuration/integrations/grafana"
+  />
+  <Card
+    title="Datadog"
+    icon="dog"
+    href="/guides/configuration/integrations/datadog"
+  />
+  <Card
+    title="Dynatrace"
+    icon="d"
+    href="/guides/configuration/integrations/dynatrace"
+  />
+  <Card
+    title="AppDynamics"
+    icon="a"
+    href="/guides/configuration/integrations/appdynamics"
+  />
+  <Card
+    title="New Relic"
+    icon="n"
+    href="/guides/configuration/integrations/newrelic"
+  />
+  <Card
+    title="Custom"
+    icon="code"
+    href="/guides/configuration/integrations/custom"
+  />
 </CardGroup>
 
 ---
@@ -73,6 +122,7 @@ Connect your existing monitoring tools in minutes. EasyContact automatically det
     - **Normalize severity** — Standardize severity levels across different tools
     - **Enrich alerts** — Add tags for routing and categorization
     - **Transform fields** — Modify alert properties before incident creation
+
   </Accordion>
 
   <Accordion title="Escalation Routing" icon="route">
@@ -82,6 +132,7 @@ Connect your existing monitoring tools in minutes. EasyContact automatically det
     - **Flexible conditions** — 13 operators including regex, in, exists
     - **Priority-based** — First matching rule wins
     - **Initial delay** — Allow time for auto-resolution before escalating
+
   </Accordion>
 
   <Accordion title="On-Call Schedules" icon="calendar-days">
@@ -91,6 +142,7 @@ Connect your existing monitoring tools in minutes. EasyContact automatically det
     - **Multiple layers** — Primary, secondary, and specialized coverage
     - **Time restrictions** — Business hours, nights, or weekends
     - **Temporary overrides** — Handle vacations and shift swaps
+
   </Accordion>
 
   <Accordion title="Escalation Policies" icon="stairs">
@@ -101,6 +153,7 @@ Connect your existing monitoring tools in minutes. EasyContact automatically det
     - **Parallel or sequential** — Notify all at once or one by one
     - **Automatic retries** — Retry calls if not answered
     - **Repeat cycles** — Keep escalating until resolved
+
   </Accordion>
 </AccordionGroup>
 
@@ -134,17 +187,17 @@ Reach your team through their preferred channels with smart notifications.
 
 <Steps>
   <Step title="Create Your Account">
-    Sign up at [app.easycontact.ai](https://app.easycontact.ai) and create your organization
+    Sign up at [admin.easyalert.io](https://admin.easyalert.io) and create your
+    organization
   </Step>
   <Step title="Add Team Members">
-    Invite your team and configure their contact methods and notification preferences
+    Invite your team and configure their contact methods and notification
+    preferences
   </Step>
   <Step title="Set Up Integrations">
     Connect your monitoring tools using webhook URLs
   </Step>
-  <Step title="Create Schedules">
-    Build on-call rotations for your teams
-  </Step>
+  <Step title="Create Schedules">Build on-call rotations for your teams</Step>
   <Step title="Configure Escalation">
     Define escalation policies with multiple levels and notification channels
   </Step>
@@ -164,22 +217,29 @@ Reach your team through their preferred channels with smart notifications.
   <Card title="Management" icon="sitemap" href="/management/teams">
     Configure teams, schedules, and escalation policies
   </Card>
-  <Card title="Configuration" icon="gear" href="/configuration/integrations/overview">
+  <Card
+    title="Configuration"
+    icon="gear"
+    href="/configuration/integrations/overview"
+  >
     Set up integrations, routing rules, and notification channels
   </Card>
 </CardGroup>
 
 ### Access Management
+
 - [Users](/access-management/users) — Add team members and contacts
 - [Roles](/access-management/roles) — Define permission sets
 - [Groups](/access-management/groups) — Organize users into groups
 
 ### Management
+
 - [Teams](/management/teams) — Create and manage teams
 - [Schedules](/management/schedules) — Set up on-call rotations
 - [Escalation Policies](/management/escalation-policies) — Define notification workflows
 
 ### Configuration
+
 - [Integrations](/configuration/integrations/overview) — Connect monitoring tools
 - [Alert Rules](/configuration/alert-rules) — Filter and transform alerts
 - [Escalation Routing](/configuration/escalation-routing) — Route to the right policy
@@ -187,7 +247,7 @@ Reach your team through their preferred channels with smart notifications.
 
 ---
 
-## Why Teams Choose EasyContact
+## Why Teams Choose EasyAlert
 
 <CardGroup cols={3}>
   <Card title="Reduce MTTR" icon="clock">
@@ -218,7 +278,7 @@ Reach your team through their preferred channels with smart notifications.
   <Card title="Documentation" icon="book" href="/">
     Browse our comprehensive guides and references
   </Card>
-  <Card title="Support" icon="headset" href="mailto:support@easycontact.ai">
+  <Card title="Support" icon="headset" href="mailto:contact@easycontact.ai">
     Contact our support team for assistance
   </Card>
 </CardGroup>

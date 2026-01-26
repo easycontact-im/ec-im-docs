@@ -1,7 +1,7 @@
 ---
-title: 'Teams'
-description: 'Organize your responders into teams for streamlined incident management and escalations'
-icon: 'people-group'
+title: "Teams"
+description: "Organize your responders into teams for streamlined incident management and escalations"
+icon: "people-group"
 ---
 
 ## Overview
@@ -30,6 +30,7 @@ Teams are the foundation of your incident response structure. By grouping respon
     - **By Expertise** — Security Team, Performance Team, Infrastructure Team
 
     When an incident is assigned to a team, all members can see and respond to it.
+
   </Tab>
   <Tab title="Escalation Policies">
     Teams integrate seamlessly with escalation policies:
@@ -40,6 +41,7 @@ Teams are the foundation of your incident response structure. By grouping respon
     - Configure parallel or sequential notification
 
     This ensures incidents reach the right people even during complex escalation flows.
+
   </Tab>
   <Tab title="On-Call Management">
     Teams work together with schedules for on-call rotations:
@@ -48,6 +50,7 @@ Teams are the foundation of your incident response structure. By grouping respon
     - Set up rotation schedules within teams
     - Assign default escalation policies
     - Track team availability
+
   </Tab>
 </Tabs>
 
@@ -57,13 +60,13 @@ Teams are the foundation of your incident response structure. By grouping respon
 
 The Teams page displays all teams in your organization:
 
-| Column | Description |
-|--------|-------------|
-| **Team** | Team name and description |
+| Column      | Description                           |
+| ----------- | ------------------------------------- |
+| **Team**    | Team name and description             |
 | **Members** | Number of members with avatar preview |
-| **Status** | Active or Inactive |
-| **Created** | When the team was created |
-| **Actions** | Edit, manage members, or delete |
+| **Status**  | Active or Inactive                    |
+| **Created** | When the team was created             |
+| **Actions** | Edit, manage members, or delete       |
 
 ### Filtering Teams
 
@@ -81,35 +84,37 @@ Use the toolbar to find specific teams:
     Click the **Create Team** button in the top right corner
   </Step>
   <Step title="Enter Team Details">
-    Fill in the team information:
-    - **Name** — Display name for the team (e.g., "Platform Engineering")
-    - **Slug** — Unique identifier, lowercase with hyphens (e.g., `platform-engineering`)
-    - **Description** — Brief explanation of the team's responsibility
+    Fill in the team information: - **Name** — Display name for the team (e.g.,
+    "Platform Engineering") - **Slug** — Unique identifier, lowercase with
+    hyphens (e.g., `platform-engineering`) - **Description** — Brief explanation
+    of the team's responsibility
   </Step>
-  <Step title="Save the Team">
-    Click **Create** to save your new team
-  </Step>
+  <Step title="Save the Team">Click **Create** to save your new team</Step>
 </Steps>
 
 <Info>
-  The slug is auto-generated from the team name but can be customized. It's used in URLs and integrations.
+  The slug is auto-generated from the team name but can be customized. It's used
+  in URLs and integrations.
 </Info>
 
 ### Slug Format
 
 The slug must follow these rules:
+
 - Lowercase letters only
 - Numbers allowed
 - Hyphens for spaces
 - No special characters
 
 **Examples:**
+
 - `backend-api`
 - `customer-support-tier1`
 - `devops-infrastructure`
 
 <Warning>
-  The slug cannot be changed after creation. Choose a meaningful, permanent identifier.
+  The slug cannot be changed after creation. Choose a meaningful, permanent
+  identifier.
 </Warning>
 
 ---
@@ -119,6 +124,7 @@ The slug must follow these rules:
 ### Viewing Members
 
 Team members are shown in the Members column with avatar previews:
+
 - Up to 4 avatars displayed
 - "+X" indicator shows additional members
 - Click the members cell to open the full member list
@@ -127,7 +133,8 @@ Team members are shown in the Members column with avatar previews:
 
 <Steps>
   <Step title="Open Members Dialog">
-    Click the **three-dot menu** (⋮) and select **Manage Members**, or click directly on the members cell
+    Click the **three-dot menu** (⋮) and select **Manage Members**, or click
+    directly on the members cell
   </Step>
   <Step title="Select User">
     Use the dropdown to find the user you want to add
@@ -145,21 +152,19 @@ The member is added immediately and can start receiving notifications for team-a
   <Step title="Open Members Dialog">
     Click the three-dot menu and select **Manage Members**
   </Step>
-  <Step title="Find the Member">
-    Locate the member in the list
-  </Step>
-  <Step title="Remove">
-    Click the **X** button next to their name
-  </Step>
+  <Step title="Find the Member">Locate the member in the list</Step>
+  <Step title="Remove">Click the **X** button next to their name</Step>
 </Steps>
 
 <Note>
-  Removed members will no longer receive notifications for incidents assigned to this team.
+  Removed members will no longer receive notifications for incidents assigned to
+  this team.
 </Note>
 
 ### Member Information
 
 The members dialog shows:
+
 - **Avatar** — User's profile picture or initials
 - **Name** — Full name
 - **Email** — Contact email address
@@ -171,13 +176,14 @@ The members dialog shows:
 
 Each team member can have one of two roles:
 
-| Role | Description |
-|------|-------------|
-| **Lead** | Team leader with management responsibilities |
-| **Member** | Standard team member |
+| Role       | Description                                  |
+| ---------- | -------------------------------------------- |
+| **Lead**   | Team leader with management responsibilities |
+| **Member** | Standard team member                         |
 
 <Tip>
-  Member roles are informational and help identify team structure. Both roles receive the same notifications.
+  Member roles are informational and help identify team structure. Both roles
+  receive the same notifications.
 </Tip>
 
 ---
@@ -187,22 +193,17 @@ Each team member can have one of two roles:
 To modify an existing team:
 
 <Steps>
-  <Step title="Find the Team">
-    Locate the team in the list
-  </Step>
+  <Step title="Find the Team">Locate the team in the list</Step>
   <Step title="Open Edit Dialog">
     Click the **three-dot menu** (⋮) and select **Edit**
   </Step>
-  <Step title="Update Information">
-    Modify the team name or description
-  </Step>
-  <Step title="Save Changes">
-    Click **Save** to apply your modifications
-  </Step>
+  <Step title="Update Information">Modify the team name or description</Step>
+  <Step title="Save Changes">Click **Save** to apply your modifications</Step>
 </Steps>
 
 <Note>
-  The team slug cannot be changed after creation. If you need a different slug, create a new team and migrate members.
+  The team slug cannot be changed after creation. If you need a different slug,
+  create a new team and migrate members.
 </Note>
 
 ---
@@ -218,6 +219,7 @@ Deactivate a team to temporarily disable it while preserving its configuration:
 3. Save changes
 
 **Inactive teams:**
+
 - Won't appear in escalation target selections
 - Members remain associated
 - Can be reactivated at any time
@@ -237,7 +239,8 @@ Delete a team to permanently remove it:
 </Steps>
 
 <Warning>
-  Deleting a team removes all member associations and cannot be undone. Consider deactivating instead if you might need the team again.
+  Deleting a team removes all member associations and cannot be undone. Consider
+  deactivating instead if you might need the team again.
 </Warning>
 
 ---
@@ -261,7 +264,8 @@ When a team is notified through an escalation:
 
 <CardGroup cols={2}>
   <Card title="Parallel Mode" icon="arrows-split-up-and-left">
-    All team members are notified simultaneously. First responder handles the incident.
+    All team members are notified simultaneously. First responder handles the
+    incident.
   </Card>
   <Card title="Sequential Mode" icon="arrow-down-1-9">
     Team members are notified one by one until someone acknowledges.
@@ -271,6 +275,7 @@ When a team is notified through an escalation:
 ### Mixed Targets
 
 Escalation levels can combine different target types:
+
 - Individual users
 - Teams
 - On-call schedules
@@ -281,15 +286,18 @@ This flexibility allows complex notification flows tailored to your organization
   **Level 1** (0 min):
   - On-Call Schedule: "Primary On-Call"
 
-  **Level 2** (5 min):
-  - Team: "Backend Engineering"
-  - Mode: Parallel
+**Level 2** (5 min):
 
-  **Level 3** (15 min):
-  - User: "Engineering Manager"
-  - Team: "Leadership"
+- Team: "Backend Engineering"
+- Mode: Parallel
 
-  This ensures the on-call person is notified first, then the entire team if no response, and finally leadership for critical situations.
+**Level 3** (15 min):
+
+- User: "Engineering Manager"
+- Team: "Leadership"
+
+This ensures the on-call person is notified first, then the entire team if no response, and finally leadership for critical situations.
+
 </Accordion>
 
 ---
@@ -305,6 +313,7 @@ This flexibility allows complex notification flows tailored to your organization
     - **Infrastructure Team** — Cloud and DevOps
     - **Database Team** — Data storage and optimization
     - **Security Team** — Security incidents and compliance
+
   </Accordion>
   <Accordion title="By Service Ownership">
     Align teams with services they own:
@@ -313,6 +322,7 @@ This flexibility allows complex notification flows tailored to your organization
     - **Auth Team** — Authentication and authorization
     - **Notifications Team** — Email, SMS, push services
     - **Search Team** — Search and indexing service
+
   </Accordion>
   <Accordion title="By Support Tier">
     Structure for customer support escalations:
@@ -320,6 +330,7 @@ This flexibility allows complex notification flows tailored to your organization
     - **Support Tier 1** — First-line support
     - **Support Tier 2** — Technical escalation
     - **Support Tier 3** — Engineering escalation
+
   </Accordion>
   <Accordion title="By Region">
     Global teams for follow-the-sun support:
@@ -327,6 +338,7 @@ This flexibility allows complex notification flows tailored to your organization
     - **EMEA Team** — Europe, Middle East, Africa
     - **APAC Team** — Asia Pacific
     - **Americas Team** — North and South America
+
   </Accordion>
 </AccordionGroup>
 
@@ -347,6 +359,7 @@ This flexibility allows complex notification flows tailored to your organization
     **Good:** "Payment Processing Team", "EU Customer Support"
 
     **Avoid:** "Team A", "Engineers", "Support"
+
   </Accordion>
   <Accordion title="Document Team Purpose">
     Use the description field to explain:
@@ -395,6 +408,7 @@ This flexibility allows complex notification flows tailored to your organization
     - Incident assignments
 
     Remove these references before deleting, or deactivate the team instead.
+
   </Accordion>
 </AccordionGroup>
 
@@ -402,15 +416,16 @@ This flexibility allows complex notification flows tailored to your organization
 
 ## Teams vs. Groups
 
-Teams and Groups serve different purposes in EasyContact:
+Teams and Groups serve different purposes in EasyAlert:
 
-| Aspect | Teams | Groups |
-|--------|-------|--------|
-| **Purpose** | Incident response and escalations | Access control and permissions |
-| **Used For** | On-call, incident assignment, notifications | Role assignment, feature access |
-| **Found In** | Escalation policies, incidents | User management, IAM |
-| **Members** | Responders for specific services | Users needing similar permissions |
+| Aspect       | Teams                                       | Groups                            |
+| ------------ | ------------------------------------------- | --------------------------------- |
+| **Purpose**  | Incident response and escalations           | Access control and permissions    |
+| **Used For** | On-call, incident assignment, notifications | Role assignment, feature access   |
+| **Found In** | Escalation policies, incidents              | User management, IAM              |
+| **Members**  | Responders for specific services            | Users needing similar permissions |
 
 <Tip>
-  Use **Teams** for operational structure (who responds to incidents) and **Groups** for access control (who can do what in the platform).
+  Use **Teams** for operational structure (who responds to incidents) and
+  **Groups** for access control (who can do what in the platform).
 </Tip>
