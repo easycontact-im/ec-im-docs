@@ -1,7 +1,7 @@
 ---
-title: 'Settings'
-description: 'Configure notification channels and webhook integrations'
-icon: 'gear'
+title: "Settings"
+description: "Configure notification channels and webhook integrations"
+icon: "gear"
 ---
 
 ## Overview
@@ -33,17 +33,18 @@ Webhook channels allow you to send HTTP requests to external systems when incide
 
 The Settings page displays all configured webhook channels as cards:
 
-| Element | Description |
-|---------|-------------|
-| **Name** | Channel identifier |
-| **Description** | Purpose of the channel |
-| **URL** | Target webhook endpoint |
-| **Method** | HTTP method (GET, POST, PUT, PATCH) |
-| **Status** | Active or Inactive toggle |
+| Element           | Description                             |
+| ----------------- | --------------------------------------- |
+| **Name**          | Channel identifier                      |
+| **Description**   | Purpose of the channel                  |
+| **URL**           | Target webhook endpoint                 |
+| **Method**        | HTTP method (GET, POST, PUT, PATCH)     |
+| **Status**        | Active or Inactive toggle               |
 | **Default Badge** | Indicates default channel for this type |
 
 <Tip>
-  Inactive channels appear with reduced opacity. You can toggle status without deleting the channel.
+  Inactive channels appear with reduced opacity. You can toggle status without
+  deleting the channel.
 </Tip>
 
 ---
@@ -55,18 +56,16 @@ The Settings page displays all configured webhook channels as cards:
     Click the **Add Webhook** button in the page header
   </Step>
   <Step title="Enter Basic Info">
-    - **Name** — Descriptive channel name (required)
-    - **Description** — Explain what this channel does
+    - **Name** — Descriptive channel name (required) - **Description** — Explain
+    what this channel does
   </Step>
   <Step title="Configure Webhook URL">
     Enter the target URL for the webhook (e.g., Slack incoming webhook URL)
   </Step>
   <Step title="Select HTTP Method">
-    Choose the HTTP method:
-    - **POST** — Most common for webhooks
-    - **PUT** — For update operations
-    - **PATCH** — For partial updates
-    - **GET** — For simple notifications
+    Choose the HTTP method: - **POST** — Most common for webhooks - **PUT** —
+    For update operations - **PATCH** — For partial updates - **GET** — For
+    simple notifications
   </Step>
   <Step title="Configure Authentication">
     Select authentication type and provide credentials if needed
@@ -77,16 +76,14 @@ The Settings page displays all configured webhook channels as cards:
   <Step title="Create Payload Template">
     Define the JSON payload with template variables
   </Step>
-  <Step title="Save Channel">
-    Click **Create** to save the channel
-  </Step>
+  <Step title="Save Channel">Click **Create** to save the channel</Step>
 </Steps>
 
 ---
 
 ## Authentication Types
 
-Configure how EasyContact authenticates with your webhook endpoint.
+Configure how EasyAlert authenticates with your webhook endpoint.
 
 <Tabs>
   <Tab title="None">
@@ -95,6 +92,7 @@ Configure how EasyContact authenticates with your webhook endpoint.
     ```
     Authentication: None
     ```
+
   </Tab>
   <Tab title="Bearer Token">
     Send a Bearer token in the Authorization header.
@@ -104,6 +102,7 @@ Configure how EasyContact authenticates with your webhook endpoint.
     | Authentication | Bearer Token |
     | Token | `<YOUR_BEARER_TOKEN>` |
     | Header sent | `Authorization: Bearer <YOUR_BEARER_TOKEN>` |
+
   </Tab>
   <Tab title="API Key">
     Send an API key in a custom header.
@@ -113,6 +112,7 @@ Configure how EasyContact authenticates with your webhook endpoint.
     | Authentication | API Key |
     | API Key | `<YOUR_API_KEY>` |
     | Header sent | `X-API-Key: <YOUR_API_KEY>` |
+
   </Tab>
   <Tab title="Basic Auth">
     Send username and password as Base64-encoded Basic authentication.
@@ -122,11 +122,13 @@ Configure how EasyContact authenticates with your webhook endpoint.
     | Authentication | Basic Auth |
     | Credentials | `username:password` (Base64 encoded) |
     | Header sent | `Authorization: Basic <BASE64_ENCODED>` |
+
   </Tab>
 </Tabs>
 
 <Warning>
-  Authentication credentials are stored securely but are never displayed after saving. You'll need to re-enter them when editing.
+  Authentication credentials are stored securely but are never displayed after
+  saving. You'll need to re-enter them when editing.
 </Warning>
 
 ---
@@ -201,6 +203,7 @@ Payload templates define the JSON body sent to your webhook. Use template variab
     | `upper` | `{{incident.severity\|upper}}` | CRITICAL |
     | `default` | `{{incident.host\|default("unknown")}}` | Fallback value if empty |
     | `truncate` | `{{incident.description\|truncate(100)}}` | Truncate to length |
+
   </Tab>
 </Tabs>
 
@@ -218,7 +221,7 @@ Use these templates as starting points for common integrations.
         {
           "color": "{{incident.severity == 'critical' ? '#FF0000' : '#FFA500'}}",
           "title": "{{incident.title}}",
-          "title_link": "https://app.easycontact.ai/incidents/{{incident.id}}",
+          "title_link": "https://admin.easyalert.io/incidents/{{incident.id}}",
           "text": "{{incident.description}}",
           "fields": [
             {
@@ -252,7 +255,7 @@ Use these templates as starting points for common integrations.
               "short": true
             }
           ],
-          "footer": "EasyContact",
+          "footer": "EasyAlert",
           "ts": "{{incident.triggeredAt}}"
         }
       ]
@@ -262,6 +265,7 @@ Use these templates as starting points for common integrations.
     <Info>
       For Slack, use the incoming webhook URL from your Slack app. No authentication is needed as the token is embedded in the URL.
     </Info>
+
   </Accordion>
   <Accordion title="Microsoft Teams Template">
     ```json
@@ -305,7 +309,7 @@ Use these templates as starting points for common integrations.
           "targets": [
             {
               "os": "default",
-              "uri": "https://app.easycontact.ai/incidents/{{incident.id}}"
+              "uri": "https://admin.easyalert.io/incidents/{{incident.id}}"
             }
           ]
         }
@@ -316,6 +320,7 @@ Use these templates as starting points for common integrations.
     <Info>
       For Teams, use the incoming webhook URL from your Teams channel connector.
     </Info>
+
   </Accordion>
   <Accordion title="Generic Webhook Template">
     ```json
@@ -381,15 +386,17 @@ Before using a channel in production, test it to verify the configuration is cor
 
 ### Test Results
 
-| Field | Description |
-|-------|-------------|
-| **Status** | Success (green) or Failed (red) |
-| **Message** | Response message or error description |
-| **Response Code** | HTTP status code (200, 201, etc.) |
-| **Duration** | Request time in milliseconds |
+| Field             | Description                           |
+| ----------------- | ------------------------------------- |
+| **Status**        | Success (green) or Failed (red)       |
+| **Message**       | Response message or error description |
+| **Response Code** | HTTP status code (200, 201, etc.)     |
+| **Duration**      | Request time in milliseconds          |
 
 <Tip>
-  A successful test means the webhook endpoint is reachable and accepted the request. Check your target system to verify the message was received correctly.
+  A successful test means the webhook endpoint is reachable and accepted the
+  request. Check your target system to verify the message was received
+  correctly.
 </Tip>
 
 ---
@@ -408,7 +415,8 @@ You can mark one webhook channel as the **default** for each channel type. The d
 3. Save changes
 
 <Info>
-  Only one channel per type can be the default. Setting a new default automatically removes the default status from the previous channel.
+  Only one channel per type can be the default. Setting a new default
+  automatically removes the default status from the previous channel.
 </Info>
 
 ---
@@ -430,7 +438,8 @@ Use the switch on each channel card to quickly enable or disable:
 - **Inactive** — Channel is skipped (useful for maintenance or testing)
 
 <Tip>
-  Inactive channels remain configured but don't receive notifications. Use this instead of deleting when you might need the channel again.
+  Inactive channels remain configured but don't receive notifications. Use this
+  instead of deleting when you might need the channel again.
 </Tip>
 
 ### Deleting Channels
@@ -440,7 +449,8 @@ Use the switch on each channel card to quickly enable or disable:
 3. Confirm deletion
 
 <Warning>
-  Deleted channels cannot be recovered. Any escalation policy levels using this channel will need to be reconfigured.
+  Deleted channels cannot be recovered. Any escalation policy levels using this
+  channel will need to be reconfigured.
 </Warning>
 
 ---
@@ -456,6 +466,7 @@ Use the switch on each channel card to quickly enable or disable:
     4. No authentication needed (token in URL)
 
     **URL Format:** Slack incoming webhook URL from your app settings
+
   </Accordion>
   <Accordion title="Microsoft Teams">
     **Setup:**
@@ -465,6 +476,7 @@ Use the switch on each channel card to quickly enable or disable:
     4. No authentication needed (token in URL)
 
     **URL Format:** Teams incoming webhook URL from your channel connector
+
   </Accordion>
   <Accordion title="Discord">
     **Setup:**
@@ -489,6 +501,7 @@ Use the switch on each channel card to quickly enable or disable:
       ]
     }
     ```
+
   </Accordion>
   <Accordion title="Custom API">
     **Setup:**
@@ -505,6 +518,7 @@ Use the switch on each channel card to quickly enable or disable:
     | Method | POST |
     | Auth | Bearer Token |
     | Token | `<YOUR_API_TOKEN>` |
+
   </Accordion>
 </AccordionGroup>
 
@@ -542,41 +556,32 @@ Use the switch on each channel card to quickly enable or disable:
 
 <AccordionGroup>
   <Accordion title="Test returns error">
-    1. Verify the webhook URL is correct and accessible
-    2. Check authentication credentials
-    3. Ensure the payload template is valid JSON
-    4. Try the request manually with curl to diagnose
-    5. Check if the endpoint has IP restrictions
+    1. Verify the webhook URL is correct and accessible 2. Check authentication
+    credentials 3. Ensure the payload template is valid JSON 4. Try the request
+    manually with curl to diagnose 5. Check if the endpoint has IP restrictions
   </Accordion>
   <Accordion title="Notifications not being sent">
-    1. Verify channel is **Active**
-    2. Check that the channel is selected in escalation policy levels
-    3. Ensure the escalation policy is active and assigned
-    4. Review incident logs for delivery errors
+    1. Verify channel is **Active** 2. Check that the channel is selected in
+    escalation policy levels 3. Ensure the escalation policy is active and
+    assigned 4. Review incident logs for delivery errors
   </Accordion>
   <Accordion title="Payload template errors">
-    1. Validate JSON syntax in the editor
-    2. Check variable names match exactly (case-sensitive)
-    3. Ensure filters are applied correctly
-    4. Test with a minimal template first
+    1. Validate JSON syntax in the editor 2. Check variable names match exactly
+    (case-sensitive) 3. Ensure filters are applied correctly 4. Test with a
+    minimal template first
   </Accordion>
   <Accordion title="Authentication failures">
-    1. Verify credentials are entered correctly
-    2. Check token hasn't expired
-    3. Ensure auth type matches endpoint requirements
-    4. Verify the endpoint expects the header format used
+    1. Verify credentials are entered correctly 2. Check token hasn't expired 3.
+    Ensure auth type matches endpoint requirements 4. Verify the endpoint
+    expects the header format used
   </Accordion>
   <Accordion title="Timeout errors">
-    1. Increase timeout value
-    2. Check if endpoint is slow or overloaded
-    3. Verify network connectivity
-    4. Consider using async webhook if available
+    1. Increase timeout value 2. Check if endpoint is slow or overloaded 3.
+    Verify network connectivity 4. Consider using async webhook if available
   </Accordion>
   <Accordion title="Messages not appearing in Slack/Teams">
-    1. Verify webhook URL is correct
-    2. Check channel/team permissions
-    3. Ensure webhook hasn't been revoked
-    4. Verify payload matches expected format
+    1. Verify webhook URL is correct 2. Check channel/team permissions 3. Ensure
+    webhook hasn't been revoked 4. Verify payload matches expected format
   </Accordion>
 </AccordionGroup>
 
@@ -586,30 +591,30 @@ Use the switch on each channel card to quickly enable or disable:
 
 ### Authentication Types
 
-| Type | Header Format | Use Case |
-|------|---------------|----------|
-| None | (no header) | Slack, Teams incoming webhooks |
-| Bearer | `Authorization: Bearer {token}` | OAuth APIs, modern REST APIs |
-| API Key | `X-API-Key: {key}` | Simple API authentication |
-| Basic | `Authorization: Basic {base64}` | Legacy systems, basic auth APIs |
+| Type    | Header Format                   | Use Case                        |
+| ------- | ------------------------------- | ------------------------------- |
+| None    | (no header)                     | Slack, Teams incoming webhooks  |
+| Bearer  | `Authorization: Bearer {token}` | OAuth APIs, modern REST APIs    |
+| API Key | `X-API-Key: {key}`              | Simple API authentication       |
+| Basic   | `Authorization: Basic {base64}` | Legacy systems, basic auth APIs |
 
 ### HTTP Methods
 
-| Method | Use Case |
-|--------|----------|
-| POST | Creating new records, most webhooks |
-| PUT | Replacing existing records |
-| PATCH | Partial updates |
-| GET | Simple notifications without body |
+| Method | Use Case                            |
+| ------ | ----------------------------------- |
+| POST   | Creating new records, most webhooks |
+| PUT    | Replacing existing records          |
+| PATCH  | Partial updates                     |
+| GET    | Simple notifications without body   |
 
 ### Common Template Variables
 
-| Variable | Example Value |
-|----------|---------------|
-| `{{incident.id}}` | `abc123-def456` |
-| `{{incident.title}}` | `High CPU on web-01` |
-| `{{incident.severity}}` | `critical` |
-| `{{incident.host}}` | `web-server-01` |
-| `{{incident.service}}` | `api-gateway` |
-| `{{target.name}}` | `John Doe` |
-| `{{tenant.slug}}` | `acme-corp` |
+| Variable                | Example Value        |
+| ----------------------- | -------------------- |
+| `{{incident.id}}`       | `abc123-def456`      |
+| `{{incident.title}}`    | `High CPU on web-01` |
+| `{{incident.severity}}` | `critical`           |
+| `{{incident.host}}`     | `web-server-01`      |
+| `{{incident.service}}`  | `api-gateway`        |
+| `{{target.name}}`       | `John Doe`           |
+| `{{tenant.slug}}`       | `acme-corp`          |
