@@ -9,7 +9,8 @@ icon: "chart-line"
 Grafana is a popular open-source platform for monitoring and observability. Easyalert supports both **Grafana Unified Alerting (8+)** and **Legacy Alerting (7.x)** formats.
 
 <Info>
-  Grafana 8+ uses Unified Alerting by default. Legacy alerting is deprecated but still supported for older installations.
+  Grafana 8+ uses Unified Alerting by default. Legacy alerting is deprecated but
+  still supported for older installations.
 </Info>
 
 ---
@@ -33,7 +34,8 @@ Grafana is a popular open-source platform for monitoring and observability. Easy
     5. Click **Create** to save
     6. Copy the generated **Webhook URL**
 
-    > **Example:** `https://easyalert-api.easycontact.ai/api/v1/webhooks/ingest/wh_abc123...`
+    > **Example:** `https://api.easyalert.io/api/v1/webhooks/ingest/wh_abc123...`
+
   </Step>
   <Step title="Create Contact Point (Unified Alerting)">
     1. Go to **Alerting → Contact points**
@@ -49,6 +51,7 @@ Grafana is a popular open-source platform for monitoring and observability. Easy
 
     4. Click **Test** button to verify connection
     5. Click **Save contact point**
+
   </Step>
   <Step title="Configure Notification Policy">
     1. Go to **Alerting → Notification policies**
@@ -61,6 +64,7 @@ Grafana is a popular open-source platform for monitoring and observability. Easy
     | **Group wait** | `30s` |
     | **Group interval** | `5m` |
     | **Repeat interval** | `4h` |
+
   </Step>
   <Step title="Test the Integration">
     Use the **Test** button in the contact point configuration to send a test alert
@@ -75,16 +79,12 @@ For Grafana 7.x and earlier with legacy alerting:
 
 <Steps>
   <Step title="Create Notification Channel">
-    1. Go to **Alerting → Notification channels**
-    2. Click **Add channel**
-    3. Select **webhook** as the type
+    1. Go to **Alerting → Notification channels** 2. Click **Add channel** 3.
+    Select **webhook** as the type
   </Step>
   <Step title="Configure Webhook">
-    - **Name**: Easyalert
-    - **URL**: Your Easyalert webhook URL
-    - **HTTP Method**: POST
-    - **Send on all alerts**: Yes
-    - **Include image**: Optional
+    - **Name**: Easyalert - **URL**: Your Easyalert webhook URL - **HTTP
+    Method**: POST - **Send on all alerts**: Yes - **Include image**: Optional
   </Step>
 </Steps>
 
@@ -98,19 +98,19 @@ For Grafana 7.x and earlier with legacy alerting:
 
 In **Section 3: Add annotations and labels**, add labels for routing:
 
-| Label | Value | Description |
-|-------|-------|-------------|
-| `severity` | `warning` or `critical` | Alert severity |
-| `customer` | `AcmeCorp` | Customer name (for MSPs) |
-| `team` | `backend` | Responsible team |
-| `environment` | `production` | Environment |
+| Label         | Value                   | Description              |
+| ------------- | ----------------------- | ------------------------ |
+| `severity`    | `warning` or `critical` | Alert severity           |
+| `customer`    | `AcmeCorp`              | Customer name (for MSPs) |
+| `team`        | `backend`               | Responsible team         |
+| `environment` | `production`            | Environment              |
 
 ### Add Annotations
 
-| Annotation | Example Value |
-|------------|---------------|
-| `summary` | `High CPU usage on {{ $labels.instance }}` |
-| `description` | `CPU usage is {{ $values.A }}%` |
+| Annotation    | Example Value                              |
+| ------------- | ------------------------------------------ |
+| `summary`     | `High CPU usage on {{ $labels.instance }}` |
+| `description` | `CPU usage is {{ $values.A }}%`            |
 
 ---
 
@@ -118,46 +118,46 @@ In **Section 3: Add annotations and labels**, add labels for routing:
 
 ### Unified Alerting
 
-| Grafana Field | Easyalert Field |
-|---------------|-----------------|
-| `labels.alertname` | Title |
-| `annotations.summary` | Title (fallback) |
-| `annotations.description` | Description |
-| `status` | Status (firing → problem, resolved → ok) |
-| `labels.severity` | Severity |
-| `labels.instance` | Host |
-| `labels.job` | Service |
-| `fingerprint` | Event ID |
+| Grafana Field             | Easyalert Field                          |
+| ------------------------- | ---------------------------------------- |
+| `labels.alertname`        | Title                                    |
+| `annotations.summary`     | Title (fallback)                         |
+| `annotations.description` | Description                              |
+| `status`                  | Status (firing → problem, resolved → ok) |
+| `labels.severity`         | Severity                                 |
+| `labels.instance`         | Host                                     |
+| `labels.job`              | Service                                  |
+| `fingerprint`             | Event ID                                 |
 
 ### Legacy Alerting
 
 | Grafana Field | Easyalert Field |
-|---------------|-----------------|
-| `ruleName` | Title |
-| `message` | Description |
-| `state` | Status |
-| `ruleUrl` | URL |
-| `evalMatches` | Metric details |
+| ------------- | --------------- |
+| `ruleName`    | Title           |
+| `message`     | Description     |
+| `state`       | Status          |
+| `ruleUrl`     | URL             |
+| `evalMatches` | Metric details  |
 
 ---
 
 ## Severity Mapping
 
 | Grafana Severity | Easyalert Severity |
-|-----------------|-------------------|
-| critical | Critical |
-| error | High |
-| warning | Warning |
-| info | Info |
+| ---------------- | ------------------ |
+| critical         | Critical           |
+| error            | High               |
+| warning          | Warning            |
+| info             | Info               |
 
 ### Legacy State Mapping
 
-| Grafana State | Easyalert Status |
-|---------------|-----------------|
-| alerting | Problem |
-| ok | OK |
-| pending | Problem (warning) |
-| no_data | Problem (warning) |
+| Grafana State | Easyalert Status  |
+| ------------- | ----------------- |
+| alerting      | Problem           |
+| ok            | OK                |
+| pending       | Problem (warning) |
+| no_data       | Problem (warning) |
 
 ---
 
@@ -168,6 +168,7 @@ In **Section 3: Add annotations and labels**, add labels for routing:
 ### Example Conversion
 
 Labels in Alert Rule:
+
 ```
 alertname = HighCPUUsage
 severity = critical
@@ -177,6 +178,7 @@ environment = production
 ```
 
 Available Tags in Easyalert:
+
 ```
 tags.alertname = "HighCPUUsage"
 tags.severity = "critical"
@@ -188,6 +190,7 @@ tags.environment = "production"
 ### Routing Examples
 
 **Escalation Routing:**
+
 ```
 tags.customer equals "acme" → Acme Corp Policy
 tags.team equals "database" → DBA Team Policy
@@ -195,6 +198,7 @@ tags.environment equals "production" → Critical Policy
 ```
 
 **Notification Rules:**
+
 ```
 tags.severity equals "critical" → call + sms + email
 tags.severity equals "warning" → sms + email
@@ -253,12 +257,12 @@ team: infra
 
 Grafana includes helpful links in alerts:
 
-| Field | Description |
-|-------|-------------|
-| `dashboardURL` | Link to the dashboard |
-| `panelURL` | Direct link to the panel |
-| `silenceURL` | Quick link to silence the alert |
-| `generatorURL` | Link to the alert rule |
+| Field          | Description                     |
+| -------------- | ------------------------------- |
+| `dashboardURL` | Link to the dashboard           |
+| `panelURL`     | Direct link to the panel        |
+| `silenceURL`   | Quick link to silence the alert |
+| `generatorURL` | Link to the alert rule          |
 
 These are captured and displayed in the incident details.
 
@@ -298,29 +302,27 @@ curl -X POST "YOUR_WEBHOOK_URL" \
 
 <AccordionGroup>
   <Accordion title="Alerts not being received">
-    1. Test the contact point from Grafana UI
-    2. Check Grafana server logs for webhook errors
-    3. Verify network connectivity to Easyalert
-    4. Ensure notification policy routes to correct contact point
+    1. Test the contact point from Grafana UI 2. Check Grafana server logs for
+    webhook errors 3. Verify network connectivity to Easyalert 4. Ensure
+    notification policy routes to correct contact point
   </Accordion>
   <Accordion title="Labels not becoming tags">
-    1. Check Labels section in alert rule
-    2. Verify labels are properly defined
+    1. Check Labels section in alert rule 2. Verify labels are properly defined
     3. Review webhook samples in Easyalert
   </Accordion>
   <Accordion title="Resolved alerts not working">
-    1. Verify "Disable Resolved Message" is NOT checked in contact point
-    2. Check notification policy includes resolved alerts
-    3. Verify alert rule has proper conditions for resolution
+    1. Verify "Disable Resolved Message" is NOT checked in contact point 2.
+    Check notification policy includes resolved alerts 3. Verify alert rule has
+    proper conditions for resolution
   </Accordion>
   <Accordion title="Missing dashboard links">
-    1. Ensure `externalURL` is configured in Grafana
-    2. Check Grafana root URL settings
+    1. Ensure `externalURL` is configured in Grafana 2. Check Grafana root URL
+    settings
   </Accordion>
   <Accordion title="Legacy vs Unified format issues">
-    1. Check which alerting system is enabled in Grafana
-    2. Easyalert auto-detects format, but verify payload structure
-    3. Review webhook samples for actual format being sent
+    1. Check which alerting system is enabled in Grafana 2. Easyalert
+    auto-detects format, but verify payload structure 3. Review webhook samples
+    for actual format being sent
   </Accordion>
 </AccordionGroup>
 
@@ -330,10 +332,12 @@ curl -X POST "YOUR_WEBHOOK_URL" \
 
 <AccordionGroup>
   <Accordion title="Use Unified Alerting">
-    Migrate to Unified Alerting for better features and consistency with Prometheus/Alertmanager format.
+    Migrate to Unified Alerting for better features and consistency with
+    Prometheus/Alertmanager format.
   </Accordion>
   <Accordion title="Include Runbook URLs">
-    Add `runbook_url` annotation to help responders quickly find remediation steps.
+    Add `runbook_url` annotation to help responders quickly find remediation
+    steps.
   </Accordion>
   <Accordion title="Organize with Folders">
     Use Grafana folders to organize alerts and include folder name in labels.
@@ -342,6 +346,7 @@ curl -X POST "YOUR_WEBHOOK_URL" \
     Set Grafana's external URL properly so dashboard links work correctly.
   </Accordion>
   <Accordion title="Use Labels for Routing">
-    Add labels like `customer`, `team`, `environment` for escalation routing in Easyalert.
+    Add labels like `customer`, `team`, `environment` for escalation routing in
+    Easyalert.
   </Accordion>
 </AccordionGroup>

@@ -9,7 +9,8 @@ icon: "code"
 The Custom integration allows you to connect any monitoring tool, script, or application that can send HTTP POST requests. Easyalert automatically extracts common fields and captures additional data as tags.
 
 <Info>
-  Use Custom integration when your monitoring tool isn't in our supported list, or when you want to send alerts from custom applications.
+  Use Custom integration when your monitoring tool isn't in our supported list,
+  or when you want to send alerts from custom applications.
 </Info>
 
 ---
@@ -25,7 +26,8 @@ The Custom integration allows you to connect any monitoring tool, script, or app
     5. Click **Create** to save
     6. Copy the generated **Webhook URL**
 
-    > **Example:** `https://easyalert-api.easycontact.ai/api/v1/webhooks/ingest/wh_abc123...`
+    > **Example:** `https://api.easyalert.io/api/v1/webhooks/ingest/wh_abc123...`
+
   </Step>
   <Step title="Configure Your Source">
     Set up your monitoring tool or script to POST JSON to the webhook URL
@@ -42,15 +44,15 @@ The Custom integration allows you to connect any monitoring tool, script, or app
 Your webhook URL:
 
 ```
-https://api.easycontact.ai/api/v1/webhooks/ingest/{token}
+https://api.easyalert.io/api/v1/webhooks/ingest/{token}
 ```
 
 ### Request Format
 
-| Setting | Value |
-|---------|-------|
-| **Method** | POST |
-| **Content-Type** | application/json |
+| Setting            | Value               |
+| ------------------ | ------------------- |
+| **Method**         | POST                |
+| **Content-Type**   | application/json    |
 | **Authentication** | None (token in URL) |
 
 ---
@@ -59,20 +61,20 @@ https://api.easycontact.ai/api/v1/webhooks/ingest/{token}
 
 ### Standard Fields
 
-| Field | Default | Description |
-|-------|---------|-------------|
-| `eventId` | auto-generated | Unique event identifier |
-| `title` | "Custom Alert" | Alert title |
-| `description` | "" | Detailed description |
-| `severity` | "warning" | critical, error, warning, info, ok |
-| `status` | "problem" | problem, ok |
-| `timestamp` | now | ISO 8601 or Unix timestamp |
-| `host` | - | Hostname |
-| `hostIp` | - | Host IP address |
-| `service` | - | Service name |
-| `environment` | - | Environment |
-| `team` | - | Team name |
-| `customerName` | - | Customer name (for MSP routing) |
+| Field          | Default        | Description                        |
+| -------------- | -------------- | ---------------------------------- |
+| `eventId`      | auto-generated | Unique event identifier            |
+| `title`        | "Custom Alert" | Alert title                        |
+| `description`  | ""             | Detailed description               |
+| `severity`     | "warning"      | critical, error, warning, info, ok |
+| `status`       | "problem"      | problem, ok                        |
+| `timestamp`    | now            | ISO 8601 or Unix timestamp         |
+| `host`         | -              | Hostname                           |
+| `hostIp`       | -              | Host IP address                    |
+| `service`      | -              | Service name                       |
+| `environment`  | -              | Environment                        |
+| `team`         | -              | Team name                          |
+| `customerName` | -              | Customer name (for MSP routing)    |
 
 ---
 
@@ -81,30 +83,39 @@ https://api.easycontact.ai/api/v1/webhooks/ingest/{token}
 Easyalert automatically recognizes these common field names:
 
 ### Title Fields
+
 - `title`, `name`, `subject`, `summary`, `alert_name`, `message_title`
 
 ### Description Fields
+
 - `description`, `message`, `body`, `text`, `details`
 
 ### Severity Fields
+
 - `severity`, `priority`, `level`, `criticality`
 
 ### Status Fields
+
 - `status`, `state`, `alert_status`, `current_state`
 
 ### Host Fields
+
 - `host`, `hostname`, `server`, `node`, `instance`, `machine`
 
 ### IP Address Fields
+
 - `hostIp`, `host_ip`, `ip`, `ip_address`, `source_ip`
 
 ### Service Fields
+
 - `service`, `application`, `app`, `component`
 
 ### Environment Fields
+
 - `environment`, `env`
 
 ### Other Fields
+
 - `region`, `datacenter`, `dc`, `location`
 - `team`, `owner`
 - `customer`, `client`, `tenant`
@@ -126,6 +137,7 @@ Any field not in the standard list is automatically captured as a tag:
 ```
 
 Result:
+
 - `tags.project_code = "PRJ-001"`
 - `tags.datacenter = "EU-West"`
 - `tags.cost_center = "CC-1234"`
@@ -150,13 +162,13 @@ You can also send structured tags:
 
 These values are automatically mapped:
 
-| Input Value | Easyalert Severity |
-|-------------|-------------------|
-| critical, disaster, fatal, emergency, P1 | Critical |
-| error, high, major, P2 | High |
-| warning, warn, medium, minor, average, P3 | Warning |
-| info, information, low, notice, P4, P5 | Info |
-| ok, resolved, recovery, clear, success | OK |
+| Input Value                               | Easyalert Severity |
+| ----------------------------------------- | ------------------ |
+| critical, disaster, fatal, emergency, P1  | Critical           |
+| error, high, major, P2                    | High               |
+| warning, warn, medium, minor, average, P3 | Warning            |
+| info, information, low, notice, P4, P5    | Info               |
+| ok, resolved, recovery, clear, success    | OK                 |
 
 Values are case-insensitive.
 
@@ -164,10 +176,10 @@ Values are case-insensitive.
 
 ## Status Values
 
-| Input Value | Easyalert Status |
-|-------------|-----------------|
-| problem, alert, alerting, triggered, firing, open, active | Problem |
-| ok, resolved, recovery, clear, closed, inactive | OK |
+| Input Value                                               | Easyalert Status |
+| --------------------------------------------------------- | ---------------- |
+| problem, alert, alerting, triggered, firing, open, active | Problem          |
+| ok, resolved, recovery, clear, closed, inactive           | OK               |
 
 ---
 
@@ -312,25 +324,26 @@ print(f"Status: {response.status_code}")
 ### From Node.js
 
 ```javascript
-const axios = require('axios');
+const axios = require("axios");
 
-const webhookUrl = 'YOUR_WEBHOOK_URL';
+const webhookUrl = "YOUR_WEBHOOK_URL";
 
 const payload = {
-  title: 'Service Degradation',
-  severity: 'warning',
-  host: 'api-gateway',
-  service: 'user-service',
-  description: 'Response times increased by 50%',
+  title: "Service Degradation",
+  severity: "warning",
+  host: "api-gateway",
+  service: "user-service",
+  description: "Response times increased by 50%",
   tags: {
-    p99_latency: '2500ms',
-    error_rate: '2.5%'
-  }
+    p99_latency: "2500ms",
+    error_rate: "2.5%",
+  },
 };
 
-axios.post(webhookUrl, payload)
-  .then(response => console.log('Alert sent:', response.status))
-  .catch(error => console.error('Error:', error.message));
+axios
+  .post(webhookUrl, payload)
+  .then((response) => console.log("Alert sent:", response.status))
+  .catch((error) => console.error("Error:", error.message));
 ```
 
 ---
@@ -339,35 +352,28 @@ axios.post(webhookUrl, payload)
 
 <AccordionGroup>
   <Accordion title="Webhook returns error">
-    1. Verify Content-Type is `application/json`
-    2. Ensure payload is valid JSON
-    3. Check webhook URL is correct
-    4. Look at response body for error details
+    1. Verify Content-Type is `application/json` 2. Ensure payload is valid JSON
+    3. Check webhook URL is correct 4. Look at response body for error details
   </Accordion>
   <Accordion title="Fields not being extracted">
-    1. Use recognized field names from the list above
-    2. Check field name spelling and casing
-    3. View webhook samples to see parsed result
+    1. Use recognized field names from the list above 2. Check field name
+    spelling and casing 3. View webhook samples to see parsed result
   </Accordion>
   <Accordion title="Wrong severity assigned">
-    1. Check severity value spelling
-    2. Use standard values (critical, warning, info, etc.)
-    3. Set appropriate default severity in integration config
+    1. Check severity value spelling 2. Use standard values (critical, warning,
+    info, etc.) 3. Set appropriate default severity in integration config
   </Accordion>
   <Accordion title="Recovery not resolving incident">
-    1. Include same `eventId` in recovery payload
-    2. Set `status` to "resolved" or "ok"
-    3. Verify both payloads reach Easyalert
+    1. Include same `eventId` in recovery payload 2. Set `status` to "resolved"
+    or "ok" 3. Verify both payloads reach Easyalert
   </Accordion>
   <Accordion title="Invalid JSON error">
-    1. Validate JSON syntax (use jsonlint.com)
-    2. Ensure proper escaping of special characters
-    3. Check for trailing commas
+    1. Validate JSON syntax (use jsonlint.com) 2. Ensure proper escaping of
+    special characters 3. Check for trailing commas
   </Accordion>
   <Accordion title="Event grouped into existing incident">
-    1. Same host alerts within 5 minutes are grouped
-    2. Use unique eventId to create separate incidents
-    3. Check host field value
+    1. Same host alerts within 5 minutes are grouped 2. Use unique eventId to
+    create separate incidents 3. Check host field value
   </Accordion>
 </AccordionGroup>
 
@@ -377,16 +383,20 @@ axios.post(webhookUrl, payload)
 
 <AccordionGroup>
   <Accordion title="Use Consistent Event IDs">
-    Include a unique `eventId` that stays consistent between alert and recovery. This enables automatic incident resolution.
+    Include a unique `eventId` that stays consistent between alert and recovery.
+    This enables automatic incident resolution.
   </Accordion>
   <Accordion title="Include Relevant Context">
-    Add host, service, and environment fields to help responders quickly understand the alert.
+    Add host, service, and environment fields to help responders quickly
+    understand the alert.
   </Accordion>
   <Accordion title="Use Tags for Routing">
-    Add tags that can be used in escalation routing rules (team, environment, customer).
+    Add tags that can be used in escalation routing rules (team, environment,
+    customer).
   </Accordion>
   <Accordion title="Test Thoroughly">
-    Send test alerts and recoveries before relying on the integration in production.
+    Send test alerts and recoveries before relying on the integration in
+    production.
   </Accordion>
   <Accordion title="Include URLs">
     Add links to your monitoring tool or relevant dashboards in the `url` field.

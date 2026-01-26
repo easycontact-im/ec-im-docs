@@ -9,7 +9,8 @@ icon: "fire"
 Prometheus is a leading open-source monitoring and alerting toolkit. Easyalert integrates with Prometheus via Alertmanager webhooks, receiving alert notifications when your alerting rules fire.
 
 <Info>
-  This integration receives webhooks from Alertmanager, not directly from Prometheus. Make sure you have Alertmanager configured.
+  This integration receives webhooks from Alertmanager, not directly from
+  Prometheus. Make sure you have Alertmanager configured.
 </Info>
 
 ---
@@ -33,7 +34,8 @@ Prometheus is a leading open-source monitoring and alerting toolkit. Easyalert i
     5. Click **Create** to save
     6. Copy the generated **Webhook URL**
 
-    > **Example:** `https://easyalert-api.easycontact.ai/api/v1/webhooks/ingest/wh_abc123...`
+    > **Example:** `https://api.easyalert.io/api/v1/webhooks/ingest/wh_abc123...`
+
   </Step>
   <Step title="Configure Alertmanager">
     Edit your `alertmanager.yml` file:
@@ -57,6 +59,7 @@ Prometheus is a leading open-source monitoring and alerting toolkit. Easyalert i
             http_config:
               follow_redirects: true
     ```
+
   </Step>
   <Step title="Reload Alertmanager">
     Apply the configuration:
@@ -75,12 +78,12 @@ Prometheus is a leading open-source monitoring and alerting toolkit. Easyalert i
 
 ### Route Parameters
 
-| Parameter | Description | Recommended Value |
-|-----------|-------------|-------------------|
-| `group_by` | Labels to group by | `['alertname', 'severity']` |
-| `group_wait` | Wait time after first alert | `30s` |
-| `group_interval` | Interval for adding new alerts to group | `5m` |
-| `repeat_interval` | Resend interval for same alert | `4h` |
+| Parameter         | Description                             | Recommended Value           |
+| ----------------- | --------------------------------------- | --------------------------- |
+| `group_by`        | Labels to group by                      | `['alertname', 'severity']` |
+| `group_wait`      | Wait time after first alert             | `30s`                       |
+| `group_interval`  | Interval for adding new alerts to group | `5m`                        |
+| `repeat_interval` | Resend interval for same alert          | `4h`                        |
 
 ### Multi-Tenant Configuration (for MSPs)
 
@@ -88,24 +91,24 @@ Route different customers to different webhooks:
 
 ```yaml
 route:
-  receiver: 'default'
+  receiver: "default"
   routes:
     - match:
-        customer: 'acme'
-      receiver: 'acme-easyalert'
+        customer: "acme"
+      receiver: "acme-easyalert"
     - match:
-        customer: 'beta'
-      receiver: 'beta-easyalert'
+        customer: "beta"
+      receiver: "beta-easyalert"
 
 receivers:
-  - name: 'acme-easyalert'
+  - name: "acme-easyalert"
     webhook_configs:
-      - url: 'https://easyalert-api.easycontact.ai/api/v1/webhooks/ingest/wh_acme...'
+      - url: "https://api.easyalert.io/api/v1/webhooks/ingest/wh_acme..."
         send_resolved: true
 
-  - name: 'beta-easyalert'
+  - name: "beta-easyalert"
     webhook_configs:
-      - url: 'https://easyalert-api.easycontact.ai/api/v1/webhooks/ingest/wh_beta...'
+      - url: "https://api.easyalert.io/api/v1/webhooks/ingest/wh_beta..."
         send_resolved: true
 ```
 
@@ -115,40 +118,41 @@ receivers:
 
 Easyalert automatically maps Alertmanager fields:
 
-| Alertmanager Field | Easyalert Field |
-|--------------------|-----------------|
-| `labels.alertname` | Title |
-| `annotations.summary` | Title (fallback) |
-| `annotations.description` | Description |
-| `status` | Status (firing → problem, resolved → ok) |
-| `labels.severity` | Severity |
-| `labels.instance` | Host |
-| `labels.job` | Service |
-| `fingerprint` | Event ID |
-| All labels | Tags |
+| Alertmanager Field        | Easyalert Field                          |
+| ------------------------- | ---------------------------------------- |
+| `labels.alertname`        | Title                                    |
+| `annotations.summary`     | Title (fallback)                         |
+| `annotations.description` | Description                              |
+| `status`                  | Status (firing → problem, resolved → ok) |
+| `labels.severity`         | Severity                                 |
+| `labels.instance`         | Host                                     |
+| `labels.job`              | Service                                  |
+| `fingerprint`             | Event ID                                 |
+| All labels                | Tags                                     |
 
 ---
 
 ## Severity Mapping
 
 | Prometheus Label | Easyalert Severity |
-|------------------|-------------------|
-| `critical` | `critical` |
-| `error` | `high` |
-| `warning` | `warning` |
-| `info` | `info` |
+| ---------------- | ------------------ |
+| `critical`       | `critical`         |
+| `error`          | `high`             |
+| `warning`        | `warning`          |
+| `info`           | `info`             |
 
 ---
 
 ## Status Handling
 
-| Alertmanager Status | Easyalert Status | Action |
-|--------------------|------------------|--------|
-| firing | Problem | Creates/updates incident |
-| resolved | OK | Resolves incident |
+| Alertmanager Status | Easyalert Status | Action                   |
+| ------------------- | ---------------- | ------------------------ |
+| firing              | Problem          | Creates/updates incident |
+| resolved            | OK               | Resolves incident        |
 
 <Tip>
-  Set `send_resolved: true` in your webhook config to automatically resolve incidents when alerts clear.
+  Set `send_resolved: true` in your webhook config to automatically resolve
+  incidents when alerts clear.
 </Tip>
 
 ---
@@ -160,6 +164,7 @@ Easyalert automatically maps Alertmanager fields:
 ### Example Conversion
 
 Labels in alert:
+
 ```yaml
 labels:
   alertname: HighCPUUsage
@@ -170,6 +175,7 @@ labels:
 ```
 
 Available tags in Easyalert:
+
 ```
 tags.alertname = "HighCPUUsage"
 tags.severity = "warning"
@@ -181,6 +187,7 @@ tags.environment = "production"
 ### Routing Examples
 
 **Escalation Routing:**
+
 ```
 tags.customer equals "acme" → Acme Corp Policy
 tags.team equals "database" → DBA Team Policy
@@ -188,6 +195,7 @@ tags.environment equals "production" → Critical Policy
 ```
 
 **Notification Rules:**
+
 ```
 tags.severity equals "critical" → call + sms + email
 tags.environment equals "staging" → email only
@@ -212,7 +220,7 @@ AlertManager generates a unique **fingerprint** for each alert. Easyalert uses t
 
 ```yaml
 route:
-  repeat_interval: 4h  # Resend every 4 hours
+  repeat_interval: 4h # Resend every 4 hours
 ```
 
 Thanks to duplicate detection, even if AlertManager resends the same alert, a new incident won't be created.
@@ -236,7 +244,7 @@ groups:
           customer: acme
         annotations:
           summary: "High CPU usage: {{ $labels.instance }}"
-          description: "CPU usage above 80% (current: {{ $value | printf \"%.1f\" }}%)"
+          description: 'CPU usage above 80% (current: {{ $value | printf "%.1f" }}%)'
 
       - alert: HighMemoryUsage
         expr: (1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100 > 85
@@ -320,7 +328,7 @@ groups:
 ### Docker Compose
 
 ```yaml
-version: '3.8'
+version: "3.8"
 services:
   alertmanager:
     image: prom/alertmanager:latest
@@ -329,7 +337,7 @@ services:
     volumes:
       - ./alertmanager.yml:/etc/alertmanager/alertmanager.yml
     command:
-      - '--config.file=/etc/alertmanager/alertmanager.yml'
+      - "--config.file=/etc/alertmanager/alertmanager.yml"
 ```
 
 ### Kubernetes ConfigMap
@@ -358,31 +366,27 @@ data:
 
 <AccordionGroup>
   <Accordion title="Alerts not being received">
-    1. Check AlertManager logs for webhook errors
-    2. Verify the webhook URL is accessible from Alertmanager
-    3. Test connectivity: `curl -X POST YOUR_WEBHOOK_URL -d '{}'`
-    4. Check firewall rules between Alertmanager and internet
-    5. Test config with `amtool`
+    1. Check AlertManager logs for webhook errors 2. Verify the webhook URL is
+    accessible from Alertmanager 3. Test connectivity: `curl -X POST
+    YOUR_WEBHOOK_URL -d '{}'` 4. Check firewall rules between Alertmanager and
+    internet 5. Test config with `amtool`
   </Accordion>
   <Accordion title="Labels not becoming tags">
-    1. Verify alert rules include required labels
-    2. Check that labels aren't being dropped by Alertmanager routes
-    3. Review `group_by` settings
+    1. Verify alert rules include required labels 2. Check that labels aren't
+    being dropped by Alertmanager routes 3. Review `group_by` settings
   </Accordion>
   <Accordion title="Resolved alerts not clearing incidents">
-    1. Verify `send_resolved: true` in webhook config
-    2. Check that fingerprint matches between firing and resolved
-    3. Review Alertmanager routing to ensure resolved alerts reach webhook
+    1. Verify `send_resolved: true` in webhook config 2. Check that fingerprint
+    matches between firing and resolved 3. Review Alertmanager routing to ensure
+    resolved alerts reach webhook
   </Accordion>
   <Accordion title="Duplicate incidents">
-    1. Check `group_by` configuration
-    2. Verify fingerprint is consistent
-    3. Review `group_interval` and `repeat_interval` settings
+    1. Check `group_by` configuration 2. Verify fingerprint is consistent 3.
+    Review `group_interval` and `repeat_interval` settings
   </Accordion>
   <Accordion title="Connection refused">
-    1. Check firewall/network settings
-    2. Verify AlertManager can reach Easyalert API
-    3. Test URL access from AlertManager server
+    1. Check firewall/network settings 2. Verify AlertManager can reach
+    Easyalert API 3. Test URL access from AlertManager server
   </Accordion>
 </AccordionGroup>
 
@@ -411,10 +415,12 @@ curl -X POST http://localhost:9093/api/v2/alerts \
 
 <AccordionGroup>
   <Accordion title="Use Consistent Severity Labels">
-    Standardize on `severity: critical|warning|info` across all alert rules for consistent mapping.
+    Standardize on `severity: critical|warning|info` across all alert rules for
+    consistent mapping.
   </Accordion>
   <Accordion title="Include Good Annotations">
-    Add meaningful `summary` and `description` annotations to help responders understand the alert.
+    Add meaningful `summary` and `description` annotations to help responders
+    understand the alert.
   </Accordion>
   <Accordion title="Group Related Alerts">
     Use `group_by` to prevent notification storms from related alerts.
@@ -426,6 +432,7 @@ curl -X POST http://localhost:9093/api/v2/alerts \
     Include `runbook_url` annotation for quick access to remediation steps.
   </Accordion>
   <Accordion title="Use Labels for Routing">
-    Add labels like `customer`, `team`, `environment` for escalation routing in Easyalert.
+    Add labels like `customer`, `team`, `environment` for escalation routing in
+    Easyalert.
   </Accordion>
 </AccordionGroup>

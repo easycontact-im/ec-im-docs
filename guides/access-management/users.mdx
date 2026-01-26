@@ -21,7 +21,7 @@ The Users page is your central hub for managing everyone who interacts with your
 
 ## Understanding User Types
 
-EasyContact supports two distinct user types to give you flexibility in how you structure your incident response team.
+EasyAlert supports two distinct user types to give you flexibility in how you structure your incident response team.
 
 <Tabs>
   <Tab title="Full Users">
@@ -38,6 +38,7 @@ EasyContact supports two distinct user types to give you flexibility in how you 
     - Enable two-factor authentication
 
     **Best for:** Engineers, on-call responders, team leads, administrators
+
   </Tab>
   <Tab title="Contacts">
     Contacts are notification-only users who stay informed without needing platform access.
@@ -49,6 +50,7 @@ EasyContact supports two distinct user types to give you flexibility in how you 
     - Appear in notification groups
 
     **Best for:** Executives, stakeholders, external vendors, on-call managers who only need awareness
+
   </Tab>
 </Tabs>
 
@@ -72,6 +74,7 @@ EasyContact supports two distinct user types to give you flexibility in how you 
     - **Email address** (required)
     - **First name** and **Last name**
     - **Phone number** (required for SMS and voice notifications)
+
   </Step>
   <Step title="Configure Contact Methods">
     Select how this user can be reached:
@@ -79,6 +82,7 @@ EasyContact supports two distinct user types to give you flexibility in how you 
     - **Email** — Always available
     - **SMS** — Requires phone number
     - **Voice** — Requires phone number
+
   </Step>
   <Step title="Assign Roles">
     For full users, assign one or more roles that define their permissions
@@ -89,7 +93,8 @@ EasyContact supports two distinct user types to give you flexibility in how you 
 </Steps>
 
 <Info>
-  Full users will receive an email invitation with a link to set up their account. The invitation expires after **7 days**.
+  Full users will receive an email invitation with a link to set up their
+  account. The invitation expires after **7 days**.
 </Info>
 
 ---
@@ -116,7 +121,8 @@ If a user hasn't received their invitation or it has expired:
 3. Select **Resend Invitation**
 
 <Tip>
-  You can also copy the invitation link directly and share it through your preferred channel.
+  You can also copy the invitation link directly and share it through your
+  preferred channel.
 </Tip>
 
 ---
@@ -140,6 +146,7 @@ To modify an existing user's information:
     - Notification preferences
     - Role assignments
     - Timezone and language
+
   </Step>
   <Step title="Save Changes">
     Click **Save** to apply your changes
@@ -156,21 +163,23 @@ Each user can have customized notification rules based on incident urgency.
 
 <CardGroup cols={2}>
   <Card title="High Urgency" icon="triangle-exclamation">
-    Critical incidents that require immediate attention. Typically configured with no delay and multiple notification channels.
+    Critical incidents that require immediate attention. Typically configured
+    with no delay and multiple notification channels.
   </Card>
   <Card title="Low Urgency" icon="circle-info">
-    Informational alerts or non-critical issues. Can be configured with delays and fewer channels.
+    Informational alerts or non-critical issues. Can be configured with delays
+    and fewer channels.
   </Card>
 </CardGroup>
 
 ### Notification Channels
 
-| Channel   | Description              | Requirements                     |
-| --------- | ------------------------ | -------------------------------- |
-| **Push**  | Mobile app notifications | EasyContact mobile app installed |
-| **Email** | Email alerts             | Valid email address              |
-| **SMS**   | Text messages            | Phone number configured          |
-| **Voice** | Phone calls              | Phone number configured          |
+| Channel   | Description              | Requirements                   |
+| --------- | ------------------------ | ------------------------------ |
+| **Push**  | Mobile app notifications | EasyAlert mobile app installed |
+| **Email** | Email alerts             | Valid email address            |
+| **SMS**   | Text messages            | Phone number configured        |
+| **Voice** | Phone calls              | Phone number configured        |
 
 ### Configuring Notification Rules
 
@@ -182,14 +191,14 @@ For each urgency level, you can set:
 <Accordion title="Example Configuration">
   **High Urgency:**
 
-  - Delay: 0 minutes (immediate)
-  - Channels: Push, SMS, Voice
+- Delay: 0 minutes (immediate)
+- Channels: Push, SMS, Voice
 
-  **Low Urgency:**
+**Low Urgency:**
 
-  - Delay: 15 minutes
-  - Channels: Email only
-</Accordion>
+- Delay: 15 minutes
+- Channels: Email only
+  </Accordion>
 
 ---
 
@@ -204,7 +213,8 @@ Roles define what actions a user can perform within the platform.
 3. Save your changes
 
 <Warning>
-  Removing all roles from a user will restrict their access to basic read-only functionality.
+  Removing all roles from a user will restrict their access to basic read-only
+  functionality.
 </Warning>
 
 ### Multiple Roles
@@ -226,12 +236,8 @@ Administrators can manage 2FA settings for users:
   <Step title="Select User">
     Find the user in the list and click the menu (⋮)
   </Step>
-  <Step title="Manage 2FA">
-    Select **Manage 2FA** from the dropdown
-  </Step>
-  <Step title="Toggle Setting">
-    Enable or disable the 2FA requirement
-  </Step>
+  <Step title="Manage 2FA">Select **Manage 2FA** from the dropdown</Step>
+  <Step title="Toggle Setting">Enable or disable the 2FA requirement</Step>
 </Steps>
 
 ### Password Reset
@@ -244,9 +250,7 @@ If a user is locked out or needs a new password:
    - Send a reset email to the user
    - Generate a temporary password to share manually
 
-<Note>
-  Temporary passwords must be changed on the user's next login.
-</Note>
+<Note>Temporary passwords must be changed on the user's next login.</Note>
 
 ---
 
@@ -274,7 +278,8 @@ Instead of deleting users, you can deactivate them to preserve historical data.
 3. Confirm the deletion
 
 <Warning>
-  Removing a user is permanent. Consider deactivating instead to maintain audit trails.
+  Removing a user is permanent. Consider deactivating instead to maintain audit
+  trails.
 </Warning>
 
 ---
@@ -302,19 +307,25 @@ Use the filter dropdown to show:
 
 <AccordionGroup>
   <Accordion title="Start with Contacts for Stakeholders">
-    For executives, managers, or external parties who only need visibility, create them as Contacts. You can always upgrade them to Full Users later if needed.
+    For executives, managers, or external parties who only need visibility,
+    create them as Contacts. You can always upgrade them to Full Users later if
+    needed.
   </Accordion>
   <Accordion title="Configure Notification Preferences Early">
-    Set up notification rules during user creation to ensure they receive alerts through their preferred channels from day one.
+    Set up notification rules during user creation to ensure they receive alerts
+    through their preferred channels from day one.
   </Accordion>
   <Accordion title="Use Role-Based Access">
-    Assign the minimum necessary roles to each user. This follows the principle of least privilege and keeps your organization secure.
+    Assign the minimum necessary roles to each user. This follows the principle
+    of least privilege and keeps your organization secure.
   </Accordion>
   <Accordion title="Require 2FA for Critical Roles">
-    Enable two-factor authentication for administrators and users with elevated permissions.
+    Enable two-factor authentication for administrators and users with elevated
+    permissions.
   </Accordion>
   <Accordion title="Regular Access Reviews">
-    Periodically review your user list and deactivate accounts that are no longer needed.
+    Periodically review your user list and deactivate accounts that are no
+    longer needed.
   </Accordion>
 </AccordionGroup>
 
@@ -324,23 +335,21 @@ Use the filter dropdown to show:
 
 <AccordionGroup>
   <Accordion title="User didn't receive invitation email">
-    1. Check the spam/junk folder
-    2. Verify the email address is correct
-    3. Resend the invitation
-    4. If still not received, copy the invite link and share it directly
+    1. Check the spam/junk folder 2. Verify the email address is correct 3.
+    Resend the invitation 4. If still not received, copy the invite link and
+    share it directly
   </Accordion>
   <Accordion title="Invitation link expired">
-    Invitations expire after 7 days. Simply resend the invitation to generate a new link.
+    Invitations expire after 7 days. Simply resend the invitation to generate a
+    new link.
   </Accordion>
   <Accordion title="User can't log in after accepting invite">
-    1. Verify the user's account is active
-    2. Check if 2FA is required but not configured
-    3. Try resetting the user's password
+    1. Verify the user's account is active 2. Check if 2FA is required but not
+    configured 3. Try resetting the user's password
   </Accordion>
   <Accordion title="Notifications not being received">
-    1. Verify contact methods are configured
-    2. Check notification rules for the appropriate urgency level
-    3. Ensure the phone number format is correct (include country code)
-    4. Verify the user is active
+    1. Verify contact methods are configured 2. Check notification rules for the
+    appropriate urgency level 3. Ensure the phone number format is correct
+    (include country code) 4. Verify the user is active
   </Accordion>
 </AccordionGroup>

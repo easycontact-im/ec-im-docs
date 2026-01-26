@@ -29,7 +29,8 @@ Easyalert automatically detects and processes Problem Notification webhooks from
     5. Click **Create** to save
     6. Copy the generated **Webhook URL**
 
-    > **Example:** `https://easyalert-api.easycontact.ai/api/v1/webhooks/ingest/wh_abc123...`
+    > **Example:** `https://api.easyalert.io/api/v1/webhooks/ingest/wh_abc123...`
+
   </Step>
   <Step title="Create Webhook in Dynatrace">
     Go to **Settings → Integration → Problem notifications → Add notification**
@@ -39,6 +40,7 @@ Easyalert automatically detects and processes Problem Notification webhooks from
     | **Display name** | `Easyalert` |
     | **Webhook URL** | Your Webhook URL |
     | **Notification type** | `Custom integration` |
+
   </Step>
   <Step title="Configure Payload Template">
     Use this recommended payload:
@@ -67,6 +69,7 @@ Easyalert automatically detects and processes Problem Notification webhooks from
     <Warning>
       **IMPORTANT:** `{ImpactedEntities}`, `{ProblemStartTime}`, `{ProblemEndTime}` must NOT be in quotes!
     </Warning>
+
   </Step>
   <Step title="Test the Integration">
     Use the **Send test notification** button in Dynatrace
@@ -77,37 +80,37 @@ Easyalert automatically detects and processes Problem Notification webhooks from
 
 ## Placeholder Variables
 
-| Placeholder | Description |
-|-------------|-------------|
-| `{PID}` | Problem ID (short form) |
-| `{ProblemID}` | Full problem identifier |
-| `{ProblemTitle}` | Problem title |
-| `{ProblemDetailsText}` | Detailed description |
-| `{ProblemSeverity}` | Severity level |
-| `{ProblemImpact}` | Impact type (INFRASTRUCTURE, SERVICE, APPLICATION) |
-| `{State}` | OPEN, RESOLVED, or MERGED |
-| `{ProblemURL}` | Link to problem in Dynatrace |
-| `{ImpactedEntities}` | JSON array of affected entities |
-| `{ImpactedEntityNames}` | Entity names (comma-separated) |
-| `{RootCauseEntity}` | Root cause entity |
-| `{ProblemStartTime}` | Start time (epoch ms) |
-| `{ProblemEndTime}` | End time (epoch ms, -1 if open) |
-| `{Tags}` | Problem tags |
+| Placeholder             | Description                                        |
+| ----------------------- | -------------------------------------------------- |
+| `{PID}`                 | Problem ID (short form)                            |
+| `{ProblemID}`           | Full problem identifier                            |
+| `{ProblemTitle}`        | Problem title                                      |
+| `{ProblemDetailsText}`  | Detailed description                               |
+| `{ProblemSeverity}`     | Severity level                                     |
+| `{ProblemImpact}`       | Impact type (INFRASTRUCTURE, SERVICE, APPLICATION) |
+| `{State}`               | OPEN, RESOLVED, or MERGED                          |
+| `{ProblemURL}`          | Link to problem in Dynatrace                       |
+| `{ImpactedEntities}`    | JSON array of affected entities                    |
+| `{ImpactedEntityNames}` | Entity names (comma-separated)                     |
+| `{RootCauseEntity}`     | Root cause entity                                  |
+| `{ProblemStartTime}`    | Start time (epoch ms)                              |
+| `{ProblemEndTime}`      | End time (epoch ms, -1 if open)                    |
+| `{Tags}`                | Problem tags                                       |
 
 ---
 
 ## Field Mapping
 
-| Dynatrace Field | Easyalert Field |
-|-----------------|-----------------|
-| `PID` / `ProblemID` | Event ID |
-| `ProblemTitle` | Title |
-| `ProblemDetailsText` | Description |
-| `State` | Status |
-| `ProblemSeverity` | Severity |
-| `ProblemImpact` | Impact tag |
-| `ImpactedEntityNames` | Host/Service |
-| `ProblemURL` | URL |
+| Dynatrace Field       | Easyalert Field |
+| --------------------- | --------------- |
+| `PID` / `ProblemID`   | Event ID        |
+| `ProblemTitle`        | Title           |
+| `ProblemDetailsText`  | Description     |
+| `State`               | Status          |
+| `ProblemSeverity`     | Severity        |
+| `ProblemImpact`       | Impact tag      |
+| `ImpactedEntityNames` | Host/Service    |
+| `ProblemURL`          | URL             |
 
 ---
 
@@ -116,20 +119,20 @@ Easyalert automatically detects and processes Problem Notification webhooks from
 ### Status Mapping
 
 | Dynatrace State | Easyalert Status |
-|-----------------|------------------|
-| `OPEN` | Problem |
-| `RESOLVED` | OK |
-| `MERGED` | Problem (linked) |
+| --------------- | ---------------- |
+| `OPEN`          | Problem          |
+| `RESOLVED`      | OK               |
+| `MERGED`        | Problem (linked) |
 
 ### Severity Mapping
 
-| Dynatrace Severity | Easyalert Severity |
-|--------------------|-------------------|
-| `AVAILABILITY` | Critical |
-| `ERROR` | Critical |
-| `PERFORMANCE` | High |
-| `RESOURCE_CONTENTION` | Warning |
-| `CUSTOM_ALERT` | Warning |
+| Dynatrace Severity    | Easyalert Severity |
+| --------------------- | ------------------ |
+| `AVAILABILITY`        | Critical           |
+| `ERROR`               | Critical           |
+| `PERFORMANCE`         | High               |
+| `RESOURCE_CONTENTION` | Warning            |
+| `CUSTOM_ALERT`        | Warning            |
 
 ---
 
@@ -140,11 +143,13 @@ Easyalert automatically detects and processes Problem Notification webhooks from
 ### Dynatrace Tags
 
 `{Tags}` placeholder brings entity tags:
+
 ```
 env:production,team:backend,customer:acme
 ```
 
 In Easyalert:
+
 ```
 tags.env = "production"
 tags.team = "backend"
@@ -154,6 +159,7 @@ tags.customer = "acme"
 ### Custom Field Example
 
 Added to template:
+
 ```json
 {
   ...
@@ -163,6 +169,7 @@ Added to template:
 ```
 
 In Easyalert:
+
 ```
 tags.datacenter = "EU-West"
 tags.project = "ecommerce"
@@ -173,6 +180,7 @@ tags.project = "ecommerce"
 ## Routing Examples
 
 **Escalation Routing:**
+
 ```
 tags.customer equals "AcmeCorp" → Acme Corp Policy
 tags.env equals "production" → Production Policy
@@ -180,6 +188,7 @@ tags.team equals "backend" → Backend Team Policy
 ```
 
 **Notification Rules:**
+
 ```
 tags.ProblemSeverity equals "AVAILABILITY" → call + sms + email
 tags.ProblemImpact equals "SERVICE" → Service Team channel
@@ -191,12 +200,12 @@ tags.ProblemImpact equals "SERVICE" → Service Team channel
 
 Dynatrace categorizes problem impact:
 
-| Impact | Description |
-|--------|-------------|
+| Impact           | Description                       |
+| ---------------- | --------------------------------- |
 | `INFRASTRUCTURE` | Affects infrastructure components |
-| `SERVICE` | Affects monitored services |
-| `APPLICATION` | Affects applications |
-| `ENVIRONMENT` | Affects entire environment |
+| `SERVICE`        | Affects monitored services        |
+| `APPLICATION`    | Affects applications              |
+| `ENVIRONMENT`    | Affects entire environment        |
 
 Impact is captured as a tag for routing.
 
@@ -253,32 +262,26 @@ This allows fine-grained control over which problems reach Easyalert.
 
 <AccordionGroup>
   <Accordion title="Notifications not being received">
-    1. Verify webhook URL in Dynatrace settings
-    2. Test with "Send test notification" button
-    3. Check Dynatrace notification logs
-    4. Verify SSL/TLS settings if using HTTPS
-    5. Is notification enabled?
+    1. Verify webhook URL in Dynatrace settings 2. Test with "Send test
+    notification" button 3. Check Dynatrace notification logs 4. Verify SSL/TLS
+    settings if using HTTPS 5. Is notification enabled?
   </Accordion>
   <Accordion title="Custom fields not becoming tags">
-    1. Verify field is added to template
-    2. Check field name spelling
-    3. View webhook samples in Easyalert
+    1. Verify field is added to template 2. Check field name spelling 3. View
+    webhook samples in Easyalert
   </Accordion>
   <Accordion title="Invalid JSON error">
-    1. Ensure `{ImpactedEntities}` is NOT in quotes
-    2. Ensure `{ProblemStartTime}` is NOT in quotes
-    3. Ensure `{ProblemEndTime}` is NOT in quotes
-    4. Validate JSON syntax
+    1. Ensure `{ImpactedEntities}` is NOT in quotes 2. Ensure `
+    {ProblemStartTime}` is NOT in quotes 3. Ensure `{ProblemEndTime}` is NOT in
+    quotes 4. Validate JSON syntax
   </Accordion>
   <Accordion title="Resolved problems not closing incidents">
-    1. Ensure `State` field is in payload
-    2. Check that RESOLVED state is being sent
-    3. Verify `PID` matches between OPEN and RESOLVED
+    1. Ensure `State` field is in payload 2. Check that RESOLVED state is being
+    sent 3. Verify `PID` matches between OPEN and RESOLVED
   </Accordion>
   <Accordion title="Missing entity information">
-    1. Include `{ImpactedEntityNames}` in payload
-    2. Check that problem has entity association
-    3. Use `{ImpactedEntities}` for detailed JSON
+    1. Include `{ImpactedEntityNames}` in payload 2. Check that problem has
+    entity association 3. Use `{ImpactedEntities}` for detailed JSON
   </Accordion>
 </AccordionGroup>
 
@@ -288,18 +291,22 @@ This allows fine-grained control over which problems reach Easyalert.
 
 <AccordionGroup>
   <Accordion title="Use Alerting Profiles">
-    Filter which problems send notifications to avoid noise from low-priority issues.
+    Filter which problems send notifications to avoid noise from low-priority
+    issues.
   </Accordion>
   <Accordion title="Include Problem URL">
-    Always include `{ProblemURL}` so responders can quickly access Dynatrace for details.
+    Always include `{ProblemURL}` so responders can quickly access Dynatrace for
+    details.
   </Accordion>
   <Accordion title="Tag Your Entities">
-    Use Dynatrace tags (environment, team, service) for better routing in Easyalert.
+    Use Dynatrace tags (environment, team, service) for better routing in
+    Easyalert.
   </Accordion>
   <Accordion title="Add Custom Fields for Routing">
     Include `customer`, `team`, `environment` in payload for escalation routing.
   </Accordion>
   <Accordion title="Configure Problem Detection">
-    Tune Dynatrace's automatic problem detection to reduce false positives before they reach Easyalert.
+    Tune Dynatrace's automatic problem detection to reduce false positives
+    before they reach Easyalert.
   </Accordion>
 </AccordionGroup>
