@@ -1,0 +1,517 @@
+---
+title: 'Postmortems'
+description: 'Document, analyze, and learn from incidents with comprehensive post-incident reviews'
+icon: 'clipboard-list'
+---
+
+## Overview
+
+Postmortems (Post-Incident Reviews) enable your team to analyze resolved incidents, identify root causes, and create action items to prevent similar incidents in the future. With a blameless approach, rich editing capabilities, and comprehensive tracking, you can build a culture of continuous improvement.
+
+<CardGroup cols={2}>
+  <Card title="Blameless Culture" icon="users">
+    Focus on processes and systems, not individuals
+  </Card>
+  <Card title="Timeline Builder" icon="clock">
+    Document key events with precise timestamps
+  </Card>
+  <Card title="Action Tracking" icon="list-check">
+    Create and track action items with assignments
+  </Card>
+  <Card title="PDF Export" icon="file-pdf">
+    Generate professional reports for stakeholders
+  </Card>
+</CardGroup>
+
+---
+
+## Postmortem Workflow
+
+A typical postmortem follows this lifecycle:
+
+```
+Incident Resolved
+       ↓
+   Create Postmortem (Draft)
+       ↓
+   Link Related Incidents
+       ↓
+   Build Timeline
+       ↓
+   Document Analysis (Root Causes, Learnings)
+       ↓
+   Create Action Items
+       ↓
+   Submit for Review
+       ↓
+   Publish
+       ↓
+   Track Action Item Completion
+```
+
+---
+
+## Viewing Postmortems
+
+The Postmortems page displays all your post-incident reviews:
+
+| Column | Description |
+|--------|-------------|
+| **Title** | Postmortem name and linked incident count |
+| **Status** | Draft, In Review, or Published |
+| **Severity** | Critical, High, Medium, or Low |
+| **Owner** | Person responsible for the postmortem |
+| **Created** | When the postmortem was created |
+| **Actions** | View, Edit, Delete |
+
+### Statistics Cards
+
+The page header shows key metrics:
+
+- **Total** — All postmortems
+- **Draft** — Work in progress
+- **In Review** — Awaiting approval
+- **Published** — Completed and shared
+- **Open Actions** — Pending action items across all postmortems
+
+---
+
+## Creating a Postmortem
+
+<Steps>
+  <Step title="Open Create Dialog">
+    Click the **Create Postmortem** button
+  </Step>
+  <Step title="Enter Basic Information">
+    - **Title** — Descriptive name for the postmortem
+    - **Primary Incident** — Select the main incident to analyze (optional)
+  </Step>
+  <Step title="Create">
+    Click **Create** to open the editor
+  </Step>
+</Steps>
+
+---
+
+## Postmortem Editor
+
+The editor is organized into tabs for different aspects of the postmortem:
+
+### Overview Tab
+
+Configure basic information and link incidents:
+
+<Tabs>
+  <Tab title="Basic Information">
+    **Severity** — Impact level of the incident
+    - Critical, High, Medium, Low
+
+    **Incident Type** — Category of the incident
+    - Outage, Degradation, Security, Data Loss
+  </Tab>
+  <Tab title="Impact Period">
+    **Started At** — When the impact began
+
+    **Ended At** — When the impact was resolved
+
+    Use the date-time picker to select precise timestamps with calendar popup.
+  </Tab>
+  <Tab title="Content Sections">
+    **Overview** — Brief summary of what happened
+
+    **What Happened** — Detailed description of the incident
+
+    **Resolution** — How the incident was resolved
+  </Tab>
+</Tabs>
+
+### Linked Incidents
+
+Connect EasyAlert incidents to the postmortem:
+
+1. Click **+ (Add)** in the Linked Incidents card
+2. Search for incidents by title, number, or description
+3. Click an incident to link it
+4. Mark one incident as **Primary** if multiple are linked
+
+<Tip>
+  Linking incidents provides context and allows you to reference timeline events from the original incident.
+</Tip>
+
+---
+
+### Timeline Tab
+
+Document the sequence of events during the incident:
+
+<Steps>
+  <Step title="Add Entry">
+    Click **Add Entry** to create a new timeline event
+  </Step>
+  <Step title="Configure Event">
+    - **When** — Date and time of the event
+    - **Title** — What happened
+    - **Event Type** — Detection, Escalation, Mitigation, Resolution, Communication, Decision
+    - **Description** — Additional details
+    - **Actor Role** — Who was involved (blameless: "On-call Engineer" not "John")
+    - **Key Moment** — Toggle to highlight critical events
+  </Step>
+  <Step title="Save">
+    Click **Add Entry** to save
+  </Step>
+</Steps>
+
+#### Event Types
+
+| Type | Description |
+|------|-------------|
+| **Detection** | When the issue was first noticed |
+| **Escalation** | When additional help was requested |
+| **Mitigation** | Actions taken to reduce impact |
+| **Resolution** | Steps that fixed the issue |
+| **Communication** | Updates sent to stakeholders |
+| **Decision** | Key decisions made during response |
+
+<Info>
+  Key moments are highlighted in the timeline and emphasized in PDF exports.
+</Info>
+
+---
+
+### Analysis Tab
+
+Identify and document root causes:
+
+<Steps>
+  <Step title="Add Root Cause">
+    Click **Add Cause** to create a new entry
+  </Step>
+  <Step title="Document the Cause">
+    - **Cause** — What went wrong
+    - **Category** — Technical, Process, Human, or External
+    - **Description** — Detailed explanation
+  </Step>
+</Steps>
+
+#### Root Cause Categories
+
+| Category | Examples |
+|----------|----------|
+| **Technical** | Bug, configuration error, capacity issue |
+| **Process** | Missing runbook, unclear ownership, deployment issue |
+| **Human** | Miscommunication, oversight, training gap |
+| **External** | Third-party outage, network issues, vendor problem |
+
+<Note>
+  Focus on systemic issues rather than individual mistakes. Ask "Why did the system allow this?" not "Who made this mistake?"
+</Note>
+
+---
+
+### Learnings Tab
+
+Document what worked well and what needs improvement:
+
+#### What Went Well
+
+Capture positive aspects of the incident response:
+
+- Quick detection
+- Effective communication
+- Good collaboration
+- Useful runbooks
+
+Each item can have:
+- **Title** — What went well
+- **Details** — Description (supports longer text)
+
+#### What Didn't Go Well
+
+Identify areas for improvement:
+
+- Slow detection
+- Missing documentation
+- Communication gaps
+- Tooling issues
+
+Each item can have:
+- **Title** — What didn't go well
+- **How can we improve?** — Suggested improvement (supports longer text)
+
+#### Lessons Learned
+
+Key takeaways from the incident:
+
+- Click **Add Lesson** to create entries
+- Focus on actionable insights
+- These appear prominently in the published view
+
+---
+
+### Actions Tab
+
+Create tasks to prevent similar incidents:
+
+<Steps>
+  <Step title="Add Action Item">
+    Click **Add Action Item**
+  </Step>
+  <Step title="Configure Details">
+    - **Title** — What needs to be done
+    - **Description** — Additional context
+    - **Priority** — Critical, High, Medium, Low
+    - **Category** — Process, Tooling, Monitoring, Documentation, Training
+    - **Assignee** — Person responsible
+    - **Due Date** — Target completion date (with calendar picker)
+  </Step>
+  <Step title="Save">
+    Click **Add** to create the action item
+  </Step>
+</Steps>
+
+#### Action Item Status
+
+| Status | Description |
+|--------|-------------|
+| **Open** | Not started |
+| **In Progress** | Currently being worked on |
+| **Completed** | Finished |
+| **Won't Fix** | Decided not to implement |
+
+<Tip>
+  Review action items regularly. Unresolved items undermine the value of postmortems.
+</Tip>
+
+---
+
+### Team Tab
+
+Add contributors who participated in the postmortem:
+
+<Steps>
+  <Step title="Add Contributor">
+    Click **Add Contributor**
+  </Step>
+  <Step title="Select Details">
+    - **User** — Select team member
+    - **Role** — Owner, Facilitator, Scribe, Contributor, Reviewer
+    - **Role Description** — Optional details (e.g., "Database SME")
+  </Step>
+</Steps>
+
+#### Contributor Roles
+
+| Role | Responsibility |
+|------|----------------|
+| **Owner** | Leads the postmortem, ensures completion |
+| **Facilitator** | Guides the postmortem meeting |
+| **Scribe** | Documents discussions and findings |
+| **Contributor** | Provides input and expertise |
+| **Reviewer** | Reviews before publication |
+
+---
+
+## Postmortem Status
+
+### Draft
+
+- Initial state when created
+- Full editing capabilities
+- Not visible to broader team
+- Can be saved incrementally
+
+### In Review
+
+- Submitted for approval
+- Limited editing
+- Reviewers can add comments
+- Requires approval to publish
+
+To submit for review:
+1. Click **Submit for Review**
+2. Confirm the action
+3. Status changes to "In Review"
+
+### Published
+
+- Finalized and shared
+- Read-only (no editing)
+- Visible to all team members
+- Can be exported as PDF
+
+To publish:
+1. Ensure status is "In Review"
+2. Click **Publish**
+3. Confirm the action
+4. Redirected to view page
+
+---
+
+## Viewing Published Postmortems
+
+The view page presents the postmortem in a professional format:
+
+- **Header** — Title, severity, status, owner
+- **Overview** — Summary and key details
+- **Timeline** — Visual timeline of events
+- **Root Causes** — Categorized causes
+- **Learnings** — What went well/didn't go well
+- **Action Items** — Status and assignments
+- **Contributors** — Team members involved
+
+---
+
+## PDF Export
+
+Generate a professional PDF document for stakeholders:
+
+<Steps>
+  <Step title="Open Postmortem">
+    Navigate to the postmortem view page
+  </Step>
+  <Step title="Export">
+    Click the **Export PDF** button
+  </Step>
+  <Step title="Download">
+    PDF downloads automatically
+  </Step>
+</Steps>
+
+The PDF includes:
+
+- Professional header with EasyAlert branding
+- All sections formatted for print
+- Timeline with key moments highlighted
+- Action items table
+- Contributors list
+- Page numbers and footer
+
+<Info>
+  PDFs are ideal for sharing with stakeholders who don't have EasyAlert access or for archival purposes.
+</Info>
+
+---
+
+## Best Practices
+
+<AccordionGroup>
+  <Accordion title="Conduct Blameless Reviews">
+    Focus on systems and processes, not individuals. Ask "How did the system allow this?" rather than "Who caused this?"
+  </Accordion>
+  <Accordion title="Complete Postmortems Promptly">
+    Aim to complete postmortems within 5-7 days while details are fresh. Set a calendar reminder after resolving major incidents.
+  </Accordion>
+  <Accordion title="Build Comprehensive Timelines">
+    Include all significant events, not just the obvious ones. Detection, communication, and decision points are often as important as technical actions.
+  </Accordion>
+  <Accordion title="Use Multiple Root Cause Categories">
+    Most incidents have contributing factors across multiple categories. A technical bug might be enabled by a process gap.
+  </Accordion>
+  <Accordion title="Create Specific Action Items">
+    "Improve monitoring" is too vague. "Add alert for database connection pool exhaustion" is actionable and measurable.
+  </Accordion>
+  <Accordion title="Assign Owners and Due Dates">
+    Action items without owners don't get done. Set realistic due dates and follow up regularly.
+  </Accordion>
+  <Accordion title="Share Learnings Broadly">
+    Publish postmortems to the whole team. Others can learn from incidents they weren't involved in.
+  </Accordion>
+  <Accordion title="Review Historical Postmortems">
+    Periodically review past postmortems. Are similar incidents recurring? Are action items being completed?
+  </Accordion>
+</AccordionGroup>
+
+---
+
+## Common Patterns
+
+<AccordionGroup>
+  <Accordion title="Production Outage">
+    **Timeline Focus:** Detection time, escalation path, mitigation steps
+
+    **Root Causes:** Often technical + process (e.g., config change without review)
+
+    **Action Items:** Improved monitoring, rollback procedures, change management
+  </Accordion>
+  <Accordion title="Performance Degradation">
+    **Timeline Focus:** When degradation started, customer impact, resolution
+
+    **Root Causes:** Capacity planning, load testing gaps, monitoring blindspots
+
+    **Action Items:** Capacity alerts, load testing, performance baselines
+  </Accordion>
+  <Accordion title="Security Incident">
+    **Timeline Focus:** Initial compromise, detection, containment, remediation
+
+    **Root Causes:** Vulnerability, access control, detection gaps
+
+    **Action Items:** Patching, access review, security monitoring
+  </Accordion>
+  <Accordion title="Data Loss/Corruption">
+    **Timeline Focus:** When issue occurred, detection, data recovery
+
+    **Root Causes:** Backup gaps, validation missing, process failures
+
+    **Action Items:** Backup verification, data validation, recovery testing
+  </Accordion>
+</AccordionGroup>
+
+---
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Can't find incidents to link">
+    - Verify you're searching with at least 2 characters
+    - Check incident exists and is visible to your tenant
+    - Try searching by incident number (e.g., "123")
+  </Accordion>
+  <Accordion title="PDF export shows blank text">
+    - Clear browser cache and retry
+    - Try a different browser
+    - Ensure postmortem has content to export
+  </Accordion>
+  <Accordion title="Can't edit published postmortem">
+    Published postmortems are read-only. Contact an admin if corrections are needed.
+  </Accordion>
+  <Accordion title="Action items not saving">
+    - Ensure required fields (Title) are filled
+    - Check for validation errors
+    - Save postmortem before adding action items
+  </Accordion>
+  <Accordion title="Contributors not appearing">
+    - Verify user exists in the tenant
+    - Check user has appropriate permissions
+    - Try searching by email if name doesn't work
+  </Accordion>
+</AccordionGroup>
+
+---
+
+## Quick Reference
+
+### Postmortem Statuses
+
+| Status | Can Edit | Visible To | Next Action |
+|--------|----------|------------|-------------|
+| Draft | Yes | Owner only | Submit for Review |
+| In Review | Limited | Reviewers | Publish |
+| Published | No | All team | Export PDF |
+
+### Severity Levels
+
+| Severity | Impact | Example |
+|----------|--------|---------|
+| Critical | Complete service outage | Production down |
+| High | Major functionality impaired | Core feature broken |
+| Medium | Limited impact | Non-critical feature affected |
+| Low | Minimal impact | Minor issue |
+
+### Action Item Priorities
+
+| Priority | Response Time | Example |
+|----------|---------------|---------|
+| Critical | Immediate | Security vulnerability |
+| High | This sprint | Major process improvement |
+| Medium | This quarter | Documentation update |
+| Low | Backlog | Nice-to-have enhancement |
