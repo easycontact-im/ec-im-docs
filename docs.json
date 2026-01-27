@@ -21,9 +21,20 @@
             ]
           },
           {
-            "group": "Analytics",
+            "group": "Incidents",
             "pages": [
               "guides/analytics/postmortems"
+            ]
+          },
+          {
+            "group": "Analytics",
+            "pages": [
+              "guides/analytics/overview",
+              "guides/analytics/alert-analytics",
+              "guides/analytics/services",
+              "guides/analytics/teams",
+              "guides/analytics/on-call",
+              "guides/analytics/recurring-alerts"
             ]
           },
           {

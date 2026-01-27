@@ -1,0 +1,293 @@
+---
+title: 'On-Call'
+description: 'Monitor on-call burden and ensure fair workload distribution among responders'
+icon: 'phone'
+---
+
+## Overview
+
+The On-Call Analytics page helps you understand and balance the on-call burden across your team. Track who handles the most incidents, identify after-hours and weekend load, and ensure no individual is overwhelmed.
+
+<CardGroup cols={2}>
+  <Card title="Burden Scoring" icon="scale-balanced">
+    Quantified workload scores for each responder
+  </Card>
+  <Card title="After-Hours Tracking" icon="moon">
+    Separate metrics for nights and weekends
+  </Card>
+  <Card title="Fair Distribution" icon="users">
+    Identify imbalances in incident assignment
+  </Card>
+  <Card title="Burnout Prevention" icon="heart-pulse">
+    Spot high-burden individuals early
+  </Card>
+</CardGroup>
+
+---
+
+## Summary Statistics
+
+Five key metrics provide an overview of on-call load:
+
+| Metric | Description |
+|--------|-------------|
+| **On-Call Engineers** | Number of responders who handled incidents |
+| **Total Incidents** | Total incidents handled by all responders |
+| **After Hours** | Incidents outside business hours (6pm-8am) |
+| **Night Incidents** | Incidents during night hours (10pm-6am) |
+| **Weekend Incidents** | Incidents on Saturday and Sunday |
+
+<Info>
+  After-hours and night incidents contribute more heavily to burden scores as they're more disruptive to work-life balance.
+</Info>
+
+---
+
+## Incident Distribution Chart
+
+The bar chart shows how incidents are distributed among responders:
+
+### Reading the Chart
+
+- **Taller bars** indicate responders handling more incidents
+- First names are shown for readability
+- Top 10 responders are displayed
+
+### Ideal Distribution
+
+<Tabs>
+  <Tab title="Balanced">
+    Relatively even bars across responders indicates:
+    - Fair on-call rotation
+    - Good coverage distribution
+    - Healthy team dynamics
+  </Tab>
+  <Tab title="Unbalanced">
+    Large disparities may indicate:
+    - Schedule gaps being filled by certain individuals
+    - Skill-based routing concentrating incidents
+    - Need to adjust rotation schedules
+  </Tab>
+</Tabs>
+
+---
+
+## Burden Score
+
+Each responder receives a **Burden Score** (0-100) that factors in:
+
+| Factor | Weight | Description |
+|--------|--------|-------------|
+| Total Incidents | Base | Raw incident count |
+| After-Hours | 1.5x | Incidents outside 8am-6pm |
+| Night Incidents | 2x | Incidents between 10pm-6am |
+| Weekend Incidents | 1.5x | Saturday and Sunday incidents |
+
+### Burden Levels
+
+| Score | Level | Indicator |
+|-------|-------|-----------|
+| 0-49 | Low | 🟢 Green |
+| 50-79 | Medium | 🟡 Amber |
+| 80-100 | High | 🔴 Red |
+
+<Warning>
+  Responders with **High** burden scores are at risk of burnout. Take immediate action to redistribute workload.
+</Warning>
+
+---
+
+## Engineer Burden Cards
+
+Each responder has a detailed card showing:
+
+### Card Layout
+
+| Section | Information |
+|---------|-------------|
+| **Header** | Name, email, rank, and burden level badge |
+| **Progress Bar** | Visual burden score indicator |
+| **Metrics Grid** | Total, After Hours, Night, and Weekend counts |
+
+### Using the Cards
+
+<Steps>
+  <Step title="Review Rankings">
+    Cards are ordered by burden score (highest first)
+  </Step>
+  <Step title="Identify High Burden">
+    Look for red "High" badges indicating overloaded responders
+  </Step>
+  <Step title="Compare Metrics">
+    Check if high burden comes from total volume or after-hours work
+  </Step>
+  <Step title="Take Action">
+    Adjust schedules, add coverage, or redistribute responsibilities
+  </Step>
+</Steps>
+
+---
+
+## Managing On-Call Burden
+
+### Identifying Problems
+
+<AccordionGroup>
+  <Accordion title="Single Responder High Burden">
+    **Signs:**
+    - One person with score 80+ while others are under 50
+    - Consistently handling most after-hours incidents
+
+    **Causes:**
+    - Unfair schedule rotation
+    - Being the "go-to" person for certain issues
+    - Coverage gaps during specific shifts
+
+    **Solutions:**
+    - Review and adjust rotation schedule
+    - Cross-train team members
+    - Add backup on-call coverage
+  </Accordion>
+  <Accordion title="High After-Hours Load">
+    **Signs:**
+    - After-hours count approaching or exceeding business-hours count
+    - Night incidents are common
+
+    **Causes:**
+    - Batch jobs or scheduled tasks failing
+    - Serving global customers
+    - Infrastructure issues manifesting overnight
+
+    **Solutions:**
+    - Review timing of batch jobs
+    - Implement better monitoring before failure
+    - Consider follow-the-sun coverage
+  </Accordion>
+  <Accordion title="Weekend Concentration">
+    **Signs:**
+    - High weekend incident count
+    - Same people always handling weekend work
+
+    **Causes:**
+    - Deployment patterns (Friday deploys)
+    - Reduced monitoring attention
+    - Scheduled maintenance issues
+
+    **Solutions:**
+    - Avoid Friday deployments
+    - Rotate weekend on-call fairly
+    - Automate weekend monitoring
+  </Accordion>
+</AccordionGroup>
+
+### Taking Action
+
+<Steps>
+  <Step title="Analyze the Data">
+    Understand where burden is coming from (total volume vs. timing)
+  </Step>
+  <Step title="Discuss with Team">
+    Have an open conversation about workload and preferences
+  </Step>
+  <Step title="Adjust Schedules">
+    Modify on-call rotations to distribute load more evenly
+  </Step>
+  <Step title="Monitor Results">
+    Track burden scores over time to verify improvements
+  </Step>
+</Steps>
+
+---
+
+## Best Practices
+
+<AccordionGroup>
+  <Accordion title="Regular Reviews">
+    Review on-call analytics at least monthly. Burden can accumulate without obvious signs until burnout occurs.
+  </Accordion>
+  <Accordion title="Fair Rotations">
+    Ensure everyone takes turns with undesirable shifts (nights, weekends, holidays). Use the data to verify fairness.
+  </Accordion>
+  <Accordion title="Compensatory Time">
+    When someone handles a high-burden period, consider:
+    - Extra time off
+    - Reduced on-call in following weeks
+    - Other recognition
+  </Accordion>
+  <Accordion title="Team Size">
+    Maintain adequate team size for sustainable on-call. Generally, minimum 4-5 people for 24/7 coverage.
+  </Accordion>
+  <Accordion title="Reduce Total Incidents">
+    The best way to reduce burden is to reduce incidents:
+    - Fix recurring issues
+    - Tune noisy alerts
+    - Improve service reliability
+  </Accordion>
+  <Accordion title="Follow-the-Sun">
+    For global teams, route incidents to responders in their business hours when possible.
+  </Accordion>
+</AccordionGroup>
+
+---
+
+## Comparing Time Periods
+
+<Steps>
+  <Step title="Select Baseline Period">
+    Use date selector to view a previous period (e.g., last 30 days)
+  </Step>
+  <Step title="Note Key Metrics">
+    Record burden scores and distribution
+  </Step>
+  <Step title="Compare to Current">
+    Switch to current period and compare
+  </Step>
+  <Step title="Identify Trends">
+    - Is overall burden increasing or decreasing?
+    - Are the same people consistently high burden?
+    - Has distribution improved after schedule changes?
+  </Step>
+</Steps>
+
+---
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="No data appearing">
+    - Verify incidents exist in the selected date range
+    - Check that incidents have assignees
+    - Ensure responders are properly configured in the system
+  </Accordion>
+  <Accordion title="Burden scores seem wrong">
+    - Verify incident timestamps are correct
+    - Check timezone settings
+    - Review how after-hours/night/weekend are defined for your org
+  </Accordion>
+  <Accordion title="Missing responders">
+    - Check if they handled any incidents in the period
+    - Verify they're members of active teams
+    - Ensure incidents are properly attributed to them
+  </Accordion>
+  <Accordion title="After-hours counts seem high">
+    - Review your organization's business hours definition
+    - Consider timezone of incident vs. responder
+    - Check for systematic issues (e.g., batch job failures)
+  </Accordion>
+</AccordionGroup>
+
+---
+
+## Related Pages
+
+<CardGroup cols={3}>
+  <Card title="Schedules" icon="calendar" href="/management/schedules">
+    Configure on-call rotations
+  </Card>
+  <Card title="Team Performance" icon="users" href="/analytics/teams">
+    Team-level metrics
+  </Card>
+  <Card title="Recurring Alerts" icon="repeat" href="/analytics/recurring-alerts">
+    Reduce total incident load
+  </Card>
+</CardGroup>

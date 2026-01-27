@@ -1,0 +1,192 @@
+---
+title: 'Overview'
+description: 'Monitor incident metrics, response times, and team performance at a glance'
+icon: 'chart-line'
+---
+
+## Overview
+
+The Analytics dashboard provides a comprehensive view of your incident management performance. Track key metrics like MTTA, MTTR, incident volume, and see who's currently on-call—all in one place.
+
+<CardGroup cols={2}>
+  <Card title="Real-time Metrics" icon="gauge">
+    Monitor current incident counts, response times, and escalation rates
+  </Card>
+  <Card title="Trend Analysis" icon="chart-line">
+    Track performance trends over time with visual charts
+  </Card>
+  <Card title="On-Call Visibility" icon="users">
+    See who's currently on-call across all teams
+  </Card>
+  <Card title="Flexible Date Ranges" icon="calendar">
+    Analyze data across 7, 14, 30, or 90 day periods
+  </Card>
+</CardGroup>
+
+---
+
+## Key Metrics
+
+The dashboard displays five primary metrics at the top:
+
+| Metric | Description |
+|--------|-------------|
+| **Total Incidents** | Total incidents in the selected period, with open count |
+| **MTTA** | Mean Time to Acknowledge - average time from trigger to acknowledgment |
+| **MTTR** | Mean Time to Resolve - average time from trigger to resolution |
+| **Escalation Rate** | Percentage of incidents that required escalation |
+| **On-Call Today** | Number of engineers currently on-call |
+
+### Understanding Trend Indicators
+
+Each metric shows a trend indicator comparing to the previous period:
+
+<Tabs>
+  <Tab title="Time Metrics (MTTA/MTTR)">
+    For response time metrics, **lower is better**:
+    - 🟢 **Green (↓)** — Response times are improving
+    - 🔴 **Red (↑)** — Response times are getting worse
+    - ➖ **Gray (−)** — No significant change
+  </Tab>
+  <Tab title="Count Metrics">
+    For incident counts and escalation rates:
+    - 🟢 **Green (↓)** — Fewer incidents/escalations (positive)
+    - 🟠 **Amber (↑)** — More incidents (requires attention)
+    - ➖ **Gray (−)** — No significant change
+  </Tab>
+</Tabs>
+
+---
+
+## Incident Volume Chart
+
+The stacked bar chart shows daily incident volume broken down by severity:
+
+| Severity | Color | Typical Impact |
+|----------|-------|----------------|
+| **Critical** | Red | Complete service outage |
+| **High** | Orange | Major functionality impaired |
+| **Medium** | Yellow | Limited impact |
+| **Low** | Blue | Minimal impact |
+
+<Tip>
+  Use this chart to identify patterns like increased incidents on specific days or severity spikes that may indicate systemic issues.
+</Tip>
+
+---
+
+## Severity Distribution
+
+The donut chart shows the proportion of incidents by severity level. This helps you understand:
+
+- **Overall incident profile** — Are most incidents low severity, or dealing with many critical issues?
+- **Severity trends** — Compare distributions across different time periods
+- **Resource allocation** — High critical/high ratios may indicate need for more senior responders
+
+---
+
+## Monthly Trends
+
+The line chart tracks two key metrics over the last 6 months:
+
+- **Incident Count** (left axis) — Monthly incident volume
+- **MTTR** (right axis) — Average resolution time
+
+<Info>
+  This long-term view helps identify whether your incident response is improving over time or if seasonal patterns exist.
+</Info>
+
+### What to Look For
+
+<AccordionGroup>
+  <Accordion title="Improving Trend">
+    - Decreasing incident count over time
+    - Decreasing MTTR with stable or increasing incidents
+    - These indicate effective preventive measures and faster response
+  </Accordion>
+  <Accordion title="Concerning Patterns">
+    - Rising incident count month over month
+    - Increasing MTTR despite stable incidents
+    - Spikes that correlate with deployments or changes
+  </Accordion>
+  <Accordion title="Seasonal Patterns">
+    - Recurring spikes at month-end (batch processing)
+    - Holiday period changes (reduced staffing)
+    - Quarterly patterns (traffic increases)
+  </Accordion>
+</AccordionGroup>
+
+---
+
+## Currently On-Call
+
+The on-call section shows all engineers currently on-call, including:
+
+- **Name** — Engineer's full name
+- **Email** — Contact email
+- **Team** — Associated team (if applicable)
+
+This provides quick visibility into who's available to respond to incidents right now.
+
+---
+
+## Using the Dashboard
+
+### Changing Date Range
+
+<Steps>
+  <Step title="Open Date Selector">
+    Click the calendar dropdown in the top right
+  </Step>
+  <Step title="Select Period">
+    Choose from:
+    - Last 7 days
+    - Last 14 days
+    - Last 30 days
+    - Last 90 days
+  </Step>
+  <Step title="View Updated Data">
+    All charts and metrics automatically refresh
+  </Step>
+</Steps>
+
+### Refreshing Data
+
+Click the refresh button (↻) next to the date selector to reload all data with the latest information.
+
+---
+
+## Best Practices
+
+<AccordionGroup>
+  <Accordion title="Review Weekly">
+    Check the analytics dashboard at least weekly during team standup or incident review meetings to track trends.
+  </Accordion>
+  <Accordion title="Set Baseline Targets">
+    Establish target MTTA and MTTR values for your organization. Common targets:
+    - MTTA: < 5 minutes
+    - MTTR: < 1 hour for high severity
+  </Accordion>
+  <Accordion title="Investigate Anomalies">
+    When you see spikes in the incident volume chart, drill down to understand the root cause.
+  </Accordion>
+  <Accordion title="Compare Periods">
+    Use different date ranges to compare performance: "Are we doing better this month than last month?"
+  </Accordion>
+</AccordionGroup>
+
+---
+
+## Related Pages
+
+<CardGroup cols={3}>
+  <Card title="Alert Analytics" icon="bell" href="/analytics/incidents">
+    Detailed alert metrics and heatmaps
+  </Card>
+  <Card title="Team Performance" icon="users" href="/analytics/teams">
+    Compare team response times
+  </Card>
+  <Card title="On-Call Analytics" icon="phone" href="/analytics/on-call">
+    Track on-call burden distribution
+  </Card>
+</CardGroup>
