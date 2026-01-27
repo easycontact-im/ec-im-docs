@@ -15,7 +15,16 @@
         "groups": [
           {
             "group": "Getting started",
-            "pages": ["index", "quickstart"]
+            "pages": [
+              "index",
+              "quickstart"
+            ]
+          },
+          {
+            "group": "Analytics",
+            "pages": [
+              "guides/analytics/postmortems"
+            ]
           },
           {
             "group": "Management",
