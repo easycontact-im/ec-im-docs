@@ -1,0 +1,264 @@
+---
+title: 'Alert Analytics'
+description: 'Detailed alert metrics, distribution analysis, and pattern identification'
+icon: 'bell'
+---
+
+## Overview
+
+The Alert Analytics page provides deep insights into your incident patterns. Identify when incidents occur, analyze response time distributions, and discover which alert sources generate the most noise.
+
+<CardGroup cols={2}>
+  <Card title="Incident Heatmap" icon="grip">
+    Visualize when incidents occur by day and hour
+  </Card>
+  <Card title="Response Distributions" icon="chart-bar">
+    Understand MTTA and MTTR patterns
+  </Card>
+  <Card title="Top Sources" icon="database">
+    Identify noisiest alert sources
+  </Card>
+  <Card title="Recurring Alerts" icon="repeat">
+    Find candidates for tuning or suppression
+  </Card>
+</CardGroup>
+
+---
+
+## Key Metrics
+
+The page displays four primary metrics:
+
+| Metric | Description |
+|--------|-------------|
+| **Total Incidents** | Total incidents in the period with change percentage |
+| **MTTA** | Mean Time to Acknowledge with trend indicator |
+| **MTTR** | Mean Time to Resolve with trend indicator |
+| **Escalation Rate** | Percentage of incidents requiring escalation |
+
+---
+
+## Incident Heatmap
+
+The heatmap visualizes incident frequency by day of week and hour:
+
+### Reading the Heatmap
+
+| Color | Incident Level |
+|-------|----------------|
+| Gray | No incidents |
+| Light Green | Low (< 25% of max) |
+| Amber | Moderate (25-50% of max) |
+| Orange | High (50-75% of max) |
+| Red | Very High (> 75% of max) |
+
+### What to Look For
+
+<AccordionGroup>
+  <Accordion title="Peak Hours">
+    Identify when most incidents occur. Common patterns:
+    - Business hours spikes (user-driven issues)
+    - Off-hours spikes (batch jobs, maintenance windows)
+    - Early morning (overnight job failures)
+  </Accordion>
+  <Accordion title="Day Patterns">
+    - Monday spikes may indicate weekend accumulation
+    - Friday afternoon spikes may suggest deployment issues
+    - Weekend patterns show after-hours coverage needs
+  </Accordion>
+  <Accordion title="Scheduling Insights">
+    Use heatmap data to:
+    - Optimize on-call schedules for high-incident periods
+    - Schedule maintenance during quiet hours
+    - Plan deployments to avoid peak incident times
+  </Accordion>
+</AccordionGroup>
+
+<Tip>
+  Hover over any cell to see the exact incident count for that day and hour.
+</Tip>
+
+---
+
+## MTTA Distribution
+
+The MTTA (Mean Time to Acknowledge) distribution chart shows how long it takes to acknowledge incidents:
+
+| Bucket | Performance |
+|--------|-------------|
+| 0-2 min | Excellent |
+| 2-5 min | Good |
+| 5-15 min | Acceptable |
+| 15-30 min | Needs improvement |
+| 30+ min | Critical - review alerting |
+
+### Key Statistics
+
+- **Average** — Mean acknowledgment time
+- **P95** — 95th percentile (95% of incidents acknowledged faster than this)
+
+<Info>
+  A high P95 with low average suggests occasional slow responses. Check for patterns in those slow acknowledgments.
+</Info>
+
+---
+
+## MTTR Distribution
+
+The MTTR (Mean Time to Resolve) distribution shows resolution time patterns:
+
+| Bucket | Typical Severity |
+|--------|------------------|
+| 0-30 min | Quick fixes, auto-resolved |
+| 30-60 min | Standard incidents |
+| 1-4 hours | Complex issues |
+| 4-24 hours | Major incidents |
+| 24+ hours | Extended outages |
+
+### Analyzing MTTR
+
+<AccordionGroup>
+  <Accordion title="Bimodal Distribution">
+    Two peaks (e.g., 15 min and 4 hours) often indicate:
+    - Quick-fix incidents vs. complex investigations
+    - Different severity levels requiring different effort
+    - Opportunity to improve runbooks for the longer category
+  </Accordion>
+  <Accordion title="Long Tail">
+    A long tail of high-MTTR incidents may indicate:
+    - Missing documentation for complex issues
+    - Need for escalation path improvements
+    - Knowledge gaps in the on-call team
+  </Accordion>
+  <Accordion title="Tight Distribution">
+    Most incidents resolving in similar time suggests:
+    - Well-defined playbooks
+    - Consistent incident complexity
+    - Effective knowledge sharing
+  </Accordion>
+</AccordionGroup>
+
+---
+
+## Top Alert Sources
+
+This section ranks alert sources by incident volume:
+
+| Column | Description |
+|--------|-------------|
+| **Rank** | Position by incident count |
+| **Source** | Alert source/integration name |
+| **Count** | Number of incidents |
+| **Percent** | Share of total incidents |
+
+### Using This Data
+
+<Steps>
+  <Step title="Identify Noisy Sources">
+    Sources generating > 20% of alerts may need tuning
+  </Step>
+  <Step title="Review Alert Quality">
+    High-volume, low-severity sources are candidates for:
+    - Alert threshold adjustment
+    - Suppression rules
+    - Consolidation
+  </Step>
+  <Step title="Balance Coverage">
+    Ensure critical services have adequate alerting relative to their importance
+  </Step>
+</Steps>
+
+---
+
+## Top Recurring Alerts
+
+This table shows the most frequently triggered alerts:
+
+| Column | Description |
+|--------|-------------|
+| **Alert Title** | The alert name and service |
+| **Count** | Number of occurrences |
+| **Trend** | Increasing, stable, or decreasing |
+| **Volume** | Percentage of total alerts |
+| **MTTA/MTTR** | Average response times for this alert |
+| **Severities** | Breakdown by severity level |
+
+### Group by Service Toggle
+
+Enable "Group by Service" to aggregate alerts by service, useful for:
+- Identifying services generating the most alerts
+- Service-level noise analysis
+- Capacity planning
+
+### Taking Action
+
+From the recurring alerts view, you can:
+
+1. **View Incidents** — Filter incident list to this alert
+2. **Create Suppress Rule** — Set up an alert rule to reduce noise
+
+<Warning>
+  Before suppressing alerts, ensure they're truly noise and not indicators of underlying issues.
+</Warning>
+
+---
+
+## Best Practices
+
+<AccordionGroup>
+  <Accordion title="Weekly Alert Review">
+    Schedule weekly reviews of top recurring alerts to identify tuning opportunities.
+  </Accordion>
+  <Accordion title="Set MTTA/MTTR Targets">
+    Establish targets based on severity:
+    - Critical: MTTA < 5 min, MTTR < 1 hour
+    - High: MTTA < 10 min, MTTR < 4 hours
+    - Medium: MTTA < 30 min, MTTR < 24 hours
+  </Accordion>
+  <Accordion title="Use Heatmap for Scheduling">
+    Align on-call schedules with peak incident hours identified in the heatmap.
+  </Accordion>
+  <Accordion title="Address Increasing Trends">
+    Alerts with increasing trends should be investigated—they often indicate growing problems.
+  </Accordion>
+  <Accordion title="Document Alert Sources">
+    Maintain documentation for each major alert source including expected volume and response procedures.
+  </Accordion>
+</AccordionGroup>
+
+---
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Heatmap shows no data">
+    - Verify incidents exist in the selected date range
+    - Check that incidents have proper timestamps
+    - Ensure incidents are assigned to your tenant
+  </Accordion>
+  <Accordion title="MTTA shows as 0">
+    - Incidents may be auto-acknowledged
+    - Check if acknowledgment is being recorded properly
+    - Review integration configurations
+  </Accordion>
+  <Accordion title="Top sources list is empty">
+    - Verify incidents have source information
+    - Check integration is properly configured to send source data
+  </Accordion>
+</AccordionGroup>
+
+---
+
+## Related Pages
+
+<CardGroup cols={3}>
+  <Card title="Recurring Alerts" icon="repeat" href="/analytics/recurring-alerts">
+    Full recurring alerts analysis
+  </Card>
+  <Card title="Alert Rules" icon="filter" href="/configuration/alert-rules">
+    Configure suppression rules
+  </Card>
+  <Card title="Integrations" icon="plug" href="/integrations/overview">
+    Manage alert sources
+  </Card>
+</CardGroup>

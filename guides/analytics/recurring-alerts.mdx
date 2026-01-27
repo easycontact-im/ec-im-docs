@@ -1,0 +1,402 @@
+---
+title: 'Recurring Alerts'
+description: 'Identify noisy alerts for tuning, suppression rules, and alert optimization'
+icon: 'repeat'
+---
+
+## Overview
+
+The Recurring Alerts page provides a comprehensive view of your most frequently triggered alerts. Use this data to identify candidates for tuning, create suppression rules, and reduce alert fatigue across your team.
+
+<CardGroup cols={2}>
+  <Card title="Alert Ranking" icon="list-ol">
+    See which alerts fire most frequently
+  </Card>
+  <Card title="Trend Analysis" icon="chart-line">
+    Identify increasing or decreasing patterns
+  </Card>
+  <Card title="Export & Reports" icon="file-export">
+    Export data and send email reports
+  </Card>
+  <Card title="Quick Actions" icon="bolt">
+    Create suppression rules directly
+  </Card>
+</CardGroup>
+
+---
+
+## Summary Statistics
+
+Four metrics provide an overview of recurring alert patterns:
+
+| Metric | Description |
+|--------|-------------|
+| **Unique Alerts** | Number of distinct alert types |
+| **Total Occurrences** | Sum of all alert instances |
+| **Increasing Trend** | Alerts getting worse over time |
+| **Avg Alert Share** | Average percentage of total each alert represents |
+
+<Info>
+  High "Increasing Trend" count indicates growing problems that need attention.
+</Info>
+
+---
+
+## Alert List Table
+
+The main table displays detailed information about each recurring alert:
+
+| Column | Description |
+|--------|-------------|
+| **#** | Rank by occurrence count |
+| **Alert Title** | Alert name and associated service |
+| **Count** | Number of times alert fired |
+| **Trend** | Increasing, stable, or decreasing |
+| **Volume** | Percentage of total alerts |
+| **MTTA** | Average acknowledgment time |
+| **MTTR** | Average resolution time |
+| **Severities** | Breakdown by severity level |
+| **Actions** | Quick action menu |
+
+### Understanding Trends
+
+| Trend | Icon | Meaning |
+|-------|------|---------|
+| **Increasing** | 🔴 ↑ | Alert firing more frequently |
+| **Stable** | ➖ | No significant change |
+| **Decreasing** | 🟢 ↓ | Alert firing less frequently |
+
+<Warning>
+  Alerts with **Increasing** trends require investigation—they often indicate growing underlying problems.
+</Warning>
+
+---
+
+## Filtering and Search
+
+### Search
+
+Search across multiple fields:
+- Alert title
+- Service name
+- Host names
+- Custom tags
+
+### Trend Filter
+
+Filter to see only:
+- **All Trends** — Show everything
+- **Increasing** — Alerts getting worse
+- **Stable** — Consistent alerts
+- **Decreasing** — Improving alerts
+
+### Group by Service
+
+Toggle "Group by Service" to aggregate alerts by service:
+
+| Mode | Use Case |
+|------|----------|
+| **Off** | See individual alert patterns |
+| **On** | Identify noisy services overall |
+
+<Tip>
+  Use "Group by Service" to find services that need comprehensive alert review.
+</Tip>
+
+---
+
+## Taking Action
+
+### From the Actions Menu
+
+For each alert, you can:
+
+<Steps>
+  <Step title="View Incidents">
+    Opens the incidents page filtered to this alert title
+  </Step>
+  <Step title="Create Suppress Rule">
+    Pre-populates an alert rule with this alert's details
+  </Step>
+</Steps>
+
+### Export Options
+
+<Tabs>
+  <Tab title="CSV Export">
+    Click the download button to export all filtered data to CSV:
+
+    **Included Fields:**
+    - Rank, Alert Title, Service
+    - Count, Percent of Total
+    - MTTA, MTTR
+    - Severity breakdown
+    - Trend information
+    - Last occurrence
+    - Affected services and hosts
+  </Tab>
+  <Tab title="Email Report">
+    Click the email button to send a report to yourself:
+
+    **Report includes:**
+    - Summary statistics
+    - Top 20 recurring alerts
+    - Trend highlights
+    - Recommendations
+
+    <Info>
+      Reports are sent to your registered email address.
+    </Info>
+  </Tab>
+</Tabs>
+
+---
+
+## Identifying Tuning Candidates
+
+### High-Priority Candidates
+
+Alerts that should be reviewed first:
+
+<AccordionGroup>
+  <Accordion title="High Volume, Low Severity">
+    **Pattern:** Alert fires frequently but is mostly low/medium severity
+
+    **Action Options:**
+    - Increase threshold to reduce triggers
+    - Convert to informational alert
+    - Suppress during non-business hours
+  </Accordion>
+  <Accordion title="Increasing Trend">
+    **Pattern:** Alert firing more frequently over time
+
+    **Action Options:**
+    - Investigate root cause of increase
+    - Fix underlying issue
+    - Temporarily suppress while fixing
+  </Accordion>
+  <Accordion title="High MTTR Alerts">
+    **Pattern:** Alert takes long time to resolve
+
+    **Action Options:**
+    - Create or improve runbook
+    - Automate remediation
+    - Review if alert is actionable
+  </Accordion>
+  <Accordion title="Auto-Resolved Alerts">
+    **Pattern:** Alert fires and resolves quickly without action
+
+    **Action Options:**
+    - Increase alert delay/threshold
+    - Convert to warning level
+    - Implement hysteresis
+  </Accordion>
+</AccordionGroup>
+
+### Creating Effective Suppress Rules
+
+<Steps>
+  <Step title="Identify Pattern">
+    Determine what makes this alert non-actionable:
+    - Specific time windows?
+    - Certain environments?
+    - Below specific threshold?
+  </Step>
+  <Step title="Define Conditions">
+    Create precise conditions that match:
+    - Alert title patterns
+    - Source/service
+    - Severity level
+  </Step>
+  <Step title="Set Appropriate Action">
+    Choose the right response:
+    - **Suppress** — Don't create incident
+    - **Reduce Severity** — Lower priority
+    - **Route Differently** — Send to different team
+  </Step>
+  <Step title="Monitor Results">
+    After implementing, verify:
+    - Desired alerts are suppressed
+    - Important alerts still come through
+    - Overall noise reduced
+  </Step>
+</Steps>
+
+---
+
+## Best Practices
+
+<AccordionGroup>
+  <Accordion title="Regular Review Cadence">
+    Schedule weekly or bi-weekly reviews of recurring alerts:
+    - Monday morning review of previous week
+    - Include in team standup agenda
+    - Track progress on noise reduction
+  </Accordion>
+  <Accordion title="Start with Top 10">
+    Focus on the top 10 recurring alerts:
+    - These represent most of the noise
+    - Improvements have biggest impact
+    - More manageable scope
+  </Accordion>
+  <Accordion title="Document Decisions">
+    For each reviewed alert, document:
+    - Decision made (tune, suppress, keep as-is)
+    - Reasoning
+    - Expected outcome
+    - Review date
+  </Accordion>
+  <Accordion title="Measure Improvement">
+    Track metrics over time:
+    - Total unique alerts
+    - Total occurrences
+    - Percentage of alerts suppressed
+    - Team feedback on noise levels
+  </Accordion>
+  <Accordion title="Don't Over-Suppress">
+    Before suppressing, ask:
+    - Has this alert ever caught a real issue?
+    - Could we miss something important?
+    - Is there a better alternative (tuning vs. suppressing)?
+  </Accordion>
+  <Accordion title="Review Suppressions Periodically">
+    Suppressions can become stale:
+    - Services change
+    - Thresholds should be reconsidered
+    - Set reminders to review suppression rules quarterly
+  </Accordion>
+</AccordionGroup>
+
+---
+
+## Common Patterns and Solutions
+
+<AccordionGroup>
+  <Accordion title="Disk Space Alerts">
+    **Pattern:** Frequent disk space warnings that self-resolve
+
+    **Solutions:**
+    - Increase threshold (e.g., 80% → 90%)
+    - Implement auto-cleanup scripts
+    - Add hysteresis (alert only after X minutes)
+    - Separate critical partition alerts from non-critical
+  </Accordion>
+  <Accordion title="Connection Pool Alerts">
+    **Pattern:** Brief spikes in connection pool usage
+
+    **Solutions:**
+    - Increase pool size if appropriate
+    - Add averaging/smoothing to alert
+    - Alert on sustained high usage, not spikes
+  </Accordion>
+  <Accordion title="Batch Job Failures">
+    **Pattern:** Same job fails and succeeds on retry
+
+    **Solutions:**
+    - Improve job retry logic
+    - Alert only after N failures
+    - Separate transient vs. persistent failures
+  </Accordion>
+  <Accordion title="Health Check Flapping">
+    **Pattern:** Health checks failing/recovering rapidly
+
+    **Solutions:**
+    - Add dead time between alerts
+    - Require multiple consecutive failures
+    - Review health check timeout settings
+  </Accordion>
+  <Accordion title="Deployment Noise">
+    **Pattern:** Alerts during deployments
+
+    **Solutions:**
+    - Implement deployment windows with suppression
+    - Use canary/gradual deployments
+    - Improve deployment health checks
+  </Accordion>
+</AccordionGroup>
+
+---
+
+## Pagination and Large Datasets
+
+For organizations with many alerts:
+
+### Pagination Controls
+
+- **Rows per page:** 10, 25, 50, or 100
+- **Navigation:** Previous/Next page buttons
+- **Position indicator:** "1-25 of 150"
+
+### Working with Large Lists
+
+<Tips>
+  - Use search and filters to narrow down
+  - Export to CSV for offline analysis
+  - Focus on top performers by incident count
+  - Use "Group by Service" to aggregate
+</Tips>
+
+---
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="No alerts appearing">
+    - Verify incidents exist in the selected date range
+    - Check that incidents have title information
+    - Ensure incidents are assigned to your tenant
+  </Accordion>
+  <Accordion title="Trend data seems wrong">
+    - Trends compare current period to previous period
+    - Short date ranges may show variable trends
+    - Try longer date range for more accurate trends
+  </Accordion>
+  <Accordion title="Service grouping not working">
+    - Verify incidents have service metadata
+    - Check integration is sending service information
+    - Review alert payload configuration
+  </Accordion>
+  <Accordion title="Export not including all data">
+    - Exports include current filter results
+    - Clear filters to export all data
+    - Maximum export is 100 alerts
+  </Accordion>
+  <Accordion title="Email report not received">
+    - Check spam/junk folders
+    - Verify email address in profile
+    - Contact admin if email delivery issues persist
+  </Accordion>
+</AccordionGroup>
+
+---
+
+## URL Parameters
+
+The page supports URL parameters for deep linking:
+
+| Parameter | Description | Example |
+|-----------|-------------|---------|
+| `days` | Date range in days | `?days=14` |
+| `groupByService` | Enable service grouping | `?groupByService=true` |
+| `search` | Pre-fill search | `?search=database` |
+| `trend` | Filter by trend | `?trend=increasing` |
+
+<Tip>
+  Bookmark filtered views for quick access to specific alert categories.
+</Tip>
+
+---
+
+## Related Pages
+
+<CardGroup cols={3}>
+  <Card title="Alert Rules" icon="filter" href="/configuration/alert-rules">
+    Create suppression rules
+  </Card>
+  <Card title="Alert Analytics" icon="bell" href="/analytics/incidents">
+    Detailed incident metrics
+  </Card>
+  <Card title="Integrations" icon="plug" href="/integrations/overview">
+    Configure alert sources
+  </Card>
+</CardGroup>

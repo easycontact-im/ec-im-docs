@@ -1,0 +1,274 @@
+---
+title: 'Teams'
+description: 'Compare team metrics, response times, and workload distribution'
+icon: 'users'
+---
+
+## Overview
+
+The Team Performance page enables you to compare how different teams handle incidents. Identify high-performing teams, spot teams that may need support, and ensure balanced workload distribution across your organization.
+
+<CardGroup cols={2}>
+  <Card title="Team Comparison" icon="scale-balanced">
+    Compare metrics across all teams side-by-side
+  </Card>
+  <Card title="Workload Analysis" icon="chart-bar">
+    Visualize incident distribution by team
+  </Card>
+  <Card title="Response Metrics" icon="clock">
+    Track MTTA, MTTR, and acknowledgment rates
+  </Card>
+  <Card title="Escalation Tracking" icon="arrow-up-right-dots">
+    Monitor which teams escalate most frequently
+  </Card>
+</CardGroup>
+
+---
+
+## Summary Statistics
+
+The dashboard shows three key summary metrics:
+
+| Metric | Description |
+|--------|-------------|
+| **Active Teams** | Number of teams with incident activity |
+| **Avg MTTA** | Average acknowledgment time across all teams |
+| **Avg MTTR** | Average resolution time across all teams |
+
+These provide a baseline for comparing individual team performance.
+
+---
+
+## Incidents by Team Chart
+
+The horizontal bar chart ranks teams by incident volume:
+
+### Reading the Chart
+
+- **Longer bars** indicate teams handling more incidents
+- Teams are sorted by incident count (highest first)
+- Top 10 teams are shown by default
+
+### What to Look For
+
+<AccordionGroup>
+  <Accordion title="Unbalanced Workload">
+    If one team handles significantly more incidents:
+    - Verify it's appropriate for their service scope
+    - Consider if alert tuning is needed
+    - Evaluate if team needs more resources
+  </Accordion>
+  <Accordion title="Low Activity Teams">
+    Teams with very few incidents may indicate:
+    - Well-maintained services
+    - Missing alert coverage
+    - Incidents being routed elsewhere
+  </Accordion>
+  <Accordion title="Comparison Points">
+    Compare teams with similar responsibilities to identify:
+    - Best practices to share
+    - Training opportunities
+    - Process improvements
+  </Accordion>
+</AccordionGroup>
+
+---
+
+## Team Comparison Table
+
+The detailed table shows comprehensive metrics for each team:
+
+| Column | Description |
+|--------|-------------|
+| **Team** | Team name |
+| **Incidents** | Total incidents handled |
+| **Avg MTTA** | Average time to acknowledge |
+| **Avg MTTR** | Average time to resolve |
+| **Escalation Rate** | Percentage of incidents escalated |
+| **Ack Rate** | Percentage of incidents acknowledged |
+
+### Understanding the Metrics
+
+<Tabs>
+  <Tab title="MTTA">
+    **Mean Time to Acknowledge** measures how quickly a team responds to new incidents.
+
+    - **< 5 min** — Excellent
+    - **5-15 min** — Good
+    - **15-30 min** — Acceptable
+    - **> 30 min** — Needs improvement
+
+    Low MTTA indicates effective alerting and available responders.
+  </Tab>
+  <Tab title="MTTR">
+    **Mean Time to Resolve** measures how quickly a team fixes incidents.
+
+    - **< 30 min** — Excellent (for non-critical)
+    - **30 min - 2 hours** — Good
+    - **2-8 hours** — Acceptable for complex issues
+    - **> 8 hours** — Review for improvements
+
+    MTTR varies significantly by incident complexity and team scope.
+  </Tab>
+  <Tab title="Escalation Rate">
+    **Escalation Rate** shows how often incidents require additional help.
+
+    - **< 10%** — Team handles most issues independently
+    - **10-25%** — Normal escalation level
+    - **> 25%** — May indicate training needs or complex services
+
+    Some variation is expected based on service criticality.
+  </Tab>
+  <Tab title="Acknowledgment Rate">
+    **Acknowledgment Rate** shows what percentage of incidents get acknowledged.
+
+    - **> 95%** — Excellent
+    - **85-95%** — Good
+    - **< 85%** — Review alerting and on-call coverage
+
+    Low ack rates may indicate alert fatigue or coverage gaps.
+  </Tab>
+</Tabs>
+
+---
+
+## Using Team Analytics
+
+### Identifying Performance Patterns
+
+<Steps>
+  <Step title="Review Overall Metrics">
+    Start with the summary statistics to understand baseline performance
+  </Step>
+  <Step title="Identify Outliers">
+    Look for teams significantly above or below average in any metric
+  </Step>
+  <Step title="Investigate Differences">
+    For outlier teams, consider:
+    - Service complexity differences
+    - Team size and experience
+    - Alert quality and volume
+  </Step>
+  <Step title="Take Action">
+    - Share best practices from high-performing teams
+    - Provide support to struggling teams
+    - Adjust alert configurations as needed
+  </Step>
+</Steps>
+
+### Comparing Similar Teams
+
+To make fair comparisons, consider teams with:
+- Similar service complexity
+- Comparable incident volumes
+- Similar severity distributions
+
+<Info>
+  A team handling mostly critical incidents will naturally have different metrics than one handling mostly low-severity alerts.
+</Info>
+
+---
+
+## Best Practices
+
+<AccordionGroup>
+  <Accordion title="Review Monthly">
+    Schedule monthly team performance reviews to track improvement over time.
+  </Accordion>
+  <Accordion title="Set Team Goals">
+    Establish team-specific targets based on:
+    - Historical performance
+    - Service criticality
+    - Industry benchmarks
+  </Accordion>
+  <Accordion title="Focus on Trends">
+    A team's improvement over time matters more than absolute numbers. Celebrate progress.
+  </Accordion>
+  <Accordion title="Avoid Blame">
+    Use metrics to identify improvement opportunities, not to penalize teams. High MTTR may indicate complex services, not poor performance.
+  </Accordion>
+  <Accordion title="Share Knowledge">
+    When a team shows excellent metrics:
+    - Document their practices
+    - Share with other teams
+    - Consider cross-team mentoring
+  </Accordion>
+  <Accordion title="Consider Context">
+    Always consider factors that affect metrics:
+    - Team size and coverage hours
+    - Service age and technical debt
+    - Recent changes or deployments
+  </Accordion>
+</AccordionGroup>
+
+---
+
+## Common Scenarios
+
+<AccordionGroup>
+  <Accordion title="New Team with High MTTR">
+    **Situation:** A newly formed team shows higher MTTR than established teams.
+
+    **Action:**
+    - This is normal for new teams learning their services
+    - Pair new members with experienced responders
+    - Ensure runbooks and documentation are available
+    - Track improvement over first 3-6 months
+  </Accordion>
+  <Accordion title="Team with High Escalation Rate">
+    **Situation:** A team escalates more than 30% of incidents.
+
+    **Action:**
+    - Review what types of incidents are escalated
+    - Identify knowledge gaps for training
+    - Evaluate if services should be reassigned
+    - Check if escalation paths are appropriate
+  </Accordion>
+  <Accordion title="Team with Low Acknowledgment Rate">
+    **Situation:** A team acknowledges fewer than 85% of incidents.
+
+    **Action:**
+    - Review on-call coverage schedules
+    - Check notification delivery (email, SMS, app)
+    - Evaluate alert fatigue (too many low-value alerts)
+    - Consider auto-escalation policies
+  </Accordion>
+</AccordionGroup>
+
+---
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Team not appearing in list">
+    - Verify team has incidents assigned in the selected period
+    - Check that incidents are properly associated with teams
+    - Ensure team is set to active status
+  </Accordion>
+  <Accordion title="Metrics showing as 0 or blank">
+    - Verify incidents have acknowledgment/resolution timestamps
+    - Check that team members are properly assigned to incidents
+    - Review date range selection
+  </Accordion>
+  <Accordion title="Data seems incorrect">
+    - Compare with incident list for the team
+    - Check for data from recent incidents (may not be included yet)
+    - Verify all team incidents are in the selected date range
+  </Accordion>
+</AccordionGroup>
+
+---
+
+## Related Pages
+
+<CardGroup cols={3}>
+  <Card title="Teams" icon="people-group" href="/management/teams">
+    Manage team membership
+  </Card>
+  <Card title="On-Call Analytics" icon="phone" href="/analytics/on-call">
+    Individual responder metrics
+  </Card>
+  <Card title="Escalation Policies" icon="arrow-up-right-dots" href="/management/escalation-policies">
+    Configure team escalations
+  </Card>
+</CardGroup>
