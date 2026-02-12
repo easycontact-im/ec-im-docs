@@ -55,6 +55,12 @@
             ]
           },
           {
+            "group": "Synthetics",
+            "pages": [
+              "guides/synthetics/uptime"
+            ]
+          },
+          {
             "group": "Configuration",
             "pages": [
               "guides/configuration/alert-rules",
