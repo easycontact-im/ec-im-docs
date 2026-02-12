@@ -33,6 +33,12 @@
             ]
           },
           {
+            "group": "Synthetics",
+            "pages": [
+              "uptime-monitoring"
+            ]
+          },
+          {
             "group": "Management",
             "pages": [
               "guides/management/teams",

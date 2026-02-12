@@ -1,0 +1,889 @@
+---
+title: 'Uptime Monitoring'
+description: 'Monitor your services with synthetic checks from globally distributed probes'
+icon: 'signal-stream'
+---
+
+## Overview
+
+Synthetics Uptime Monitoring lets you proactively detect outages and performance degradation before your users notice. Lightweight probe agents deployed across multiple global regions execute checks against your endpoints on a configurable schedule and report results back to EasyAlert.
+
+When a monitor detects a failure confirmed from multiple locations, an incident is created automatically, triggering your escalation policies and notifying the right people.
+
+<CardGroup cols={2}>
+  <Card title="Multi-Protocol Checks" icon="plug">
+    Monitor HTTP APIs, TCP ports, DNS records, ICMP ping, SSL certificates, and gRPC services
+  </Card>
+  <Card title="Global Probe Network" icon="earth-americas">
+    Run checks from distributed locations worldwide to detect regional issues
+  </Card>
+  <Card title="Smart Alerting" icon="bell">
+    Multi-location confirmation prevents false positives from transient network blips
+  </Card>
+  <Card title="Detailed Analytics" icon="chart-mixed">
+    Uptime percentages, response time charts, connection timing waterfall, and aggregated metrics
+  </Card>
+</CardGroup>
+
+---
+
+## Monitor Types
+
+EasyAlert supports six monitor types, each tailored to a different protocol or use case.
+
+<Tabs>
+  <Tab title="HTTP(S)">
+    Monitor websites, REST APIs, and any HTTP/HTTPS endpoint.
+
+    **Best for:** API health checks, website availability, webhook endpoints
+
+    **Key config fields:**
+    - HTTP method (GET, POST, PUT, etc.)
+    - Custom headers and request body
+    - Authentication (Basic, Bearer token)
+    - Expected status codes (default: 200)
+    - Body content assertions (contains string, regex match)
+    - Maximum response time threshold (for degraded status)
+    - Redirect following, HTTP version enforcement
+    - Proxy support, HTTP/3 (QUIC), CEL expressions for JSON validation
+
+    **Example:**
+    ```
+    Name: Production API Health
+    URL: https://api.example.com/health
+    Method: GET
+    Expected Status: 200
+    Body Contains: "status":"ok"
+    Max Response Time: 2000ms
+    ```
+  </Tab>
+  <Tab title="TCP">
+    Check that a TCP port is reachable and optionally validate the response to a sent payload.
+
+    **Best for:** Database connectivity, custom services, mail servers, Redis/Memcached ports
+
+    **Key config fields:**
+    - Host and port
+    - Send/expect strings (single-step)
+    - Multi-step query/response sequences
+    - TLS and STARTTLS support
+    - Minimum TLS version enforcement
+
+    **Example:**
+    ```
+    Name: PostgreSQL Primary
+    Host: db.example.com
+    Port: 5432
+    TLS: enabled
+    ```
+  </Tab>
+  <Tab title="DNS">
+    Verify DNS record resolution returns the expected values.
+
+    **Best for:** DNS propagation monitoring, domain validation, DNSSEC verification
+
+    **Key config fields:**
+    - Record type (A, AAAA, CNAME, MX, NS, TXT, CAA, SRV, SOA, PTR)
+    - Custom nameserver
+    - Expected values
+    - DNSSEC validation
+    - Transport protocol (UDP, TCP, DNS-over-TLS)
+    - Response code validation (NOERROR, NXDOMAIN, etc.)
+    - Answer/Authority/Additional section regex matching
+
+    **Example:**
+    ```
+    Name: API DNS Record
+    Host: api.example.com
+    Record Type: A
+    Expected Values: ["203.0.113.10"]
+    Nameserver: 8.8.8.8
+    ```
+  </Tab>
+  <Tab title="Ping">
+    ICMP ping check for basic host reachability and latency measurement.
+
+    **Best for:** Network connectivity, host reachability, latency baselines
+
+    **Key config fields:**
+    - Payload size (0 – 65,500 bytes)
+    - TTL (1 – 255)
+    - Don't Fragment flag
+
+    **Example:**
+    ```
+    Name: Edge Server Ping
+    Host: edge-us.example.com
+    Payload Size: 56
+    TTL: 64
+    ```
+  </Tab>
+  <Tab title="SSL">
+    Monitor SSL/TLS certificate validity and expiration.
+
+    **Best for:** Certificate expiry alerts, chain validation, TLS compliance
+
+    **Key config fields:**
+    - Alert days before expiry (default: 30)
+    - Certificate chain validation
+    - Minimum TLS version (TLSv1.2, TLSv1.3)
+
+    **Example:**
+    ```
+    Name: Main Domain SSL
+    URL: https://example.com
+    Alert Days Before Expiry: 30
+    Check Chain: enabled
+    Min TLS Version: TLSv1.2
+    ```
+  </Tab>
+  <Tab title="gRPC">
+    gRPC health check using the standard gRPC health checking protocol.
+
+    **Best for:** Microservice health, gRPC endpoints, service mesh monitoring
+
+    **Key config fields:**
+    - Service name (empty for server-level check)
+    - TLS enabled/disabled
+    - Custom metadata key-value pairs
+
+    **Example:**
+    ```
+    Name: Payment Service gRPC
+    Host: payments.internal.example.com
+    Port: 50051
+    Service: payment.PaymentService
+    TLS: enabled
+    ```
+  </Tab>
+</Tabs>
+
+---
+
+## Creating a Monitor
+
+<Steps>
+  <Step title="Open the Create Dialog">
+    Navigate to **Synthetics** and click the **New Monitor** button.
+  </Step>
+  <Step title="Enter a Name">
+    Give the monitor a descriptive name (e.g., "Production API Health Check").
+  </Step>
+  <Step title="Select a Monitor Type">
+    Choose from HTTP(S), TCP, DNS, Ping, SSL, or gRPC. The form updates to show type-specific fields.
+  </Step>
+  <Step title="Configure the Target">
+    - **HTTP / SSL:** Enter the full URL (e.g., `https://api.example.com/health`). If you omit the scheme, `https://` is prepended automatically.
+    - **TCP / gRPC:** Enter the host and port.
+    - **DNS / Ping:** Enter the hostname.
+  </Step>
+  <Step title="Set Check Interval and Locations">
+    Choose how often checks run (30 seconds to 30 minutes) and which probe locations to use. All online locations are selected by default.
+  </Step>
+  <Step title="Configure Type-Specific Settings">
+    Expand the type-specific section to configure protocol details (HTTP headers, DNS record types, TCP send/expect, etc.).
+  </Step>
+  <Step title="Set Alert Settings">
+    Configure the incident severity, number of confirmations required, and whether alert grouping is enabled.
+  </Step>
+  <Step title="Optional: Advanced Settings">
+    Expand **Advanced Options** to configure SSL settings (for HTTP/SSL types), IP protocol preference, tags, and description.
+  </Step>
+  <Step title="Save">
+    Click **Create Monitor**. The monitor begins checking on the next probe cycle.
+  </Step>
+</Steps>
+
+---
+
+## Monitor Configuration
+
+### Check Intervals
+
+| Interval | Value | Recommendation |
+|----------|-------|----------------|
+| 30 seconds | `30` | Critical production services requiring near-realtime detection |
+| 1 minute | `60` | **Default.** Good balance of speed and resource usage |
+| 2 minutes | `120` | Standard production monitoring |
+| 5 minutes | `300` | Non-critical services or high-volume environments |
+| 10 minutes | `600` | Background checks, cost-sensitive setups |
+| 30 minutes | `1800` | Low-priority endpoints, SSL expiry watches |
+
+<Tip>
+  Shorter intervals detect outages faster but generate more check data. Start with 1-minute intervals for production services and adjust based on your needs.
+</Tip>
+
+### Probe Locations
+
+Checks are executed from globally distributed probe agents. When creating or editing a monitor, all online probe locations are pre-selected.
+
+The **Probe Globe** in the toolbar provides a visual overview of available locations, their regions, and current status.
+
+Each probe location independently executes the check and reports results. This distributed approach helps you detect region-specific outages versus global failures.
+
+### Multi-Location Confirmation
+
+The **Confirmations** setting controls how many locations must report failure before a status change is triggered.
+
+- **Default:** 2 confirmations
+- **Range:** 1 – 10 (limited by the number of selected locations)
+- If a location is offline, the threshold adjusts dynamically
+
+<Accordion title="Example: 3 locations, 2 confirmations">
+  **Setup:** Monitor with locations `us-east-1`, `eu-west-1`, `ap-southeast-1` and 2 confirmations.
+
+  ```
+  Check cycle begins:
+    us-east-1     → DOWN (connection timeout)
+    eu-west-1     → DOWN (connection refused)
+    ap-southeast-1 → UP (200 OK, 145ms)
+
+  Result: 2 of 3 locations report failure
+          ≥ 2 confirmations required
+          → Status changes to DOWN
+          → Incident created
+  ```
+
+  If only 1 location had failed, the monitor would remain UP — the failure is treated as a transient network issue.
+</Accordion>
+
+<Info>
+  Multi-location confirmation is the primary mechanism for preventing false-positive alerts. Always set confirmations to at least 2 when using multiple locations.
+</Info>
+
+### IP Protocol
+
+| Option | Behavior |
+|--------|----------|
+| **Auto** (default) | Let the probe resolve the address using the system's default (typically IPv4) |
+| **IPv4** | Force IPv4 resolution |
+| **IPv6** | Force IPv6 resolution |
+
+When a specific protocol is selected, you can enable **Protocol Fallback** to try the opposite protocol if the preferred one fails to connect.
+
+### HTTP Configuration
+
+<AccordionGroup>
+  <Accordion title="Method & Headers">
+    - **Method:** GET (default), HEAD, POST, PUT, PATCH, DELETE, OPTIONS
+    - **Headers:** Custom key-value pairs sent with every request
+    - **Compression:** gzip, br, deflate, identity, or auto
+    - **Valid HTTP Versions:** Restrict to HTTP/1.0, HTTP/1.1, or HTTP/2
+  </Accordion>
+  <Accordion title="Authentication">
+    - **Basic Auth:** Username and password
+    - **Bearer Token:** Authorization header with a bearer token
+  </Accordion>
+  <Accordion title="Response Assertions">
+    - **Expected Status Codes:** List of acceptable HTTP status codes (default: `[200]`)
+    - **Max Response Time:** Threshold in milliseconds — responses exceeding this are marked `degraded`
+    - **SSL enforcement:** `failIfSsl` / `failIfNotSsl` to enforce or reject HTTPS
+  </Accordion>
+  <Accordion title="Body Validation">
+    - **Body Contains:** Simple string match
+    - **Body Regex:** Regular expression match
+    - **Fail If Body Matches:** List of regex patterns — fail if body matches any
+    - **Body Size Limit:** Maximum response body size in bytes
+    - **CEL Expressions:** Common Expression Language rules for structured JSON body validation
+  </Accordion>
+  <Accordion title="TLS Settings">
+    - **Follow Redirects:** Enabled by default
+    - **Fail If SSL / Fail If Not SSL:** Enforce HTTPS presence or absence
+  </Accordion>
+  <Accordion title="Advanced">
+    - **Proxy URL:** Per-check HTTP/SOCKS proxy
+    - **No Proxy:** Comma-separated bypass list
+    - **HTTP/3 (QUIC):** Enable experimental HTTP/3 support
+    - **Expected Headers:** Key-value pairs the response must contain
+    - **Header regex matching:** Fail-if-matches / fail-if-not-matches rules for response headers
+  </Accordion>
+</AccordionGroup>
+
+### TCP Configuration
+
+- **Send / Expect:** Single-step data exchange after connecting
+- **Query/Response Steps:** Multi-step sequences — each step sends data and expects a response
+- **TLS:** Wrap the connection with TLS from the start
+- **STARTTLS:** Upgrade a plain connection to TLS mid-stream
+- **Minimum TLS Version:** Enforce TLSv1.2 or TLSv1.3
+
+### DNS Configuration
+
+| Field | Description |
+|-------|-------------|
+| **Record Type** | A, AAAA, CNAME, MX, NS, TXT, CAA, SRV, SOA, PTR |
+| **Nameserver** | Custom DNS server to query (default: system resolver) |
+| **Expected Values** | List of expected record values |
+| **DNSSEC Validation** | Verify DNSSEC signatures |
+| **Transport Protocol** | UDP (default), TCP, or DNS-over-TLS (DoT) |
+| **Valid RCodes** | Acceptable response codes (NOERROR, NXDOMAIN, etc.) |
+| **Query Class** | IN (default), CS, CH, HS |
+| **Recursion Desired** | Request recursive resolution (default: true) |
+
+Advanced regex matching is available for answer, authority, and additional sections.
+
+### SSL Configuration
+
+| Field | Default | Description |
+|-------|---------|-------------|
+| **Alert Days Before Expiry** | 30 | How many days before expiry to trigger a warning |
+| **Check Chain** | true | Validate the full certificate chain |
+| **Minimum TLS Version** | — | Enforce TLSv1.2 or TLSv1.3 |
+
+<Info>
+  SSL configuration is available for both **HTTP** and **SSL** monitor types. For HTTP monitors, it appears under Advanced Options.
+</Info>
+
+### Ping Configuration
+
+| Field | Default | Description |
+|-------|---------|-------------|
+| **Payload Size** | System default | ICMP payload size in bytes (0 – 65,500) |
+| **TTL** | System default | Time-to-live / hop limit (1 – 255) |
+| **Don't Fragment** | false | Set the DF bit to prevent fragmentation |
+
+### gRPC Configuration
+
+| Field | Default | Description |
+|-------|---------|-------------|
+| **Service** | (empty) | gRPC service name. Empty means server-level health check |
+| **TLS** | false | Enable TLS for the gRPC connection |
+| **Metadata** | — | Custom key-value metadata pairs sent with the health check |
+
+---
+
+## Monitor Status
+
+Every monitor has one of seven statuses:
+
+| Status | Color | Description |
+|--------|-------|-------------|
+| **Up** | Emerald | All checks passing. Service is healthy |
+| **Down** | Red | Confirmed failure from multiple locations. Incident created |
+| **Degraded** | Amber | Service responding but exceeding performance thresholds |
+| **Pending** | Blue | Monitor just created, waiting for first check results |
+| **Paused** | Gray | Monitoring temporarily suspended by user |
+| **Maintenance** | Amber | Inside a scheduled maintenance window |
+| **Unknown** | Gray | Status cannot be determined (e.g., all probes offline) |
+
+### Status Transitions
+
+```
+                    ┌─────────┐
+     Created ──────→│ Pending │
+                    └────┬────┘
+                         │ first check
+                         ▼
+                    ┌─────────┐
+              ┌────→│   Up    │◄────┐
+              │     └────┬────┘     │
+              │          │          │ recovery
+              │   failure confirmed │
+              │          ▼          │
+              │     ┌─────────┐    │
+              │     │  Down   │────┘
+              │     └─────────┘
+              │
+              │     ┌──────────┐
+              ├────→│ Degraded │ (threshold exceeded but reachable)
+              │     └──────────┘
+              │
+   user action│     ┌──────────┐
+              ├────→│  Paused  │ (user paused monitoring)
+              │     └──────────┘
+              │
+  maintenance │     ┌─────────────┐
+  window      └────→│ Maintenance │ (inside scheduled window)
+                    └─────────────┘
+```
+
+### How Status Is Evaluated
+
+1. Probes independently execute checks at the configured interval
+2. Each check result is recorded with status `up`, `down`, `degraded`, or `error`
+3. If enough locations report failure (≥ confirmations), the monitor transitions to **Down**
+4. If a check exceeds the `maxResponseTime` threshold (HTTP), the check is marked **Degraded**
+5. When recovery is detected across locations, the monitor transitions back to **Up**
+
+---
+
+## Viewing Monitors
+
+### Monitor List
+
+The Synthetics page shows all your monitors in a searchable, paginated table:
+
+| Column | Description |
+|--------|-------------|
+| **Status** | Current monitor status badge (Up, Down, Degraded, etc.) |
+| **Name** | Monitor name and target URL/host |
+| **Type** | Protocol badge (HTTP, TCP, DNS, Ping, SSL, gRPC) |
+| **Response** | Last recorded response time in milliseconds |
+| **Uptime (24h)** | Rolling 24-hour uptime percentage |
+| **Interval** | Check frequency |
+| **Last Check** | Timestamp of the most recent check |
+| **Actions** | View, Edit, Pause/Resume, Delete |
+
+### Stats Cards
+
+At the top of the list, summary cards show:
+- **Total Monitors** — count of all monitors
+- **Up** — monitors currently healthy
+- **Down** — monitors currently failing
+- **Degraded** — monitors with performance issues
+- **Paused** — monitors that are suspended
+
+### Filtering and Search
+
+- **Search:** Filter monitors by name
+- **Status Filter:** Show only monitors with a specific status (Up, Down, Degraded, Paused, Pending)
+- **Type Filter:** Show only monitors of a specific protocol (HTTP, TCP, DNS, Ping, SSL, gRPC)
+
+### Monitor Detail
+
+Click any monitor to open its detail page with rich analytics and configuration views.
+
+**Header area** displays the monitor name, status badge, type badge, target URL/host, and action buttons (Run Now, Pause/Resume, Edit, Delete).
+
+If the monitor has an active incident, a banner links directly to it.
+
+**Quick stats cards** show:
+- Uptime percentage for the selected period
+- Current response time
+- Number of probe locations
+- Total checks in the period
+
+**Uptime bar** visualizes status changes over time with period selectors (24h, 7d, 30d, 90d).
+
+**Tabs:**
+
+<Tabs>
+  <Tab title="Overview">
+    - **Response Time Chart** — time series of response times
+    - **Connection Timing Waterfall** — per-phase breakdown (DNS, TCP, TLS, Server, Content Transfer). HTTP monitors only
+    - **Aggregate Metrics** — hourly/daily/monthly summary with percentiles
+    - **Location Status** — per-location check results
+    - **Configuration** — check interval, timeout, confirmations, severity
+  </Tab>
+  <Tab title="Checks">
+    Paginated table of individual check results. Filterable by:
+    - **Location** — specific probe location
+    - **Status** — Up, Down, Degraded, Error
+
+    Each row shows: location, status, response time, status code, error message, and timestamp.
+  </Tab>
+  <Tab title="Status Changes">
+    Timeline of every status transition:
+    - From/to status with color-coded indicators
+    - Reason for the change
+    - Duration in previous state
+    - Linked incident (if one was created)
+  </Tab>
+  <Tab title="SSL">
+    Available for HTTP and SSL monitor types. Displays cached certificate information:
+    - **Issued To** — domain the certificate covers
+    - **Issuer** — certificate authority
+    - **Expires** — expiration date
+  </Tab>
+  <Tab title="Maintenance">
+    List of scheduled maintenance windows with the ability to create new ones and delete existing ones.
+  </Tab>
+</Tabs>
+
+---
+
+## Uptime Analytics
+
+### Uptime Percentage
+
+Select a period using the buttons in the uptime card header:
+
+| Period | Description |
+|--------|-------------|
+| **24h** | Last 24 hours |
+| **7d** | Last 7 days |
+| **30d** | Last 30 days |
+| **90d** | Last 90 days |
+
+Uptime is calculated based on status changes, not individual check counts. This means short-lived failures that don't trigger a status change won't affect the uptime percentage.
+
+The **Uptime Bar** provides a visual timeline of status changes in the selected period. Each colored segment represents a period where the monitor was in a specific status.
+
+### Response Time
+
+The response time chart shows average, minimum, and maximum response times over the selected period. Data points are bucketed by time based on the period:
+
+| Period | Bucket Size |
+|--------|-------------|
+| 24h | ~15 minutes |
+| 7d | ~1 hour |
+| 30d | ~6 hours |
+| 90d | ~1 day |
+
+You can filter response time data by a specific probe location.
+
+### Response Timings (HTTP Only)
+
+For HTTP monitors, the **Connection Timing Waterfall** breaks down each request into its constituent phases:
+
+| Phase | Description |
+|-------|-------------|
+| **DNS Lookup** | Time to resolve the hostname to an IP address |
+| **TCP Connect** | Time to establish the TCP connection |
+| **TLS Handshake** | Time to complete the TLS handshake (HTTPS only) |
+| **Server Processing** | Time from request sent to first byte received |
+| **Content Transfer** | Time to download the full response body |
+
+<Tip>
+  Use the waterfall to identify bottlenecks. A slow DNS phase might indicate resolver issues, while high server processing suggests backend problems.
+</Tip>
+
+### Aggregated Metrics
+
+The Aggregate Metrics card shows summarized data at hourly, daily, or monthly granularity:
+
+- **Total / Success / Failed / Degraded** check counts
+- **Response time percentiles:** p50, p95, p99
+- **Average / Min / Max** response time
+- **Uptime percentage** per period
+- **Downtime** in seconds
+- **Per-location breakdown** via location metrics
+
+### Check History
+
+The Checks tab provides a paginated table of every individual check result:
+
+- Filter by **location** or **status**
+- Columns: Location, Status, Response Time, Status Code, Error Message, Timestamp
+- Configurable page size (10, 20, 50, 100)
+
+### Status Changes
+
+The Status Changes tab shows a timeline of every transition:
+
+- **From → To** status with color indicators
+- **Reason** for the change
+- **Duration** in the previous state (e.g., "was 2h 15m in Up")
+- **Linked Incident** — click to navigate to the incident
+
+---
+
+## Maintenance Windows
+
+Maintenance windows let you schedule periods where status changes won't trigger incident alerts. Checks continue to run during maintenance, but the monitor's status is set to **Maintenance**.
+
+### Creating a Maintenance Window
+
+<Steps>
+  <Step title="Open the Maintenance Tab">
+    Navigate to the monitor's detail page and select the **Maintenance** tab.
+  </Step>
+  <Step title="Click Schedule">
+    Click the **Schedule** button to open the creation dialog.
+  </Step>
+  <Step title="Enter Details">
+    - **Title** — descriptive name (e.g., "Database Migration")
+    - **Description** — optional details
+    - **Start** — date and time when maintenance begins
+    - **End** — date and time when maintenance ends
+  </Step>
+  <Step title="Save">
+    Click **Schedule** to create the maintenance window.
+  </Step>
+</Steps>
+
+### Behavior During Maintenance
+
+- Checks **continue to run** — results are still recorded
+- Status changes **do not trigger incidents** or alerts
+- The monitor status shows as **Maintenance** in the UI
+- When the window ends, normal alerting resumes automatically
+
+### Managing Windows
+
+Each maintenance window shows:
+- Title and description
+- Start and end times
+- **Active** badge if currently in effect
+- **Past** badge if the window has ended
+- Recurrence indicator if the window repeats
+
+To delete a window, click the trash icon and confirm.
+
+<Note>
+  Deleting an active maintenance window immediately resumes normal alerting. Any status changes that occur after deletion will trigger incidents as usual.
+</Note>
+
+---
+
+## Incident Integration
+
+### Automatic Incident Creation
+
+When a monitor transitions to **Down**, EasyAlert automatically:
+
+1. Creates an incident with the configured **severity** (critical, high, medium, or low)
+2. Links the incident to the monitor
+3. Triggers the assigned **escalation policy**
+4. Displays a banner on the monitor detail page linking to the incident
+
+### Alert Grouping
+
+When **Alert Grouping** is enabled (default), subsequent failures from the same monitor are grouped into the existing open incident rather than creating new ones. This prevents incident spam during extended outages.
+
+### Automatic Resolution
+
+When a monitor recovers (transitions back to **Up**), the linked incident is automatically resolved. The resolution note includes downtime duration information.
+
+---
+
+## SSL Certificate Monitoring
+
+For **HTTP** and **SSL** monitor types, EasyAlert tracks SSL certificate information:
+
+- **Issued To** — the domain the certificate covers
+- **Issuer** — the certificate authority
+- **Expires At** — expiration date
+- **Days Until Expiry** — countdown to expiration
+- **Certificate Chain** — full chain validation
+- **Serial Number / Fingerprint / Protocol** — detailed certificate metadata
+
+### Expiry Alerts
+
+Configure the **Alert Days Before Expiry** setting (default: 30 days) to receive warnings before a certificate expires. The SSL configuration also supports enforcing a **minimum TLS version**.
+
+<Info>
+  SSL certificate data is collected during regular checks and cached on the monitor. View it in the **SSL** tab on the monitor detail page.
+</Info>
+
+---
+
+## Bulk Operations
+
+The monitor list supports multi-select for bulk actions:
+
+1. Use the checkbox column to select monitors (available for users with write permission)
+2. A bulk action bar appears showing the count of selected monitors
+3. Available actions:
+   - **Bulk Pause** — pause all selected monitors
+   - **Bulk Resume** — resume all selected monitors
+4. Maximum 100 monitors per bulk operation
+
+You can also trigger an immediate check using **Run Now** from the monitor detail page. This queues the check for the next probe cycle.
+
+---
+
+## Data Retention
+
+| Data Type | Retention |
+|-----------|-----------|
+| **Individual checks** | 30 days |
+| **Hourly aggregates** | 90 days |
+| **Daily aggregates** | 1 year |
+| **Monthly aggregates** | Indefinite |
+| **Status changes** | Indefinite |
+
+---
+
+## Best Practices
+
+<AccordionGroup>
+  <Accordion title="Use Multiple Locations">
+    Always monitor from at least 2-3 locations. This enables multi-location confirmation and helps distinguish between regional and global outages.
+  </Accordion>
+  <Accordion title="Set Appropriate Confirmations">
+    Use at least 2 confirmations to avoid false positives from transient network issues. For critical services with many locations, consider 3 or more.
+  </Accordion>
+  <Accordion title="Match Interval to Criticality">
+    - **Critical services:** 30s – 1 minute
+    - **Standard production:** 2 – 5 minutes
+    - **SSL expiry / low-priority:** 10 – 30 minutes
+  </Accordion>
+  <Accordion title="Use Body Assertions for HTTP">
+    Don't just check for a 200 status code. Add a body assertion (e.g., `"status":"ok"`) to verify the application is actually healthy, not just returning a generic error page.
+  </Accordion>
+  <Accordion title="Schedule Maintenance Windows for Deployments">
+    Before deploying changes that might cause brief downtime, schedule a maintenance window. This prevents noisy incident alerts during planned work.
+  </Accordion>
+  <Accordion title="Monitor SSL Expiry Proactively">
+    Set the alert days before expiry to at least 30 days. This gives you enough time to renew certificates before they cause outages.
+  </Accordion>
+  <Accordion title="Use Tags for Organization">
+    Apply key-value tags to monitors for grouping and filtering (e.g., `environment: production`, `team: platform`).
+  </Accordion>
+  <Accordion title="Review Response Timing Waterfall">
+    For HTTP monitors, regularly check the waterfall breakdown. A sudden increase in DNS lookup time or TLS handshake time can indicate infrastructure issues before a full outage occurs.
+  </Accordion>
+</AccordionGroup>
+
+---
+
+## Common Patterns
+
+<AccordionGroup>
+  <Accordion title="Website Monitoring">
+    **Type:** HTTP
+    **URL:** `https://www.example.com`
+    **Method:** GET
+    **Expected Status:** 200
+    **Body Contains:** A unique string from the homepage
+    **Interval:** 1 minute
+    **Confirmations:** 2
+  </Accordion>
+  <Accordion title="API Health Check">
+    **Type:** HTTP
+    **URL:** `https://api.example.com/health`
+    **Method:** GET
+    **Expected Status:** 200
+    **Body Contains:** `"status":"ok"`
+    **Max Response Time:** 2000ms
+    **Interval:** 30 seconds
+    **Confirmations:** 2
+  </Accordion>
+  <Accordion title="SSL Expiry Watch">
+    **Type:** SSL
+    **URL:** `https://example.com`
+    **Alert Days Before Expiry:** 30
+    **Check Chain:** enabled
+    **Interval:** 30 minutes
+    **Confirmations:** 1
+  </Accordion>
+  <Accordion title="Database Connectivity">
+    **Type:** TCP
+    **Host:** `db.example.com`
+    **Port:** 5432
+    **TLS:** enabled
+    **Interval:** 2 minutes
+    **Confirmations:** 2
+  </Accordion>
+  <Accordion title="DNS Propagation">
+    **Type:** DNS
+    **Host:** `api.example.com`
+    **Record Type:** A
+    **Expected Values:** `["203.0.113.10"]`
+    **Nameserver:** `8.8.8.8`
+    **Interval:** 5 minutes
+    **Confirmations:** 2
+  </Accordion>
+  <Accordion title="Multi-Region Redundancy">
+    Create separate monitors for the same service targeting different regions:
+
+    - **US Monitor:** Locations `us-east-1`, `us-west-2` — 30s interval
+    - **EU Monitor:** Locations `eu-west-1`, `eu-central-1` — 30s interval
+    - **APAC Monitor:** Locations `ap-southeast-1`, `ap-northeast-1` — 30s interval
+
+    Use different escalation policies per region to route alerts to the right team.
+  </Accordion>
+</AccordionGroup>
+
+---
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Monitor stuck in Pending status">
+    1. Verify that at least one probe location is online (check the Probe Globe)
+    2. Confirm the target URL/host is correct and accessible from the internet
+    3. Check that the monitor is not paused
+    4. Wait for the first check cycle to complete (up to 1 interval)
+  </Accordion>
+  <Accordion title="False positives (Down alerts when service is up)">
+    1. Increase the **confirmations** count to 2 or 3
+    2. Add more probe locations for better confirmation coverage
+    3. Check if a firewall or WAF is blocking probe IPs
+    4. For HTTP monitors, verify expected status codes include all valid responses (e.g., add 301 if redirects are expected)
+  </Accordion>
+  <Accordion title="Monitor shows Degraded but service seems fine">
+    1. Check the **maxResponseTime** threshold — it may be set too aggressively
+    2. Review the Response Timing Waterfall to identify which phase is slow
+    3. Consider that network latency between the probe location and your server affects total response time
+    4. Try filtering response time data by specific locations to find slow regions
+  </Accordion>
+  <Accordion title="SSL certificate not showing">
+    1. Ensure the monitor type is **HTTP** or **SSL**
+    2. Wait for at least one successful check to complete
+    3. Verify the target URL uses HTTPS
+    4. Check that the server is presenting a valid certificate
+  </Accordion>
+  <Accordion title="Checks running but no status changes recorded">
+    1. This is normal if the service is consistently healthy — status changes only appear on transitions
+    2. Check the **Checks** tab to verify individual check results are being recorded
+    3. Verify the confirmations threshold isn't higher than the number of failing locations
+  </Accordion>
+  <Accordion title="Maintenance window not preventing alerts">
+    1. Verify the maintenance window times are correct (check timezone)
+    2. Confirm the window's start time has actually passed
+    3. Ensure the window was created for the correct monitor
+    4. Check that the window hasn't already ended
+  </Accordion>
+  <Accordion title="Bulk operations not available">
+    1. Bulk actions require **write** permission on synthetics
+    2. The checkbox column only appears for users with write access
+    3. Select at least one monitor to see the bulk action bar
+    4. Maximum 100 monitors can be selected per bulk operation
+  </Accordion>
+  <Accordion title="Response time spikes in specific locations">
+    1. Filter the Response Time chart by the affected location
+    2. Compare with other locations to determine if the issue is regional
+    3. Check the Connection Timing Waterfall (HTTP) to identify the slow phase
+    4. Consider adding a monitor from a nearby location for comparison
+  </Accordion>
+</AccordionGroup>
+
+---
+
+## Quick Reference
+
+### Monitor Types
+
+| Type | Target | Key Use Case |
+|------|--------|--------------|
+| HTTP(S) | URL | APIs, websites, webhooks |
+| TCP | Host:Port | Database, Redis, custom services |
+| DNS | Hostname | DNS records, propagation |
+| Ping | Hostname | Network reachability, latency |
+| SSL | URL | Certificate expiry, TLS compliance |
+| gRPC | Host:Port | Microservice health checks |
+
+### Check Intervals
+
+| Interval | Seconds | Best For |
+|----------|---------|----------|
+| 30 seconds | 30 | Critical production |
+| 1 minute | 60 | Standard production |
+| 2 minutes | 120 | General monitoring |
+| 5 minutes | 300 | Non-critical services |
+| 10 minutes | 600 | Background checks |
+| 30 minutes | 1800 | SSL expiry, low priority |
+
+### Status Meanings
+
+| Status | Triggers Incident | Checks Run |
+|--------|-------------------|------------|
+| Up | No | Yes |
+| Down | Yes | Yes |
+| Degraded | No | Yes |
+| Pending | No | Yes (waiting for first result) |
+| Paused | No | No |
+| Maintenance | No | Yes (alerts suppressed) |
+| Unknown | No | Varies |
+
+### Default Settings
+
+| Setting | Default Value |
+|---------|---------------|
+| Check Interval | 60 seconds (1 minute) |
+| Timeout | 30 seconds |
+| Confirmations | 2 |
+| Severity | High |
+| Alert Grouping | Enabled |
+| IP Protocol | Auto |
+| Protocol Fallback | Enabled |
+| SSL Alert Days | 30 |
+| SSL Check Chain | Enabled |
+| HTTP Method | GET |
+| HTTP Expected Status | 200 |
+| HTTP Follow Redirects | Enabled |
+| DNS Record Type | A |
+| DNS Transport | UDP |
+| DNS Recursion | Enabled |
