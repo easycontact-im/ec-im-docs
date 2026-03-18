@@ -348,27 +348,6 @@ Use these templates as starting points for common integrations.
     }
     ```
   </Accordion>
-  <Accordion title="PagerDuty Events API Template">
-    ```json
-    {
-      "routing_key": "<YOUR_PAGERDUTY_ROUTING_KEY>",
-      "event_action": "trigger",
-      "dedup_key": "{{incident.id}}",
-      "payload": {
-        "summary": "{{incident.title}}",
-        "severity": "{{incident.severity}}",
-        "source": "{{incident.host}}",
-        "component": "{{incident.service}}",
-        "group": "{{incident.environment}}",
-        "custom_details": {
-          "description": "{{incident.description}}",
-          "priority": "{{incident.priority}}",
-          "incident_url": "https://admin.easyalert.io/incidents/{{incident.id}}"
-        }
-      }
-    }
-    ```
-  </Accordion>
 </AccordionGroup>
 
 ---
