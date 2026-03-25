@@ -118,5 +118,9 @@
     "socials": {
       "linkedin": "https://www.linkedin.com/company/easycontact-ai/"
     }
+  },
+  "logo": {
+    "light": "/logo/light.svg",
+    "dark": "/logo/dark.svg"
   }
 }
