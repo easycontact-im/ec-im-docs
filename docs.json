@@ -11,7 +11,7 @@
   "navigation": {
     "tabs": [
       {
-        "tab": "Guides",
+        "tab": "Incident Management",
         "groups": [
           {
             "group": "Getting started",
@@ -83,6 +83,9 @@
             ]
           }
         ]
+      },
+      {
+        "tab": "Automation & Workflow"
       }
     ]
   },
