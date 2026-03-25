@@ -1,0 +1,284 @@
+---
+title: 'Executions'
+description: 'Monitor workflow runs, approve actions, and debug failures'
+icon: 'list-check'
+---
+
+## Overview
+
+An execution is a runtime instance of a workflow run. Every time a workflow is triggered — by an incident, webhook, cron schedule, or manual click — an execution is created. You can monitor progress in real-time, approve or reject human gates, and drill down into individual job results.
+
+<CardGroup cols={2}>
+  <Card title="Real-Time Timeline" icon="signal-stream">
+    Watch execution progress live with Server-Sent Events — see jobs start, complete, and fail as they happen
+  </Card>
+  <Card title="Job-Level Detail" icon="magnifying-glass">
+    Drill down into each job's stdout, stderr, exit code, HTTP response, and duration
+  </Card>
+  <Card title="Approval Management" icon="shield-check">
+    Approve or reject workflow steps with notes, directly from the execution detail page
+  </Card>
+  <Card title="Cancel Running" icon="circle-stop">
+    Stop a running execution at any point — in-flight jobs complete but no new jobs are dispatched
+  </Card>
+</CardGroup>
+
+---
+
+## Viewing Executions
+
+Navigate to **Automation > Executions** to see all workflow runs across your tenant.
+
+**List columns:**
+
+| Column | Description |
+|--------|-------------|
+| **Workflow** | Name of the workflow that ran |
+| **Status** | Current execution status (color-coded badge) |
+| **Trigger** | What triggered the execution (incident, webhook, cron, manual) |
+| **Started** | When the execution began |
+| **Duration** | Total execution time |
+| **Jobs** | Number of completed / total jobs |
+
+**Filtering:**
+- Filter by **Workflow** to see runs for a specific workflow
+- Filter by **Status** to find failures or paused executions
+- Results auto-refresh every 15 seconds when active executions are present
+
+<Tip>
+  Use the workflow detail page (**Workflows > [Workflow] > Execution History**) to see runs for a specific workflow, pre-filtered.
+</Tip>
+
+---
+
+## Execution Detail
+
+Click an execution to open the detail page, which shows:
+
+| Section | Content |
+|---------|---------|
+| **Status Banner** | Overall execution status with color indicator |
+| **Trigger Info** | What triggered the run (event type, incident ID, webhook key, or user) |
+| **Job Timeline** | Chronological list of jobs with status, duration, and results |
+| **Variables** | Runtime variables available during execution |
+| **Execution Log** | Internal engine events (node transitions, condition evaluations, errors) |
+
+### Job Timeline
+
+Each job in the timeline shows:
+
+- **Node Name** — Which workflow node created the job
+- **Action Type** — What was executed (e.g., `ssh.executeCommand`, `slack.sendMessage`)
+- **Status Badge** — Job status with color coding
+- **Duration** — How long the job took
+- **Output** — Expandable section with stdout, stderr, HTTP response, exit code, etc.
+- **Error** — Error message if the job failed
+
+<Info>
+  When an execution is running, the timeline updates in real-time via Server-Sent Events (SSE). You don't need to refresh the page.
+</Info>
+
+---
+
+## Execution Statuses
+
+| Status | Badge Color | Description |
+|--------|-------------|-------------|
+| **Pending** | Gray | Execution created but not yet started |
+| **Running** | Blue (animated) | Actively executing nodes |
+| **Completed** | Green | All nodes finished successfully |
+| **Failed** | Red | One or more critical nodes failed |
+| **Cancelled** | Gray | Manually cancelled by a user |
+| **Paused** | Indigo | Waiting for human approval |
+
+---
+
+## Approvals
+
+When a workflow reaches an Approval node, the execution pauses and waits for a human decision.
+
+<Steps>
+  <Step title="Execution Pauses">
+    The execution status changes to **Paused** when it hits an Approval node. The approval message (configured in the workflow) is displayed.
+  </Step>
+  <Step title="Approvers Are Notified">
+    If specific approvers were assigned in the node, they receive a notification. Otherwise, any user with the `automation:execute` permission can respond.
+  </Step>
+  <Step title="Review Context">
+    The approver reviews the execution context — trigger data, upstream job results, and the approval message.
+  </Step>
+  <Step title="Approve or Reject">
+    The approver clicks **Approve** or **Reject** and optionally adds a note explaining their decision.
+  </Step>
+</Steps>
+
+<Tabs>
+  <Tab title="Approve Flow">
+    When approved, the execution resumes and follows the **Approved** edge from the Approval node. The approver's identity and note are recorded in the execution log.
+
+    **Output available downstream:**
+    - `{{nodes.<approvalNodeId>.output.respondedBy}}` — Who approved
+    - `{{nodes.<approvalNodeId>.output.responseNote}}` — Approver's note
+    - `{{nodes.<approvalNodeId>.output.respondedVia}}` — Channel used (web, mobile, API)
+  </Tab>
+  <Tab title="Reject Flow">
+    When rejected, the execution follows the **Rejected** edge. If no rejected edge exists, the execution fails with the rejection as the reason.
+
+    The rejection note is available via the same output variables.
+  </Tab>
+</Tabs>
+
+### Approval Timeout
+
+If the timeout expires before anyone responds:
+
+- The execution follows the **Rejected** edge (same as an explicit rejection)
+- The execution log records the timeout as the reason
+- Set timeout to `0` for no timeout (waits indefinitely)
+
+<Info>
+  Pending approvals are listed in **Automation > Executions > Pending Approvals** for quick access. This tab shows all approvals waiting for your response across all workflows.
+</Info>
+
+---
+
+## Job Statuses
+
+Individual jobs within an execution have their own lifecycle:
+
+| Status | Description |
+|--------|-------------|
+| **Pending** | Job created, waiting for agent to pick it up |
+| **Dispatched** | Job sent to agent, waiting for execution to start |
+| **Running** | Agent is actively executing the action |
+| **Completed** | Action finished successfully (exit code 0 or HTTP 2xx) |
+| **Failed** | Action failed (non-zero exit, HTTP error, or exception) |
+| **Timeout** | Action exceeded its configured timeout |
+| **Cancelled** | Job cancelled because the execution was cancelled |
+
+### Retry Behavior
+
+If an action node has **Max Retries** configured:
+
+1. When a job fails, the engine waits for the **Retry Delay** (seconds)
+2. A new job is dispatched with an incremented retry counter
+3. This repeats until the job succeeds or the retry limit is reached
+4. If all retries fail, the node follows the **Error** edge
+
+<Info>
+  Retry count and delay are configured per action node in the workflow designer. The default is 0 retries (no retry).
+</Info>
+
+---
+
+## Cancelling Executions
+
+You can cancel a running execution from the detail page by clicking **Cancel**.
+
+**What happens when you cancel:**
+
+| Component | Behavior |
+|-----------|----------|
+| **In-flight jobs** | Continue to completion (not interrupted mid-execution) |
+| **Pending jobs** | Cancelled immediately (never dispatched) |
+| **Approval gates** | Auto-rejected with cancellation as the reason |
+| **Execution status** | Changes to **Cancelled** |
+
+<Warning>
+  Cancellation does not rollback actions that have already completed. If an SSH command already restarted a service, the restart is not undone. Plan your workflows with this in mind.
+</Warning>
+
+---
+
+## Analytics
+
+The **Automation > Analytics** page provides aggregated metrics about your automation performance:
+
+| Metric | Description |
+|--------|-------------|
+| **Total Executions** | Total workflow runs in the selected time range |
+| **Success Rate** | Percentage of executions that completed successfully |
+| **Average Duration** | Mean execution time across all workflows |
+| **Active Workflows** | Number of currently activated workflows |
+| **Execution Trends** | Daily execution count chart (success vs failure) |
+| **Top Workflows** | Most frequently executed workflows with success rates |
+| **Agent Utilization** | Job distribution across agents |
+
+<Tip>
+  Use analytics to identify frequently failing workflows, slow executions, and overloaded agents. A declining success rate often points to stale credentials or infrastructure changes.
+</Tip>
+
+---
+
+## Best Practices
+
+<AccordionGroup>
+  <Accordion title="Monitor executions proactively" icon="eye">
+    Don't just set up workflows and forget them. Regularly check the Executions page for failures, especially after infrastructure changes, credential rotations, or workflow updates.
+  </Accordion>
+  <Accordion title="Set appropriate timeouts on actions" icon="clock">
+    A tight timeout (30s) is good for quick health checks. A longer timeout (5–10 minutes) is needed for Kubernetes rollouts or large script executions. Match the timeout to the expected action duration.
+  </Accordion>
+  <Accordion title="Use approval nodes for high-risk actions" icon="shield-check">
+    Before production deployments, database migrations, or OS restarts, add an Approval node. The few seconds of human review can prevent costly mistakes.
+  </Accordion>
+  <Accordion title="Configure retries for transient failures" icon="rotate">
+    Network blips, temporary service unavailability, and rate limits are common. Set 1–3 retries with a 10–30 second delay for actions that might fail transiently.
+  </Accordion>
+  <Accordion title="Use execution logs for debugging" icon="bug">
+    The execution log shows every engine decision — condition evaluations, variable resolutions, node transitions. When a workflow behaves unexpectedly, the log reveals why.
+  </Accordion>
+</AccordionGroup>
+
+---
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Execution stuck in Running" icon="spinner">
+    **Cause:** A job is waiting for an agent that is offline, or an approval is pending.
+
+    **Steps:**
+    1. Check if any jobs are in **Pending** or **Dispatched** status — the agent may be offline
+    2. Check if the execution is actually **Paused** waiting for approval
+    3. Verify the assigned agent is online in **Automation > Agents**
+    4. If the agent is online but not picking up jobs, check agent logs for errors
+    5. As a last resort, cancel the execution and investigate
+  </Accordion>
+  <Accordion title="Job fails with timeout" icon="clock">
+    **Cause:** The action took longer than the configured timeout.
+
+    **Steps:**
+    1. Check the action node's timeout setting in the workflow designer
+    2. Increase the timeout if the action legitimately needs more time
+    3. If the action is completing elsewhere (e.g., service restarted but SSH hung), investigate the target system
+    4. Check network latency between the agent and the target system
+  </Accordion>
+  <Accordion title="Approval expired unexpectedly" icon="hourglass-end">
+    **Cause:** The approval timeout is too short for your review process.
+
+    **Steps:**
+    1. Check the Approval node's timeout setting in the workflow designer
+    2. Increase the timeout to match your expected review time
+    3. Set timeout to `0` for no timeout (waits indefinitely)
+    4. Consider assigning specific approvers to ensure prompt response
+  </Accordion>
+  <Accordion title="Variables show as empty in job output" icon="braces">
+    **Cause:** The template variable path doesn't match the available data.
+
+    **Steps:**
+    1. Check the execution's **Variables** section to see what data is available
+    2. Verify the variable path (e.g., `{{incident.title}}` not `{{title}}`)
+    3. Ensure the referenced upstream node actually executed (check job timeline)
+    4. For webhook triggers, verify the POST body included the `variables` field
+  </Accordion>
+  <Accordion title="Execution fails immediately" icon="circle-xmark">
+    **Cause:** Usually a trigger condition, validation, or permission issue.
+
+    **Steps:**
+    1. Check the execution log for the first error message
+    2. Verify the workflow is published (executions run the published version, not the draft)
+    3. Check if the required connections are enabled and credentials are delivered
+    4. Verify agents are online and assigned to the correct pools
+  </Accordion>
+</AccordionGroup>

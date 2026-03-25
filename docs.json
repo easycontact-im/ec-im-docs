@@ -85,7 +85,18 @@
         ]
       },
       {
-        "tab": "Automation & Workflow"
+        "tab": "Automation & Workflow",
+        "pages": [
+          "overview",
+          "agents",
+          "connections",
+          "workflows",
+          "node-types",
+          "triggers",
+          "actions",
+          "executions",
+          "webhook-api"
+        ]
       }
     ]
   },

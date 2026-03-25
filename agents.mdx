@@ -1,0 +1,331 @@
+---
+title: 'Agents'
+description: 'Deploy and manage automation agents on your infrastructure'
+icon: 'robot'
+---
+
+## Overview
+
+Automation agents are lightweight Python processes that run on your infrastructure. They poll the EasyAlert SaaS API for pending jobs, execute actions using local connections and credentials, and report results back in real-time. Because agents initiate all communication outbound, you never need to open inbound ports.
+
+<CardGroup cols={2}>
+  <Card title="Runs Anywhere" icon="server">
+    Deploy on any Linux server via Docker, systemd, or the one-line installer. Supports Ubuntu, Debian, and Alpine.
+  </Card>
+  <Card title="Encrypted Vault" icon="vault">
+    Credentials are stored locally in an AES-256-GCM encrypted vault file. They never leave the agent or reach the SaaS database.
+  </Card>
+  <Card title="Health Monitoring" icon="heart-pulse">
+    Real-time health score (0–100) based on heartbeat freshness and job success rate. Unhealthy agents are automatically deprioritized.
+  </Card>
+  <Card title="Agent Pools" icon="layer-group">
+    Group agents into pools for load distribution. Jobs are dispatched to the healthiest agent in the assigned pool.
+  </Card>
+</CardGroup>
+
+---
+
+## Architecture
+
+```
+Agent Startup
+      ↓
+POST /register → Register with SaaS (name, version, OS, capabilities)
+      ↓
+Three concurrent loops:
+      ├── Poll Loop:      GET /jobs → Execute → POST /results  (every 5s)
+      ├── Heartbeat Loop: POST /heartbeat (every 30s)
+      └── Admin Server:   127.0.0.1:9191 (credential management)
+      ↓
+Graceful Shutdown (SIGTERM/SIGINT)
+      ↓
+Wait for in-flight jobs (30s grace) → Send offline notification
+```
+
+<Info>
+  Agents only make outbound HTTPS requests to the SaaS API. No inbound ports need to be opened on your infrastructure, making deployment firewall-friendly.
+</Info>
+
+---
+
+## Creating an Agent
+
+<Steps>
+  <Step title="Navigate to Agents">
+    Go to **Automation > Agents** and click **Create Agent**.
+  </Step>
+  <Step title="Configure Agent">
+    Enter a **Name** (e.g., "prod-eu-west-1") and optional **Description**. Optionally assign the agent to a **Pool** for load distribution.
+  </Step>
+  <Step title="Copy API Key">
+    After creation, the API key is displayed **once**. Copy it immediately — you will need it for installation.
+  </Step>
+</Steps>
+
+<Warning>
+  The API key is shown only once at creation time. If you lose it, you must regenerate it from the agent's settings — which will also invalidate the agent's credential vault.
+</Warning>
+
+---
+
+## Installing an Agent
+
+<Tabs>
+  <Tab title="Quick Install (Ubuntu/Debian)">
+    The one-line installer downloads the agent, creates a systemd service, and starts it automatically:
+
+    ```bash
+    curl -fsSL https://github.com/easycontact-im/ec-im-agent/releases/latest/download/install.sh | \
+      AGENT_API_URL=https://api.easyalert.io \
+      AGENT_API_KEY=ea_agent_xxxxx \
+      AGENT_NAME=prod-eu-west-1 \
+      bash
+    ```
+
+    After installation, manage the agent with systemd:
+
+    ```bash
+    sudo systemctl status easyalert-agent   # Check status
+    sudo systemctl restart easyalert-agent  # Restart
+    sudo journalctl -u easyalert-agent -f   # View logs
+    ```
+
+    **Post-install paths:**
+
+    | Path | Purpose |
+    |------|---------|
+    | `/opt/easyalert/agent/` | Application files |
+    | `/etc/easyalert/agent.env` | Environment configuration |
+    | `/var/lib/easyalert/` | Vault data directory |
+  </Tab>
+  <Tab title="Docker">
+    ```bash
+    docker run -d \
+      --name easyalert-agent \
+      --restart unless-stopped \
+      -e AGENT_API_URL=https://api.easyalert.io \
+      -e AGENT_API_KEY=ea_agent_xxxxx \
+      -e AGENT_NAME=prod-eu-west-1 \
+      -v easyalert-vault:/root/.easyalert \
+      easyalert/agent:latest
+    ```
+
+    <Tip>
+      Mount a named volume for `/root/.easyalert` to persist the encrypted credential vault across container restarts.
+    </Tip>
+  </Tab>
+  <Tab title="Manual">
+    For environments without Docker or systemd:
+
+    ```bash
+    # Install uv (Python package manager)
+    curl -LsSf https://astral.sh/uv/install.sh | sh
+
+    # Clone and install
+    git clone https://github.com/easycontact-im/ec-im-agent.git
+    cd ec-im-agent
+    uv sync
+
+    # Configure
+    export AGENT_API_URL=https://api.easyalert.io
+    export AGENT_API_KEY=ea_agent_xxxxx
+    export AGENT_NAME=prod-eu-west-1
+
+    # Run
+    uv run python main.py
+    ```
+  </Tab>
+</Tabs>
+
+---
+
+## Agent Configuration
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `AGENT_API_URL` | SaaS API base URL | *required* |
+| `AGENT_API_KEY` | Agent authentication key (`ea_agent_xxx`) | *required* |
+| `AGENT_NAME` | Human-readable agent name | hostname |
+| `POLL_INTERVAL` | Job polling interval in seconds | `5` |
+| `HEARTBEAT_INTERVAL` | Heartbeat interval in seconds | `30` |
+| `MAX_CONCURRENT_JOBS` | Maximum parallel job executions (1–50) | `5` |
+| `ADMIN_PORT` | Local admin server port | `9191` |
+| `ADMIN_TOKEN` | Bearer token for local admin API | auto-generated |
+| `VAULT_PATH` | Encrypted vault file location | `~/.easyalert/vault.json` |
+| `LOG_LEVEL` | Logging level (DEBUG/INFO/WARNING/ERROR) | `INFO` |
+| `ALLOW_PRIVATE_NETWORK` | Allow HTTP executor to access private IPs | `false` |
+| `ALLOW_OS_RESTART` | Allow OS service executor to restart the system | `false` |
+
+---
+
+## Agent Status & Health
+
+### Status
+
+| Status | Description |
+|--------|-------------|
+| **Online** | Agent is sending heartbeats and accepting jobs |
+| **Offline** | No heartbeat received in the last 90 seconds |
+| **Degraded** | Agent is online but reporting errors or high failure rate |
+
+### Health Score (0–100)
+
+The health score determines job dispatch priority. It is calculated from two components:
+
+| Component | Weight | Calculation |
+|-----------|--------|-------------|
+| **Heartbeat** | 50 points | Full points if last heartbeat < 60s ago, decays linearly to 0 at 90s |
+| **Job Success Rate** | 50 points | `(successful_jobs / total_jobs) × 50` over the last hour |
+
+<Info>
+  When dispatching a job, the engine selects the agent with the highest health score in the assigned pool. If all agents in the pool are offline, the job remains pending until an agent comes online.
+</Info>
+
+---
+
+## Agent Pools
+
+Pools let you group agents by environment, region, or function. When a connection is linked to a pool, jobs are dispatched to the healthiest agent in that pool.
+
+<Steps>
+  <Step title="Create agents in the same pool">
+    When creating or editing an agent, assign a **Pool ID** (e.g., `prod-eu`, `staging-us`). Multiple agents can share the same pool.
+  </Step>
+  <Step title="Assign pool to connections">
+    When creating a connection, select the pool that should execute actions for that connection.
+  </Step>
+  <Step title="Engine dispatches by health">
+    When a job runs, the engine picks the healthiest online agent from the pool. If the primary agent is unavailable, the next healthiest agent takes over.
+  </Step>
+</Steps>
+
+<Tip>
+  For high-availability, deploy at least 2 agents per pool. If one goes down, the other automatically picks up pending jobs.
+</Tip>
+
+---
+
+## Managing Agents
+
+### Rotate API Key
+
+If an API key is compromised, regenerate it from **Automation > Agents > [Agent] > Regenerate Key**. The new key is shown once.
+
+<Warning>
+  Rotating the API key changes the vault encryption key. All existing credentials in the vault become unreadable. You must re-deliver credentials to the agent after rotation.
+</Warning>
+
+### Enable / Disable
+
+Disabled agents stop receiving new jobs but continue running. Re-enable to resume job dispatch.
+
+### Delete
+
+Deleting an agent removes it permanently. Any pending jobs assigned to the agent will be reassigned or fail.
+
+---
+
+## Security
+
+<CardGroup cols={2}>
+  <Card title="AES-256-GCM Vault" icon="lock">
+    Credentials encrypted with AES-256-GCM. Key derived from agent API key using PBKDF2-HMAC-SHA256 with 600,000 iterations and a random 16-byte salt.
+  </Card>
+  <Card title="API Key Hashing" icon="fingerprint">
+    API keys are bcrypt-hashed server-side with an in-memory cache (1,000 entries, 5-minute TTL) for performance. The key prefix enables O(1) lookup.
+  </Card>
+  <Card title="Localhost Admin" icon="shield-halved">
+    The admin server binds exclusively to `127.0.0.1` — it is never exposed to the network. Rate limited to 60 requests/minute.
+  </Card>
+  <Card title="SSRF Protection" icon="ban">
+    The HTTP executor blocks requests to private IP ranges (127.0.0.0/8, 10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16, 169.254.0.0/16) unless `ALLOW_PRIVATE_NETWORK=true`.
+  </Card>
+</CardGroup>
+
+---
+
+## Upgrading
+
+### Quick Install (systemd)
+
+Re-run the install script. It is idempotent — it upgrades the agent binary while preserving your configuration and vault:
+
+```bash
+curl -fsSL https://github.com/easycontact-im/ec-im-agent/releases/latest/download/install.sh | bash
+```
+
+### Docker
+
+Pull the latest image and recreate the container:
+
+```bash
+docker pull easyalert/agent:latest
+docker stop easyalert-agent && docker rm easyalert-agent
+# Re-run your docker run command with the same volume mount
+```
+
+---
+
+## Best Practices
+
+<AccordionGroup>
+  <Accordion title="Deploy at least 2 agents per pool" icon="clone">
+    A single agent is a single point of failure. With 2+ agents in a pool, the engine automatically routes jobs to the healthiest available agent.
+  </Accordion>
+  <Accordion title="Use descriptive names and pools" icon="tag">
+    Name agents by their location and purpose (e.g., `prod-eu-web-01`, `staging-us-k8s`). Use pool IDs that match your infrastructure topology (e.g., `prod-eu`, `staging-us`).
+  </Accordion>
+  <Accordion title="Monitor health scores" icon="heart-pulse">
+    An agent with a declining health score may indicate network issues, resource exhaustion, or misconfigured connections. Investigate before it drops to zero and stops receiving jobs.
+  </Accordion>
+  <Accordion title="Set appropriate concurrency limits" icon="gauge">
+    The default `MAX_CONCURRENT_JOBS=5` works for most workloads. Increase it for agents running many lightweight HTTP requests; decrease it for agents running heavy SSH scripts or Kubernetes operations.
+  </Accordion>
+  <Accordion title="Secure the admin server" icon="shield-halved">
+    The admin server binds to localhost by default. If you set a custom `ADMIN_TOKEN`, store it securely — it provides full access to the credential vault.
+  </Accordion>
+</AccordionGroup>
+
+---
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Agent shows Offline" icon="circle-xmark">
+    **Cause:** Agent is not sending heartbeats to the SaaS API.
+
+    **Steps:**
+    1. Check if the agent process is running: `sudo systemctl status easyalert-agent` or `docker ps`
+    2. Check logs for connection errors: `sudo journalctl -u easyalert-agent -f`
+    3. Verify `AGENT_API_URL` is reachable from the agent host
+    4. Check for firewall rules blocking outbound HTTPS (port 443)
+    5. If using a proxy, configure `HTTPS_PROXY` environment variable
+  </Accordion>
+  <Accordion title="Jobs timing out" icon="clock">
+    **Cause:** The action takes longer than the configured timeout, or the agent is overloaded.
+
+    **Steps:**
+    1. Increase the timeout on the action node in the workflow designer
+    2. Check agent health score — a low score may indicate the agent is struggling
+    3. Reduce `MAX_CONCURRENT_JOBS` if the agent is resource-constrained
+    4. Check the target system's responsiveness (network latency, service load)
+  </Accordion>
+  <Accordion title="Credentials not working" icon="key">
+    **Cause:** Credentials in the vault may be stale, or the API key was rotated.
+
+    **Steps:**
+    1. Test the connection from **Automation > Connections > Test**
+    2. If the test fails, re-deliver credentials from the connection settings
+    3. If the API key was rotated, all vault data is lost — re-deliver all credentials
+    4. Check the admin server logs for vault decryption errors
+  </Accordion>
+  <Accordion title="Health score is low" icon="heart-crack">
+    **Cause:** Either heartbeats are delayed or too many jobs are failing.
+
+    **Steps:**
+    1. Check heartbeat component: Is the agent sending heartbeats within 60 seconds?
+    2. Check job success component: Review recent job failures in **Automation > Executions**
+    3. Common causes: network instability, overloaded agent, misconfigured connections
+    4. Restart the agent if heartbeats are stale: `sudo systemctl restart easyalert-agent`
+  </Accordion>
+</AccordionGroup>

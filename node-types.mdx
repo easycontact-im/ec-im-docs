@@ -1,0 +1,318 @@
+---
+title: 'Node Types'
+description: '10 building blocks for composing automation workflows'
+icon: 'shapes'
+---
+
+## Overview
+
+Workflows are built from 10 node types, each serving a distinct purpose. Drag them from the palette onto the canvas and connect them with edges to define your automation logic.
+
+| Node Type | Color | Purpose | Output Handles |
+|-----------|-------|---------|---------------|
+| **Trigger** | Amber | Entry point — defines when the workflow starts | 1 (bottom) |
+| **Action** | Blue | Executes a task on a target system | 2 (success, error) |
+| **Condition** | Indigo | Branches based on a boolean expression | 2 (true, false) |
+| **Delay** | Cyan | Pauses execution for a specified duration | 1 (bottom) |
+| **Approval** | Emerald | Waits for human approval before continuing | 2 (approved, rejected) |
+| **Error Handler** | Rose | Catches and handles upstream failures | 1 (bottom) |
+| **ForEach** | Orange | Iterates over a collection | 2 (success, error) |
+| **Parallel** | Violet | Spawns multiple concurrent branches | Multiple |
+| **Join** | Violet | Waits for parallel branches to complete | 1 (bottom) |
+| **Subworkflow** | Pink | Invokes another published workflow | 2 (success, error) |
+
+---
+
+## Trigger
+
+The entry point of every workflow. Exactly one Trigger node is required per workflow.
+
+**Trigger Types:**
+
+| Type | Fires When |
+|------|-----------|
+| `incident.created` | A new incident is created |
+| `incident.acknowledged` | An incident is acknowledged |
+| `incident.resolved` | An incident is resolved |
+| `incident.escalated` | An incident escalates to the next level |
+| `incident.reassigned` | An incident is reassigned to a different team |
+| `webhook` | An external HTTP POST hits the workflow's webhook URL |
+| `schedule` | A cron expression matches the current time |
+| `manual` | Someone clicks **Execute** in the UI |
+
+**Trigger Conditions** let you filter which events activate the workflow. For example, "only trigger on critical incidents from the payment service."
+
+<Info>
+  For a detailed guide on configuring each trigger type, including conditions, webhooks, and cron expressions, see the [Triggers guide](/guides/automation/triggers).
+</Info>
+
+---
+
+## Action
+
+Executes a task on a target system via an agent and connection. This is the most common node type.
+
+**Configuration:**
+
+| Field | Description |
+|-------|-------------|
+| **Action Type** | What to execute (e.g., `ssh.executeCommand`, `http.request`, `slack.sendMessage`) |
+| **Connection** | Which target system to use |
+| **Agent / Pool** | Which agent executes the action (or auto-select from pool) |
+| **Parameters** | Action-specific settings (command, URL, message, etc.) |
+| **Timeout** | Maximum execution time in seconds |
+| **Max Retries** | Number of retry attempts on failure (0 = no retry) |
+| **Retry Delay** | Seconds to wait between retries |
+
+**Output Handles:**
+- **Success** (bottom-left) — Execution succeeded (exit code 0 or HTTP 2xx)
+- **Error** (bottom-right) — Execution failed (non-zero exit, timeout, or error)
+
+Action outputs are available as template variables: `{{nodes.<nodeId>.output.stdout}}`, `{{nodes.<nodeId>.output.statusCode}}`, etc.
+
+<Info>
+  For a complete reference of all 25+ action types and their parameters, see the [Actions guide](/guides/automation/actions).
+</Info>
+
+---
+
+## Condition
+
+Branches the workflow based on a boolean expression. The workflow follows the **True** or **False** edge based on the evaluation result.
+
+**Configuration:**
+
+| Field | Description | Example |
+|-------|-------------|---------|
+| **Field** | The value to evaluate (supports template variables) | `{{incident.severity}}` |
+| **Operator** | Comparison operator | `equals` |
+| **Value** | The value to compare against | `critical` |
+
+**Available Operators:**
+
+| Operator | Description | Requires Value |
+|----------|-------------|:-----------:|
+| `equals` | Exact string/value match | Yes |
+| `notEquals` | Not equal | Yes |
+| `contains` | Substring or element in collection | Yes |
+| `notContains` | Not contained | Yes |
+| `startsWith` | String starts with prefix | Yes |
+| `endsWith` | String ends with suffix | Yes |
+| `greaterThan` | Numeric greater than | Yes |
+| `greaterThanOrEqual` | Numeric greater than or equal | Yes |
+| `lessThan` | Numeric less than | Yes |
+| `lessThanOrEqual` | Numeric less than or equal | Yes |
+| `in` | Value is in a comma-separated list | Yes |
+| `notIn` | Value is not in a list | Yes |
+| `exists` | Value is not null/undefined | No |
+| `notExists` | Value is null/undefined | No |
+| `isEmpty` | String/array/object is empty | No |
+| `isNotEmpty` | Not empty | No |
+| `matches` | Regex pattern match | Yes |
+
+**Output Handles:**
+- **True** (bottom-left) — Condition evaluated to true
+- **False** (bottom-right) — Condition evaluated to false
+
+<Accordion title="Example: Route by Severity">
+  A condition node checks `{{incident.severity}} equals critical`:
+  - **True path** → Restart service + page on-call engineer
+  - **False path** → Send Slack notification only
+</Accordion>
+
+---
+
+## Delay
+
+Pauses the workflow execution for a specified duration before continuing to the next node.
+
+**Configuration:**
+
+| Field | Description | Range |
+|-------|-------------|-------|
+| **Duration** | How long to pause | 0 – 2,592,000 seconds (30 days) |
+
+**Use cases:**
+- Wait 5 minutes after restarting a service to verify it's healthy
+- Add a cooldown period between retry attempts
+- Delay notifications to avoid alert fatigue during incident storms
+
+<Tip>
+  Delay nodes are non-blocking to the engine — the execution is scheduled to resume at the specified time, freeing resources for other workflows.
+</Tip>
+
+---
+
+## Approval
+
+Pauses the workflow and waits for a human to approve or reject before continuing. This is essential for high-risk automations where you want a human in the loop.
+
+<Tabs>
+  <Tab title="Single Approver">
+    Any user with the `automation:execute` permission can approve or reject. The workflow resumes immediately on the first response.
+
+    | Field | Description |
+    |-------|-------------|
+    | **Message** | Displayed to the approver (supports template variables) |
+    | **Timeout** | Minutes to wait before auto-action (0 = wait forever) |
+  </Tab>
+  <Tab title="Multi-Approver">
+    Require approval from specific users or a minimum number of approvers.
+
+    | Field | Description |
+    |-------|-------------|
+    | **Assigned Approvers** | Specific user IDs who can approve |
+    | **Min Approvals** | Number of approvals needed to proceed |
+    | **Timeout** | Minutes to wait before auto-action |
+  </Tab>
+</Tabs>
+
+**Output Handles:**
+- **Approved** (bottom-left) — Approval granted
+- **Rejected** (bottom-right) — Approval denied or timed out
+
+<Info>
+  Approvers can add a note when approving or rejecting. The note is recorded in the execution log and accessible via `{{nodes.<nodeId>.output.responseNote}}`.
+</Info>
+
+---
+
+## Error Handler
+
+Catches failures from upstream nodes and executes remediation logic. Connect an Error Handler to any node's error output to define what happens when things go wrong.
+
+**Configuration:**
+
+| Field | Description |
+|-------|-------------|
+| **Notify on Error** | Send a notification when the error handler activates |
+
+**Available error context variables:**
+
+| Variable | Description |
+|----------|-------------|
+| `{{error.message}}` | Error message from the failed node |
+| `{{error.nodeId}}` | ID of the node that failed |
+| `{{error.actionType}}` | Action type that failed (e.g., `ssh.executeCommand`) |
+| `{{error.exitCode}}` | Exit code of the failed action |
+| `{{error.statusCode}}` | HTTP status code (for HTTP actions) |
+| `{{error.output}}` | Full output from the failed action |
+
+<Accordion title="Example: SSH Failure → Slack Alert">
+  An SSH action tries to restart a service. The Error Handler catches the failure and sends a Slack message:
+
+  ```
+  SSH action failed on {{incident.host}}: {{error.message}}
+  Exit code: {{error.exitCode}}
+  ```
+</Accordion>
+
+---
+
+## ForEach
+
+Iterates over a collection and executes the configured action for each item. Useful for operations that need to run across multiple targets.
+
+**Configuration:**
+
+| Field | Description | Default |
+|-------|-------------|---------|
+| **Collection** | Template variable path to iterate over | *required* |
+| **Item Variable** | Variable name for the current item | `item` |
+| **Max Items** | Maximum items to process (1–100) | `100` |
+| **Continue on Error** | Keep iterating even if one item fails | `false` |
+| **Action Type** | What to execute for each item | *required* |
+| **Connection** | Target system for the action | *required* |
+
+**Available loop variables:**
+
+| Variable | Description |
+|----------|-------------|
+| `{{foreach.item}}` | Current item value |
+| `{{foreach.index}}` | Current iteration index (0-based) |
+| `{{foreach.total}}` | Total number of items |
+
+<Warning>
+  ForEach loops have a maximum nesting depth of 2. You cannot nest more than 2 ForEach nodes inside each other. The maximum items per loop is 100.
+</Warning>
+
+---
+
+## Parallel & Join
+
+### Parallel
+
+Spawns multiple concurrent branches. Connect multiple nodes to the Parallel node's outputs to create branches that execute simultaneously.
+
+**Configuration:** No configuration required — the branch structure is defined by the edges you draw.
+
+<Info>
+  A single workflow supports up to 15 parallel branches. Each branch executes independently on separate agents if available.
+</Info>
+
+### Join
+
+Waits for parallel branches to complete before continuing.
+
+<Tabs>
+  <Tab title="All Mode">
+    Waits for **all** incoming branches to complete. The workflow continues only when every branch has finished (success or failure).
+
+    Use this when all parallel operations must complete before proceeding — for example, restarting multiple services before running a health check.
+  </Tab>
+  <Tab title="Any Mode">
+    Continues as soon as **any** one incoming branch completes. Remaining branches continue running but their results don't affect the main flow.
+
+    Use this for redundancy patterns — for example, trying multiple remediation approaches and proceeding with whichever succeeds first.
+  </Tab>
+</Tabs>
+
+**Configuration:**
+
+| Field | Description |
+|-------|-------------|
+| **Join Mode** | `all` (wait for everything) or `any` (first completion) |
+| **Timeout** | Maximum seconds to wait for branches (0 = wait forever) |
+
+---
+
+## Subworkflow
+
+Invokes another published workflow as a step in the current workflow. This enables modular workflow design — build reusable automation blocks and compose them into larger flows.
+
+**Configuration:**
+
+| Field | Description |
+|-------|-------------|
+| **Target Workflow** | The published workflow to invoke |
+| **Input Mapping** | Map variables from the current execution to the subworkflow's input |
+| **Wait for Completion** | Wait for the subworkflow to finish before continuing |
+
+**Output Handles:**
+- **Success** (bottom-left) — Subworkflow completed successfully
+- **Error** (bottom-right) — Subworkflow failed
+
+<Warning>
+  Circular references are detected at publish time. You cannot create a subworkflow chain where Workflow A calls B which calls A (directly or indirectly).
+</Warning>
+
+<Accordion title="Example: Shared Notification Block">
+  Create a "Notification Workflow" that sends alerts to Slack, creates a Jira ticket, and updates the status page. Then invoke it as a subworkflow from any incident response workflow, passing the incident data via input mapping.
+</Accordion>
+
+---
+
+## Quick Reference
+
+| Node Type | When to Use | Key Config | Outputs |
+|-----------|-------------|------------|---------|
+| **Trigger** | Starting point of every workflow | Trigger type, conditions | 1 |
+| **Action** | Execute any task | Action type, connection, params | Success / Error |
+| **Condition** | Branch on data | Field, operator, value | True / False |
+| **Delay** | Pause execution | Duration (seconds) | 1 |
+| **Approval** | Human decision gate | Message, approvers, timeout | Approved / Rejected |
+| **Error Handler** | Handle failures | Notify flag | 1 |
+| **ForEach** | Process collections | Collection, item var, max items | Success / Error |
+| **Parallel** | Run branches concurrently | *(edges define branches)* | Multiple |
+| **Join** | Wait for branches | Mode (all/any), timeout | 1 |
+| **Subworkflow** | Reuse workflow logic | Target workflow, input mapping | Success / Error |

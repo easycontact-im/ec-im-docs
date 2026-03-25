@@ -1,0 +1,392 @@
+---
+title: 'Triggers'
+description: 'Configure how and when workflows start executing'
+icon: 'bolt'
+---
+
+## Overview
+
+Every workflow starts with a trigger — the event or schedule that kicks off execution. EasyAlert supports four trigger types to cover both reactive and proactive automation.
+
+<CardGroup cols={2}>
+  <Card title="Incident Events" icon="bell">
+    Automatically respond when incidents are created, acknowledged, resolved, escalated, or reassigned
+  </Card>
+  <Card title="Webhook" icon="webhook">
+    Accept HTTP POST requests from external systems — CI/CD pipelines, monitoring tools, custom scripts
+  </Card>
+  <Card title="Scheduled (Cron)" icon="calendar-days">
+    Run workflows on a recurring schedule using standard cron expressions
+  </Card>
+  <Card title="Manual" icon="hand-pointer">
+    Execute workflows on-demand from the UI or API with optional input variables
+  </Card>
+</CardGroup>
+
+---
+
+## Incident Event Triggers
+
+Incident event triggers fire automatically when an incident lifecycle event occurs. Use trigger conditions to filter which incidents activate the workflow.
+
+<Tabs>
+  <Tab title="incident.created">
+    Fires when a new incident is created from any source — webhook integration, API call, or manual creation.
+
+    **Common use cases:**
+    - Auto-remediate known issues (restart service, scale deployment)
+    - Enrich incidents with additional data from external systems
+    - Route incidents to the right team based on service or tags
+  </Tab>
+  <Tab title="incident.acknowledged">
+    Fires when someone acknowledges an incident, signaling they are working on it.
+
+    **Common use cases:**
+    - Notify the team that someone has picked up the incident
+    - Start a timer-based escalation if not resolved within X minutes
+    - Update an external status page
+  </Tab>
+  <Tab title="incident.resolved">
+    Fires when an incident is marked as resolved.
+
+    **Common use cases:**
+    - Create a post-incident Jira ticket for root cause analysis
+    - Collect and archive diagnostic logs
+    - Update status page to "Operational"
+    - Send resolution summary to stakeholders
+  </Tab>
+  <Tab title="incident.escalated">
+    Fires when an incident escalates to the next level in the escalation policy.
+
+    **Common use cases:**
+    - Notify management when incidents escalate beyond Level 2
+    - Trigger more aggressive remediation (e.g., full deployment rollback)
+    - Create a war room in Slack
+  </Tab>
+  <Tab title="incident.reassigned">
+    Fires when an incident is reassigned to a different team or individual.
+
+    **Common use cases:**
+    - Notify the new team about the handoff
+    - Transfer incident context (timeline, notes) to a Jira ticket
+    - Update the on-call dashboard
+  </Tab>
+</Tabs>
+
+### Trigger Conditions
+
+Conditions filter which incidents activate the workflow. Without conditions, every matching event triggers the workflow.
+
+**Condition Structure:**
+
+Each condition evaluates a field against a value using an operator. Conditions are grouped with **AND** (`all`) or **OR** (`any`) logic.
+
+**Available Fields:**
+
+| Field | Description | Example Value |
+|-------|-------------|---------------|
+| `severity` | Incident severity level | `critical`, `high`, `medium`, `low` |
+| `status` | Incident status | `triggered`, `acknowledged`, `resolved` |
+| `service` | Service that generated the incident | `payment-api`, `auth-service` |
+| `source` | Integration source | `prometheus`, `datadog`, `custom` |
+| `host` | Affected hostname | `web-01.prod.internal` |
+| `teamId` | Assigned team ID | `team-uuid-here` |
+| `tags.*` | Any incident tag by key | `tags.environment = production` |
+
+**Operators:** `equals`, `notEquals`, `contains`, `startsWith`, `endsWith`, `in`, `notIn`, `exists`, `notExists`, `matches` (regex), and more. See the [Node Types guide](/guides/automation/node-types#condition) for the complete operator list.
+
+<Accordion title="Example: Critical Production Incidents Only">
+  Trigger conditions:
+
+  - **Logic:** `all` (AND)
+    - `severity` **equals** `critical`
+    - `tags.environment` **equals** `production`
+
+  This workflow only fires for critical incidents in the production environment. A high-severity staging incident won't trigger it.
+</Accordion>
+
+---
+
+## Webhook Triggers
+
+Webhook triggers let external systems start a workflow by sending an HTTP POST request. This is ideal for integrating with CI/CD pipelines, custom monitoring tools, or any system that can make HTTP calls.
+
+<Steps>
+  <Step title="Enable Webhook Trigger">
+    In the workflow designer, set the trigger type to **Webhook** in the Trigger node inspector.
+  </Step>
+  <Step title="Generate Webhook Key">
+    Click **Generate Webhook Key**. This creates a unique URL and a bearer token (secret).
+  </Step>
+  <Step title="Copy Credentials">
+    Copy the **Webhook URL** and **Secret**. The secret is shown only once.
+  </Step>
+  <Step title="Configure Your Source">
+    Set up your external system to POST to the webhook URL with the Bearer token.
+  </Step>
+</Steps>
+
+**Webhook URL format:**
+
+```
+POST https://api.easyalert.io/api/v1/automation/webhooks/{webhookKey}
+```
+
+**Example request:**
+
+```bash
+curl -X POST https://api.easyalert.io/api/v1/automation/webhooks/wh_abc123 \
+  -H "Authorization: Bearer your_webhook_secret" \
+  -H "Content-Type: application/json" \
+  -d '{"variables": {"deployment": "v2.1.0", "environment": "production"}}'
+```
+
+<Warning>
+  The webhook secret is displayed only once when generated. If you lose it, you must regenerate the webhook key (which also changes the URL). See the [Webhook API guide](/guides/automation/webhook-api) for full API reference.
+</Warning>
+
+**Security features:**
+
+| Feature | Detail |
+|---------|--------|
+| **Rate Limit** | 60 requests per minute per webhook key |
+| **Idempotency** | Duplicate payloads within 5 minutes return a cached result |
+| **Authentication** | Bearer token (bcrypt-hashed server-side) |
+| **Custom Idempotency Key** | Optional `X-Idempotency-Key` header for explicit deduplication |
+
+---
+
+## Scheduled Triggers (Cron)
+
+Cron triggers run workflows on a recurring schedule using standard 5-field cron expressions.
+
+**Cron Format:**
+
+```
+┌───────────── minute (0–59)
+│ ┌───────────── hour (0–23)
+│ │ ┌───────────── day of month (1–31)
+│ │ │ ┌───────────── month (1–12)
+│ │ │ │ ┌───────────── day of week (0–6, 0 = Sunday)
+│ │ │ │ │
+* * * * *
+```
+
+**Supported syntax:**
+
+| Syntax | Meaning | Example |
+|--------|---------|---------|
+| `*` | Every value | `* * * * *` = every minute |
+| `*/N` | Every N values | `*/5 * * * *` = every 5 minutes |
+| `N-M` | Range | `9-17 * * * *` = hours 9 through 17 |
+| `N,M,O` | List | `1,15 * * * *` = minutes 1 and 15 |
+
+**Common presets:**
+
+| Preset | Expression | Description |
+|--------|-----------|-------------|
+| Every 5 minutes | `*/5 * * * *` | Run 12 times per hour |
+| Every hour | `0 * * * *` | Top of every hour |
+| Every day at midnight | `0 0 * * *` | Once daily at 00:00 |
+| Every Monday at 9 AM | `0 9 * * 1` | Weekly on Monday morning |
+| First of month at noon | `0 12 1 * *` | Monthly on the 1st at 12:00 |
+
+<Tip>
+  The workflow designer includes a cron validator that shows a human-readable description of your expression (e.g., "Every Sunday at midnight") and the next 5 run times.
+</Tip>
+
+<Accordion title="Custom Expression Examples">
+  | Expression | Meaning |
+  |-----------|---------|
+  | `30 2 * * *` | Every day at 2:30 AM |
+  | `0 9-17 * * 1-5` | Every hour from 9 AM to 5 PM, weekdays only |
+  | `0 0 */2 * *` | Every other day at midnight |
+  | `15 10 * * 0` | Every Sunday at 10:15 AM |
+  | `0 */4 * * *` | Every 4 hours |
+</Accordion>
+
+### Auto-Disable on Failure
+
+If a cron-triggered workflow fails 5 consecutive times, it is automatically disabled to prevent runaway failures:
+
+- A banner appears on the workflow with the disable reason and timestamp
+- The cron schedule stops firing
+- You can re-enable the workflow from its settings after fixing the underlying issue
+
+<Info>
+  Auto-disable only affects cron triggers. Incident event and webhook triggers are not affected by consecutive failures.
+</Info>
+
+---
+
+## Manual Triggers
+
+Manual triggers let you execute a workflow on-demand from the UI or API. They're useful for:
+
+- Testing workflows before activating event-based triggers
+- Running one-off automation tasks
+- Executing maintenance workflows that don't need to be scheduled
+
+<Steps>
+  <Step title="Open the Workflow">
+    Navigate to **Automation > Workflows** and open the workflow you want to execute.
+  </Step>
+  <Step title="Click Execute">
+    Click the **Execute** button in the toolbar. Optionally provide input variables as JSON.
+  </Step>
+  <Step title="Monitor Execution">
+    The execution starts immediately. You're redirected to the execution detail page to monitor progress in real-time.
+  </Step>
+</Steps>
+
+<Info>
+  Manual execution requires the `automation:execute` permission. The workflow must be published but doesn't need to be active (activated) — you can manually execute inactive workflows.
+</Info>
+
+---
+
+## Template Variables
+
+Template variables let you use dynamic data in your workflow — incident fields, webhook payloads, node outputs, and more. The syntax is `{{variable.path}}` with dot notation.
+
+<Tabs>
+  <Tab title="Incident Variables">
+    Available when the trigger is an incident event:
+
+    | Variable | Description | Example |
+    |----------|-------------|---------|
+    | `{{incident.id}}` | Incident ID | `INC-001` |
+    | `{{incident.title}}` | Incident title | `High CPU on web-01` |
+    | `{{incident.description}}` | Incident description | `CPU usage exceeded 90%` |
+    | `{{incident.severity}}` | Severity level | `critical` |
+    | `{{incident.status}}` | Current status | `triggered` |
+    | `{{incident.service}}` | Source service | `payment-api` |
+    | `{{incident.host}}` | Affected hostname | `web-01.prod` |
+    | `{{incident.teamId}}` | Assigned team ID | `team-uuid` |
+    | `{{incident.assignedTo}}` | Assigned user ID | `user-uuid` |
+    | `{{incident.createdAt}}` | Creation timestamp | `2024-01-15T10:30:00Z` |
+    | `{{incident.tags}}` | All tags as object | `{"env": "prod"}` |
+    | `{{incident.eventType}}` | Event that triggered | `incident.created` |
+  </Tab>
+  <Tab title="Webhook Variables">
+    Available when the trigger is a webhook. Variables come from the `variables` field in the POST body:
+
+    ```json
+    POST /webhooks/{key}
+    {
+      "variables": {
+        "deployment": "v2.1.0",
+        "environment": "production",
+        "commit": "abc123"
+      }
+    }
+    ```
+
+    Access with `{{webhook.deployment}}`, `{{webhook.environment}}`, `{{webhook.commit}}`.
+  </Tab>
+  <Tab title="Node Output Variables">
+    Access outputs from previous nodes in the workflow:
+
+    | Variable | Description |
+    |----------|-------------|
+    | `{{nodes.<nodeId>.output}}` | Full output object |
+    | `{{nodes.<nodeId>.output.stdout}}` | SSH/Script stdout |
+    | `{{nodes.<nodeId>.output.stderr}}` | SSH/Script stderr |
+    | `{{nodes.<nodeId>.output.statusCode}}` | HTTP status code |
+    | `{{nodes.<nodeId>.output.body}}` | HTTP response body |
+    | `{{nodes.<nodeId>.status}}` | Node execution status |
+    | `{{nodes.<nodeId>.exitCode}}` | Exit code |
+  </Tab>
+  <Tab title="Error Variables">
+    Available inside Error Handler nodes:
+
+    | Variable | Description |
+    |----------|-------------|
+    | `{{error.message}}` | Error message |
+    | `{{error.nodeId}}` | Failed node ID |
+    | `{{error.actionType}}` | Failed action type |
+    | `{{error.exitCode}}` | Exit code |
+    | `{{error.statusCode}}` | HTTP status code |
+    | `{{error.output}}` | Full output from failed node |
+  </Tab>
+  <Tab title="ForEach Variables">
+    Available inside ForEach loop iterations:
+
+    | Variable | Description |
+    |----------|-------------|
+    | `{{foreach.item}}` | Current item value |
+    | `{{foreach.index}}` | 0-based iteration index |
+    | `{{foreach.total}}` | Total items in collection |
+  </Tab>
+</Tabs>
+
+<Tip>
+  Use the **Variable Picker** (braces icon) in the workflow designer to browse and insert available variables. It shows all variables from the current context — incident fields, upstream node outputs, and loop variables.
+</Tip>
+
+---
+
+## Best Practices
+
+<AccordionGroup>
+  <Accordion title="Use trigger conditions to reduce noise" icon="filter">
+    Without conditions, an `incident.created` trigger fires for every incident. Add conditions to filter by severity, service, or environment so the workflow only runs when it's relevant.
+  </Accordion>
+  <Accordion title="Test webhooks with cURL before integration" icon="terminal">
+    Before connecting your CI/CD pipeline or monitoring tool, send a test request with cURL to verify the webhook URL and secret are correct. Check the execution in the UI to confirm variables are received.
+  </Accordion>
+  <Accordion title="Use cron presets for common schedules" icon="calendar-check">
+    The designer provides presets for common intervals. Use these instead of writing cron expressions from scratch to avoid syntax errors.
+  </Accordion>
+  <Accordion title="Prefer specific event triggers over broad ones" icon="bullseye">
+    Instead of one workflow triggered by all incident events, create separate workflows for `incident.created` and `incident.resolved`. This keeps workflows focused and easier to debug.
+  </Accordion>
+</AccordionGroup>
+
+---
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Incident trigger not firing" icon="bolt">
+    **Steps:**
+    1. Verify the workflow is published **and** activated (both required)
+    2. Check trigger conditions — test with a broader filter first
+    3. Verify the incident event type matches (e.g., `created` vs `acknowledged`)
+    4. Check **Automation > Executions** for any runs that may have failed silently
+  </Accordion>
+  <Accordion title="Webhook returns 401 Unauthorized" icon="lock">
+    **Cause:** Invalid or missing Bearer token.
+
+    **Steps:**
+    1. Verify `Authorization: Bearer <secret>` header is included
+    2. Verify the secret matches — it was shown only once at generation
+    3. If unsure, regenerate the webhook key and use the new secret
+  </Accordion>
+  <Accordion title="Webhook returns 429 Too Many Requests" icon="gauge-high">
+    **Cause:** Rate limit exceeded (60 requests/minute per webhook key).
+
+    **Steps:**
+    1. Reduce the call frequency from your source system
+    2. Use the `X-Idempotency-Key` header to deduplicate retries
+    3. If you need higher throughput, contact support
+  </Accordion>
+  <Accordion title="Cron trigger stops running" icon="calendar-xmark">
+    **Cause:** Auto-disabled after 5 consecutive failures.
+
+    **Steps:**
+    1. Check the workflow for an auto-disable banner
+    2. Review recent execution failures in **Automation > Executions**
+    3. Fix the underlying issue (connection, credentials, action parameters)
+    4. Re-enable the workflow from its settings
+  </Accordion>
+  <Accordion title="Template variables resolve to empty" icon="braces">
+    **Cause:** Variable path doesn't match available data.
+
+    **Steps:**
+    1. Use the Variable Picker to check available variables
+    2. Verify the variable path matches the data structure (e.g., `{{incident.title}}` not `{{title}}`)
+    3. For node outputs, ensure the upstream node has actually executed
+    4. For webhook variables, verify the POST body includes the `variables` field
+  </Accordion>
+</AccordionGroup>

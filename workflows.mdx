@@ -1,0 +1,267 @@
+---
+title: 'Workflows'
+description: 'Build, publish, and manage visual automation workflows'
+icon: 'diagram-project'
+---
+
+## Overview
+
+Workflows are the core of EasyAlert Automation. A workflow is a visual graph of nodes (trigger, actions, conditions, etc.) connected by edges that define the execution flow. You build workflows in a drag-and-drop designer, publish versioned snapshots, and activate them to respond to events automatically.
+
+<CardGroup cols={2}>
+  <Card title="Drag-and-Drop Designer" icon="hand-pointer">
+    Build workflows visually with a ReactFlow-based canvas. Drag nodes from the palette, connect them with edges, and configure each node in the inspector panel.
+  </Card>
+  <Card title="Version Control" icon="code-branch">
+    Every publish creates an immutable version snapshot. Compare versions with the built-in diff viewer and rollback to any previous version.
+  </Card>
+  <Card title="Template Gallery" icon="grid-2-plus">
+    Start from pre-built templates for common scenarios — auto-remediation, notification routing, Kubernetes management, and more.
+  </Card>
+  <Card title="Clone & Rollback" icon="clone">
+    Duplicate existing workflows with one click. Rollback to any published version if something goes wrong.
+  </Card>
+</CardGroup>
+
+---
+
+## Creating a Workflow
+
+<Steps>
+  <Step title="Navigate to Workflows">
+    Go to **Automation > Workflows** and click **Create Workflow**.
+  </Step>
+  <Step title="Choose a Starting Point">
+    Select a **template** from the gallery for common scenarios, or choose **Blank Workflow** to start from scratch.
+  </Step>
+  <Step title="Name and Describe">
+    Enter a descriptive **Name** (e.g., "Auto-Restart Critical Services") and optional **Description** explaining when and why this workflow should run.
+  </Step>
+  <Step title="Open the Designer">
+    Click **Create** to open the visual workflow designer where you'll build the automation logic.
+  </Step>
+</Steps>
+
+---
+
+## The Workflow Designer
+
+The designer has four main areas:
+
+| Area | Location | Purpose |
+|------|----------|---------|
+| **Node Palette** | Left sidebar | Drag node types onto the canvas |
+| **Canvas** | Center | Visual workspace — arrange and connect nodes |
+| **Inspector** | Right panel | Configure the selected node's settings |
+| **Toolbar** | Top bar | Save, Publish, Undo/Redo, Auto-Layout, Version History |
+
+<Tip>
+  Use **Ctrl+Z** / **Ctrl+Y** for undo/redo. Click the **Auto-Layout** button (grid icon) to automatically arrange nodes using the Dagre algorithm.
+</Tip>
+
+### Canvas Features
+
+- **Snap Grid** — Nodes snap to a grid for clean alignment
+- **MiniMap** — Bird's-eye view of the full workflow (bottom-right corner)
+- **Zoom & Pan** — Scroll to zoom, drag to pan, or use the controls
+- **Edge Labels** — Automatic labels like "True"/"False", "Approved"/"Rejected" on conditional edges
+- **Drop-on-Edge** — Drop a node near an existing edge to automatically insert it into the flow
+
+---
+
+## Building a Workflow
+
+<Steps>
+  <Step title="Add a Trigger Node">
+    Every workflow starts with exactly one **Trigger** node. Drag it from the palette and configure the trigger type (incident event, webhook, cron schedule, or manual). See the [Triggers guide](/guides/automation/triggers) for details.
+  </Step>
+  <Step title="Connect Action Nodes">
+    Drag **Action** nodes onto the canvas and connect them to the trigger. Each action executes a task on a target system — SSH commands, HTTP requests, Kubernetes operations, Slack messages, etc. See the [Actions guide](/guides/automation/actions).
+  </Step>
+  <Step title="Add Logic Nodes">
+    Use **Condition** nodes to branch based on data, **Delay** nodes to pause execution, **Approval** nodes for human gates, and **ForEach** nodes to iterate over collections. See the [Node Types guide](/guides/automation/node-types).
+  </Step>
+  <Step title="Configure Each Node">
+    Click any node to open its inspector on the right. Fill in the required fields — action type, connection, parameters, conditions, timeout, etc.
+  </Step>
+  <Step title="Save the Draft">
+    Click **Save** in the toolbar to save your work. The workflow remains in draft state until you publish it.
+  </Step>
+</Steps>
+
+<Info>
+  Every workflow must have exactly one Trigger node. The designer validates this before publishing and shows an error if no trigger is found.
+</Info>
+
+---
+
+## Publishing & Versioning
+
+### Draft vs Published
+
+| State | Description |
+|-------|-------------|
+| **Draft** | Work in progress. Can be edited freely. Not active — won't respond to events. |
+| **Published** | Frozen snapshot of the workflow definition. Represents a specific version. |
+| **Active** | A published workflow that is currently live and responding to events. |
+
+### Publishing a Workflow
+
+<Steps>
+  <Step title="Validate">
+    Click **Validate** in the toolbar. The engine checks for:
+    - Exactly one trigger node
+    - All nodes have unique IDs
+    - All edges reference existing nodes
+    - No self-loops
+    - Required fields are filled
+    - No circular subworkflow references
+  </Step>
+  <Step title="Publish">
+    Click **Publish** to create a versioned snapshot. The version number auto-increments (v1, v2, v3...). The published definition is immutable.
+  </Step>
+  <Step title="Activate">
+    Click **Activate** to make the workflow live. Active workflows respond to their configured triggers — incident events, webhooks, or cron schedules.
+  </Step>
+</Steps>
+
+<Warning>
+  Publishing creates a new version but does not activate the workflow. You must explicitly click **Activate** after publishing. This allows you to review the published version before it goes live.
+</Warning>
+
+### Version History
+
+Every publish creates a numbered version. Access version history from the clock icon in the toolbar:
+
+- **Timeline View** — Chronological list of publishes with author and timestamp
+- **Version List** — Table of all versions with publish date
+- **Diff Viewer** — Side-by-side comparison showing added, removed, and modified nodes and edges
+- **Rollback** — Restore the workflow definition to any previous published version
+
+### Rollback
+
+Rollback replaces the current draft definition with the selected version's definition. It does **not** auto-publish — you must publish again after rolling back.
+
+---
+
+## Workflow Templates
+
+Start from pre-built templates to accelerate workflow creation:
+
+<Tabs>
+  <Tab title="Incident Response">
+    - **Auto-Remediation** — Restart service on critical incident, notify on Slack
+    - **Escalation Notification** — Multi-channel notification chain (Slack → SMS → Call)
+    - **Incident Triage** — Route incidents by severity and service to appropriate teams
+  </Tab>
+  <Tab title="Infrastructure">
+    - **Kubernetes Auto-Scale** — Scale deployment when resource threshold breached
+    - **Pod Restart** — Delete and recreate failing pods automatically
+    - **Deployment Rollback** — Roll back Kubernetes deployment on failure detection
+  </Tab>
+  <Tab title="Notification">
+    - **Multi-Channel Alert** — Send to Slack, email, and Jira simultaneously
+    - **On-Call Escalation** — Page on-call via Slack, then SMS if no acknowledgment
+    - **Status Page Update** — Update status page when incident resolved
+  </Tab>
+  <Tab title="DevOps">
+    - **Post-Incident Cleanup** — Create Jira ticket, collect logs, update documentation
+    - **Health Check** — Periodic HTTP health checks with alerting on failure
+  </Tab>
+</Tabs>
+
+<Tip>
+  Templates are fully editable after creation. Use them as starting points and customize the trigger conditions, actions, and parameters to match your environment.
+</Tip>
+
+---
+
+## Managing Workflows
+
+### Clone
+
+Duplicate an existing workflow with **Clone**. The clone gets a new ID and name (suffixed with "— Copy"), resets execution statistics, and starts in draft state.
+
+### Activate / Deactivate
+
+- **Activate** — Makes the workflow live. It will respond to configured triggers.
+- **Deactivate** — Stops the workflow from responding to events. Running executions are not affected.
+
+### Auto-Disable
+
+Workflows with cron triggers are automatically disabled after 5 consecutive execution failures. When auto-disabled:
+
+- A banner appears on the workflow showing the reason and disable timestamp
+- The workflow stops receiving cron triggers
+- You can re-enable it from the workflow settings after fixing the issue
+
+### Delete
+
+Deleting a workflow is permanent. Running executions are cancelled, and the workflow is removed from all trigger evaluations.
+
+---
+
+## Workflow Statuses
+
+| Status | Badge Color | Description |
+|--------|-------------|-------------|
+| **Draft** | Gray | Work in progress, not published or activated |
+| **Active** | Green | Published and responding to events |
+| **Inactive** | Yellow | Published but not responding to events (deactivated) |
+| **Auto-Disabled** | Red | Automatically disabled due to consecutive failures |
+
+---
+
+## Best Practices
+
+<AccordionGroup>
+  <Accordion title="Start simple, add complexity gradually" icon="seedling">
+    Begin with a trigger and one or two actions. Test the workflow end-to-end before adding conditions, error handlers, and parallel branches. It's easier to debug a simple workflow than a complex one.
+  </Accordion>
+  <Accordion title="Use descriptive node names" icon="tag">
+    Rename nodes to describe their purpose: "Check if severity is critical" instead of "Condition 1". This makes the workflow self-documenting and easier to debug.
+  </Accordion>
+  <Accordion title="Add error handlers for critical actions" icon="shield-halved">
+    If an SSH command or Kubernetes operation fails, you want to know immediately. Add Error Handler nodes to send a Slack notification or create a Jira ticket when critical actions fail.
+  </Accordion>
+  <Accordion title="Test with manual triggers first" icon="hand-pointer">
+    Before activating event-based or cron triggers, test your workflow using the **Execute** button (manual trigger). This lets you verify the entire flow without waiting for real incidents.
+  </Accordion>
+  <Accordion title="Use version history before major changes" icon="code-branch">
+    Before making significant changes to an active workflow, note the current version number. If something goes wrong, you can rollback to the known-good version.
+  </Accordion>
+  <Accordion title="Keep workflows focused" icon="bullseye">
+    A workflow should do one thing well. Instead of a mega-workflow that handles everything, create separate workflows for different scenarios and use subworkflows to share common logic.
+  </Accordion>
+</AccordionGroup>
+
+---
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Validation fails with 'No trigger node found'" icon="bolt">
+    Every workflow must have exactly one Trigger node. Check that you've dragged a Trigger node onto the canvas and that it's properly connected.
+  </Accordion>
+  <Accordion title="Workflow is active but not triggering" icon="circle-pause">
+    **Steps:**
+    1. Verify the trigger type matches the events you expect (e.g., `incident.created` vs `incident.acknowledged`)
+    2. Check trigger conditions — are they too restrictive? (e.g., filtering for severity=critical when your test incident is medium)
+    3. For cron triggers, check if the workflow was auto-disabled
+    4. For webhook triggers, verify the webhook key and secret
+  </Accordion>
+  <Accordion title="Can't publish workflow" icon="triangle-exclamation">
+    Click **Validate** to see specific errors. Common issues:
+    - Disconnected nodes (not reachable from the trigger)
+    - Missing required fields in action nodes (connection, action type)
+    - Self-referencing edges
+    - Circular subworkflow references
+  </Accordion>
+  <Accordion title="Workflow executes but actions fail" icon="circle-xmark">
+    Check the execution detail page (**Automation > Executions > [Execution]**) for per-job error messages. Common causes:
+    - Connection credentials expired or not delivered
+    - Agent offline or unhealthy
+    - Template variables resolving to empty values
+    - Action timeout too short
+  </Accordion>
+</AccordionGroup>

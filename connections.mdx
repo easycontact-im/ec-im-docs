@@ -1,0 +1,389 @@
+---
+title: 'Connections'
+description: 'Configure target systems and securely manage credentials'
+icon: 'plug'
+---
+
+## Overview
+
+Connections define the target systems your workflows interact with — SSH servers, Kubernetes clusters, Slack workspaces, Jira projects, databases, and more. EasyAlert splits connection data into two parts for security: configuration (host, port, namespace) lives in the SaaS, while credentials (passwords, API tokens, private keys) stay encrypted on the agent.
+
+<CardGroup cols={2}>
+  <Card title="13 Connection Types" icon="grid-2">
+    SSH, HTTP, Kubernetes, Slack, Jira, Email, Teams, Database, WinRM, Script, OS, Notification, and Custom
+  </Card>
+  <Card title="Secure Credential Vault" icon="vault">
+    Credentials encrypted with AES-256-GCM, stored only on the agent — never in the SaaS database
+  </Card>
+  <Card title="Test Connectivity" icon="wifi">
+    One-click connectivity tests that verify both network access and authentication
+  </Card>
+  <Card title="Guided Setup" icon="hat-wizard">
+    Step-by-step creation wizard with type-specific configuration forms
+  </Card>
+</CardGroup>
+
+---
+
+## How Connections Work
+
+```
+┌─────────────────────────────────────┐
+│           SaaS (EasyAlert)          │
+│                                     │
+│  Connection Config:                 │
+│  • name, type                       │
+│  • host, port, namespace            │
+│  • auth method, SSL settings        │
+│  (NO secrets)                       │
+└──────────────┬──────────────────────┘
+               │ Job dispatched with
+               │ connection config
+               ▼
+┌─────────────────────────────────────┐
+│       Agent (Your Infrastructure)   │
+│                                     │
+│  Encrypted Vault:                   │
+│  • passwords, API tokens            │
+│  • SSH private keys                 │
+│  • service account credentials      │
+│                                     │
+│  Agent combines config + credentials│
+│  and executes the action            │
+└─────────────────────────────────────┘
+```
+
+<Info>
+  This split architecture means that even if the SaaS database were compromised, your credentials remain safe — they only exist in the agent's encrypted vault on your infrastructure.
+</Info>
+
+---
+
+## Creating a Connection
+
+<Steps>
+  <Step title="Choose Connection Type">
+    Go to **Automation > Connections** and click **Create Connection**. Select the connection type (SSH, Kubernetes, Slack, etc.) from the dropdown.
+  </Step>
+  <Step title="Configure Settings">
+    Fill in the type-specific configuration fields — hostname, port, namespace, authentication method, etc. These settings are stored in the SaaS.
+  </Step>
+  <Step title="Select Agent">
+    Choose which agent (or agent pool) will execute actions using this connection. The agent must be able to reach the target system on the network.
+  </Step>
+  <Step title="Deliver Credentials">
+    Enter the credentials (password, API token, SSH key, etc.) and click **Deliver**. The credentials are encrypted and sent to the agent's local vault — they are never stored in the SaaS.
+  </Step>
+</Steps>
+
+<Tip>
+  After creating a connection, click **Test** to verify connectivity. The test runs on the assigned agent and checks both network access and authentication.
+</Tip>
+
+---
+
+## Connection Types
+
+<AccordionGroup>
+  <Accordion title="SSH" icon="terminal">
+    Connect to Linux/Unix servers for remote command execution and script deployment.
+
+    | Parameter | Description | Example |
+    |-----------|-------------|---------|
+    | **Host** | Hostname or IP address | `web-01.prod.internal` |
+    | **Port** | SSH port | `22` |
+    | **Username** | SSH username | `deploy` |
+    | **Auth Method** | `password` or `privateKey` | `privateKey` |
+
+    **Credentials:** Password or SSH private key (delivered to agent vault)
+
+    **Available Actions:** `ssh.executeCommand`, `ssh.executeScript`
+  </Accordion>
+
+  <Accordion title="HTTP" icon="globe">
+    Connect to any HTTP/HTTPS API endpoint for making web requests.
+
+    | Parameter | Description | Example |
+    |-----------|-------------|---------|
+    | **Base URL** | API base URL | `https://api.example.com` |
+    | **Auth Type** | `none`, `basic`, `bearer`, or `apiKey` | `bearer` |
+    | **Timeout** | Request timeout in seconds | `30` |
+    | **Verify SSL** | Validate SSL certificate | `true` |
+
+    **Credentials:** API token, username/password, or API key (depending on auth type)
+
+    **Available Actions:** `http.request`
+
+    <Info>
+      By default, HTTP connections block requests to private IP ranges (10.x, 172.16.x, 192.168.x) to prevent SSRF attacks. Set `ALLOW_PRIVATE_NETWORK=true` on the agent to allow private network access.
+    </Info>
+  </Accordion>
+
+  <Accordion title="Kubernetes" icon="dharmachakra">
+    Connect to Kubernetes clusters for deployment management, pod operations, and log retrieval.
+
+    | Parameter | Description | Example |
+    |-----------|-------------|---------|
+    | **Context** | kubectl context name | `prod-eu-west` |
+    | **Namespace** | Default namespace | `default` |
+    | **Kubeconfig Path** | Path to kubeconfig on the agent | `/home/deploy/.kube/config` |
+
+    **Credentials:** Kubeconfig file or service account token (delivered to agent vault)
+
+    **Available Actions:** `kubernetes.restartDeployment`, `kubernetes.scaleDeployment`, `kubernetes.deletePod`, `kubernetes.rollbackDeployment`, `kubernetes.getLogs`
+  </Accordion>
+
+  <Accordion title="Slack" icon="hashtag">
+    Connect to Slack workspaces for sending messages and reactions.
+
+    | Parameter | Description | Example |
+    |-----------|-------------|---------|
+    | **Default Channel** | Channel ID for messages | `C01234ABCDE` |
+
+    **Credentials:** Bot token (`xoxb-...`) delivered to agent vault
+
+    **Available Actions:** `slack.sendMessage`, `slack.updateMessage`, `slack.addReaction`
+
+    <Tip>
+      Use the Slack channel ID (starts with `C`), not the channel name. You can find it in Slack by right-clicking a channel and selecting "View channel details".
+    </Tip>
+  </Accordion>
+
+  <Accordion title="Jira" icon="ticket">
+    Connect to Jira for creating issues, updating tickets, and managing workflows.
+
+    | Parameter | Description | Example |
+    |-----------|-------------|---------|
+    | **Server URL** | Jira instance URL | `https://mycompany.atlassian.net` |
+    | **Email** | Jira account email | `deploy@company.com` |
+
+    **Credentials:** API token delivered to agent vault
+
+    **Available Actions:** `jira.createIssue`, `jira.updateIssue`, `jira.addComment`, `jira.transitionIssue`
+  </Accordion>
+
+  <Accordion title="Email" icon="envelope">
+    Connect to SMTP servers for sending email notifications.
+
+    | Parameter | Description | Example |
+    |-----------|-------------|---------|
+    | **SMTP Host** | Mail server hostname | `smtp.gmail.com` |
+    | **SMTP Port** | Mail server port | `587` |
+    | **Use TLS** | Enable TLS encryption | `true` |
+    | **From Address** | Sender email address | `alerts@company.com` |
+
+    **Credentials:** SMTP password delivered to agent vault
+
+    **Available Actions:** `email.sendEmail`
+  </Accordion>
+
+  <Accordion title="Teams" icon="message">
+    Connect to Microsoft Teams for sending messages and adaptive cards.
+
+    | Parameter | Description | Example |
+    |-----------|-------------|---------|
+    | **Webhook URL** | Incoming webhook URL | `https://outlook.office.com/webhook/...` |
+
+    **Credentials:** Webhook URL contains the authentication token
+
+    **Available Actions:** `teams.sendMessage`, `teams.sendAdaptiveCard`
+  </Accordion>
+
+  <Accordion title="Database" icon="database">
+    Connect to SQL databases for running queries.
+
+    | Parameter | Description | Example |
+    |-----------|-------------|---------|
+    | **Host** | Database hostname | `db.prod.internal` |
+    | **Port** | Database port | `5432` |
+    | **Database** | Database name | `production` |
+    | **Driver** | Database driver | `postgresql` |
+
+    **Credentials:** Username and password delivered to agent vault
+
+    **Available Actions:** `database.executeQuery`
+  </Accordion>
+
+  <Accordion title="WinRM" icon="windows">
+    Connect to Windows servers for remote PowerShell execution.
+
+    | Parameter | Description | Example |
+    |-----------|-------------|---------|
+    | **Host** | Windows server hostname | `win-server-01.internal` |
+    | **Port** | WinRM port | `5985` (HTTP) or `5986` (HTTPS) |
+    | **Use SSL** | Enable HTTPS transport | `true` |
+    | **Auth Method** | Authentication method | `ntlm` |
+
+    **Credentials:** Username and password delivered to agent vault
+
+    **Available Actions:** `winrm.executeCommand`, `winrm.executeScript`
+  </Accordion>
+
+  <Accordion title="Script" icon="code">
+    Execute local scripts on the agent without a remote connection.
+
+    No connection-level configuration required — scripts run directly on the agent host.
+
+    **Available Actions:** `script.bash`, `script.powershell`, `script.python`
+  </Accordion>
+
+  <Accordion title="OS Service" icon="gears">
+    Manage operating system services on the agent host.
+
+    No connection-level configuration required — service commands run locally.
+
+    **Available Actions:** `os.restartService`, `os.stopService`, `os.startService`, `os.restartOS`
+  </Accordion>
+
+  <Accordion title="Notification" icon="bell">
+    Send notifications via EasyAlert's built-in notification channels (email, SMS, webhook).
+
+    No agent credentials required — notifications are routed through the SaaS.
+
+    **Available Actions:** `notification.sendNotification`
+  </Accordion>
+
+  <Accordion title="Custom" icon="puzzle-piece">
+    For connection types not covered by the built-in types. Store arbitrary key-value configuration.
+
+    | Parameter | Description |
+    |-----------|-------------|
+    | **Custom fields** | Any key-value pairs needed by your workflow |
+
+    **Credentials:** Any secrets needed, delivered to agent vault
+  </Accordion>
+</AccordionGroup>
+
+---
+
+## Credential Security
+
+Credentials follow a strict security model:
+
+```
+Agent API Key
+      ↓
+PBKDF2-HMAC-SHA256 (600,000 iterations, random 16-byte salt)
+      ↓
+AES-256 Encryption Key
+      ↓
+AES-256-GCM encrypts each credential with a unique 12-byte nonce
+      ↓
+Stored in vault.json (0600 permissions)
+```
+
+**Key principles:**
+
+| Principle | Detail |
+|-----------|--------|
+| **Credentials never in SaaS** | Only connection config (host, port) stored server-side |
+| **AES-256-GCM encryption** | Industry-standard authenticated encryption |
+| **Key tied to API key** | Encryption key derived from agent's API key via PBKDF2 |
+| **Per-credential nonce** | Each credential gets a unique 12-byte random nonce |
+| **File permissions** | Vault file restricted to `0600` (owner read/write only) |
+
+<Warning>
+  If you rotate an agent's API key, the vault encryption key changes. All existing credentials become unreadable and must be re-delivered. Always back up and plan for credential re-delivery before rotating keys.
+</Warning>
+
+---
+
+## Testing Connections
+
+After creating a connection, click the **Test** button to verify it works. The test dispatches a lightweight job to the assigned agent that verifies:
+
+| Connection Type | What the Test Checks |
+|-----------------|---------------------|
+| **SSH** | TCP connection + SSH handshake + authentication |
+| **HTTP** | HTTP request to base URL + auth validation |
+| **Kubernetes** | kubectl cluster-info with configured context |
+| **Slack** | auth.test API call to validate bot token |
+| **Jira** | GET /myself to validate credentials |
+| **Email** | SMTP connection + STARTTLS + authentication |
+| **Database** | Connection + simple query (`SELECT 1`) |
+
+Test results include latency, timestamp, and any error messages.
+
+---
+
+## Managing Connections
+
+### Edit Configuration
+
+Update connection settings (host, port, namespace, etc.) from the connection detail page. Configuration changes take effect on the next job dispatch — no agent restart required.
+
+### Re-deliver Credentials
+
+If credentials change (e.g., rotated password, new API token), re-deliver them from **Connections > [Connection] > Deliver Credentials**. The old credentials are overwritten in the agent's vault.
+
+### Enable / Disable
+
+Disabled connections are not available for selection in workflow actions. Existing workflows using a disabled connection will fail at execution time.
+
+### Delete
+
+Deleting a connection removes it from the SaaS and marks the credential for deletion in the agent's vault on the next sync.
+
+---
+
+## Best Practices
+
+<AccordionGroup>
+  <Accordion title="Use service accounts, not personal credentials" icon="user-gear">
+    Create dedicated service accounts with minimal permissions for each connection. This limits blast radius if a credential is compromised and ensures workflows don't break when someone changes their personal password.
+  </Accordion>
+  <Accordion title="Test after creation and credential changes" icon="vial">
+    Always test a connection after creating it or updating credentials. A test takes seconds and catches configuration errors before they cause workflow failures at 3 AM.
+  </Accordion>
+  <Accordion title="One connection per target system" icon="bullseye">
+    Don't reuse a single SSH connection for multiple servers. Create separate connections for each target system so you can manage credentials independently and track connectivity per system.
+  </Accordion>
+  <Accordion title="Use descriptive names" icon="tag">
+    Name connections by their target and purpose: `prod-web-01-ssh`, `staging-k8s-cluster`, `slack-incidents-channel`. This makes it obvious which connection to select when building workflows.
+  </Accordion>
+  <Accordion title="Plan for credential rotation" icon="rotate">
+    Credentials expire. Set calendar reminders to rotate service account passwords and API tokens. After rotation, re-deliver credentials and test the connection.
+  </Accordion>
+</AccordionGroup>
+
+---
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Connection test fails with timeout" icon="clock">
+    **Cause:** Agent cannot reach the target system on the network.
+
+    **Steps:**
+    1. Verify the agent can reach the target host: `ping <host>` or `curl <host>:<port>` from the agent machine
+    2. Check firewall rules between the agent and the target
+    3. Verify the hostname resolves correctly from the agent's network
+    4. Check if a VPN or proxy is required
+  </Accordion>
+  <Accordion title="Connection test fails with authentication error" icon="key">
+    **Cause:** Credentials in the vault don't match the target system.
+
+    **Steps:**
+    1. Re-deliver credentials from the connection settings
+    2. Verify the username/email is correct in the connection config
+    3. Check if the service account is locked or expired on the target system
+    4. For SSH, verify the key format is correct (PEM, not PPK)
+  </Accordion>
+  <Accordion title="Credential status shows 'pending'" icon="hourglass">
+    **Cause:** Credentials haven't been delivered to the agent yet.
+
+    **Steps:**
+    1. Click **Deliver Credentials** on the connection detail page
+    2. Verify the assigned agent is online (check agent health)
+    3. Check agent logs for vault write errors
+  </Accordion>
+  <Accordion title="Connection works in test but fails in workflow" icon="triangle-exclamation">
+    **Cause:** The workflow action may use different parameters than the test.
+
+    **Steps:**
+    1. Check the action parameters in the workflow designer — are template variables resolving correctly?
+    2. Verify the action timeout is long enough for the operation
+    3. Check the execution detail page for the exact error message
+    4. Run the same command manually on the agent to reproduce
+  </Accordion>
+</AccordionGroup>

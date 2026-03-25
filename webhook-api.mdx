@@ -1,0 +1,368 @@
+---
+title: 'Webhook API'
+description: 'Trigger workflows from external systems via HTTP'
+icon: 'webhook'
+---
+
+## Overview
+
+The Webhook API allows external systems to trigger EasyAlert workflows via HTTP POST requests. Use it to integrate with CI/CD pipelines, monitoring tools, custom scripts, or any system that can make HTTP calls.
+
+**Common use cases:**
+- Trigger a deployment rollback workflow from your CI/CD pipeline
+- Start an incident response workflow from a custom monitoring tool
+- Execute a maintenance workflow from a cron job or scheduler
+- Chain automation workflows across different platforms
+
+---
+
+## Endpoint
+
+```
+POST /api/v1/automation/webhooks/{webhookKey}
+```
+
+| Setting | Value |
+|---------|-------|
+| **Method** | `POST` |
+| **Content-Type** | `application/json` |
+| **Authentication** | Bearer token (`Authorization: Bearer <secret>`) |
+| **Rate Limit** | 60 requests per minute per webhook key |
+| **Idempotency** | 5-minute deduplication window |
+
+---
+
+## Authentication
+
+Webhook requests require a Bearer token for authentication. The token (secret) is generated alongside the webhook key.
+
+<Steps>
+  <Step title="Enable Webhook Trigger">
+    In the workflow designer, set the trigger type to **Webhook** in the Trigger node inspector.
+  </Step>
+  <Step title="Generate Webhook Key">
+    Click **Generate Webhook Key**. This creates:
+    - **Webhook Key** — Part of the URL (visible, not sensitive)
+    - **Webhook Secret** — Bearer token for authentication (sensitive)
+  </Step>
+  <Step title="Copy the Secret">
+    Copy the webhook secret immediately. It is displayed **only once** and cannot be retrieved later.
+  </Step>
+  <Step title="Include in Requests">
+    Add the secret as a Bearer token in the `Authorization` header of your HTTP requests.
+  </Step>
+</Steps>
+
+<Warning>
+  The webhook secret is shown only once when generated. If you lose it, you must regenerate the webhook key — which also changes the URL.
+</Warning>
+
+---
+
+## Request Format
+
+**Body (optional):**
+
+```json
+{
+  "variables": {
+    "key1": "value1",
+    "key2": "value2",
+    "nested": {
+      "key": "value"
+    }
+  }
+}
+```
+
+| Field | Type | Required | Description |
+|-------|------|:--------:|-------------|
+| `variables` | object | No | Custom key-value pairs accessible in the workflow as `{{webhook.key}}` |
+
+The request body is optional. Sending an empty body or `{}` triggers the workflow without custom variables.
+
+---
+
+## Response Format
+
+### Success (200 OK)
+
+```json
+{
+  "success": true,
+  "data": {
+    "executionId": "exec-abc123-def456",
+    "status": "running",
+    "startedAt": "2024-01-15T10:30:00.123Z"
+  }
+}
+```
+
+### Duplicate Request (200 OK, cached)
+
+If the same payload is sent within the 5-minute idempotency window:
+
+```json
+{
+  "success": true,
+  "data": {
+    "executionId": "exec-abc123-def456",
+    "status": "running",
+    "startedAt": "2024-01-15T10:30:00.123Z",
+    "deduplicated": true
+  }
+}
+```
+
+### Error Responses
+
+| Status | Code | Description |
+|--------|------|-------------|
+| `401` | `unauthorized` | Missing or invalid Bearer token |
+| `404` | `webhook_not_found` | Webhook key does not exist or workflow is inactive |
+| `429` | `rate_limit_exceeded` | Too many requests (60/min limit) |
+| `500` | `internal_error` | Server error during execution |
+
+**Error format (RFC 7807):**
+
+```json
+{
+  "type": "about:blank",
+  "title": "Unauthorized",
+  "status": 401,
+  "code": "unauthorized",
+  "detail": "Invalid or missing webhook secret",
+  "timestamp": "2024-01-15T10:30:00.000Z",
+  "instance": "/api/v1/automation/webhooks/wh_abc123"
+}
+```
+
+---
+
+## Rate Limiting & Idempotency
+
+### Rate Limit
+
+Each webhook key is limited to **60 requests per minute**. Exceeding the limit returns HTTP 429 with a `Retry-After` header.
+
+### Idempotency
+
+Duplicate detection prevents the same event from triggering multiple executions:
+
+| Mechanism | How It Works |
+|-----------|-------------|
+| **Automatic** | Payload hash is used as the idempotency key. Identical payloads within 5 minutes return the cached execution. |
+| **Explicit** | Send `X-Idempotency-Key: your-unique-key` header. Requests with the same key within 5 minutes return the cached execution. |
+
+<Tip>
+  Use the `X-Idempotency-Key` header when your source system retries on failures. This prevents duplicate workflow runs even if the payload changes slightly between retries.
+</Tip>
+
+---
+
+## Code Examples
+
+<Tabs>
+  <Tab title="cURL">
+    ```bash
+    curl -X POST \
+      https://api.easyalert.io/api/v1/automation/webhooks/wh_abc123 \
+      -H "Authorization: Bearer your_webhook_secret_here" \
+      -H "Content-Type: application/json" \
+      -d '{
+        "variables": {
+          "deployment": "v2.1.0",
+          "environment": "production",
+          "commit": "abc123def",
+          "triggeredBy": "github-actions"
+        }
+      }'
+    ```
+  </Tab>
+  <Tab title="Python">
+    ```python
+    import requests
+
+    response = requests.post(
+        "https://api.easyalert.io/api/v1/automation/webhooks/wh_abc123",
+        headers={
+            "Authorization": "Bearer your_webhook_secret_here",
+            "Content-Type": "application/json",
+        },
+        json={
+            "variables": {
+                "deployment": "v2.1.0",
+                "environment": "production",
+                "commit": "abc123def",
+                "triggeredBy": "deploy-script",
+            }
+        },
+    )
+
+    if response.ok:
+        data = response.json()
+        print(f"Execution started: {data['data']['executionId']}")
+    else:
+        print(f"Error {response.status_code}: {response.text}")
+    ```
+  </Tab>
+  <Tab title="Node.js">
+    ```javascript
+    const response = await fetch(
+      'https://api.easyalert.io/api/v1/automation/webhooks/wh_abc123',
+      {
+        method: 'POST',
+        headers: {
+          'Authorization': 'Bearer your_webhook_secret_here',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          variables: {
+            deployment: 'v2.1.0',
+            environment: 'production',
+            commit: 'abc123def',
+            triggeredBy: 'github-actions',
+          },
+        }),
+      }
+    );
+
+    const data = await response.json();
+
+    if (response.ok) {
+      console.log(`Execution started: ${data.data.executionId}`);
+    } else {
+      console.error(`Error ${response.status}: ${data.detail}`);
+    }
+    ```
+  </Tab>
+  <Tab title="Go">
+    ```go
+    package main
+
+    import (
+        "bytes"
+        "encoding/json"
+        "fmt"
+        "net/http"
+    )
+
+    func main() {
+        payload := map[string]interface{}{
+            "variables": map[string]string{
+                "deployment":  "v2.1.0",
+                "environment": "production",
+                "commit":      "abc123def",
+                "triggeredBy": "deploy-pipeline",
+            },
+        }
+
+        body, _ := json.Marshal(payload)
+
+        req, _ := http.NewRequest(
+            "POST",
+            "https://api.easyalert.io/api/v1/automation/webhooks/wh_abc123",
+            bytes.NewBuffer(body),
+        )
+        req.Header.Set("Authorization", "Bearer your_webhook_secret_here")
+        req.Header.Set("Content-Type", "application/json")
+
+        resp, err := http.DefaultClient.Do(req)
+        if err != nil {
+            fmt.Printf("Error: %v\n", err)
+            return
+        }
+        defer resp.Body.Close()
+
+        var result map[string]interface{}
+        json.NewDecoder(resp.Body).Decode(&result)
+
+        if resp.StatusCode == 200 {
+            data := result["data"].(map[string]interface{})
+            fmt.Printf("Execution started: %s\n", data["executionId"])
+        } else {
+            fmt.Printf("Error %d: %s\n", resp.StatusCode, result["detail"])
+        }
+    }
+    ```
+  </Tab>
+</Tabs>
+
+---
+
+## Using Variables in Workflows
+
+Variables sent in the webhook payload are available in the workflow as `{{webhook.<key>}}`:
+
+```json
+// Webhook payload
+{
+  "variables": {
+    "deployment": "v2.1.0",
+    "environment": "production",
+    "services": ["payment-api", "auth-service"]
+  }
+}
+```
+
+**Usage in workflow nodes:**
+
+| Node | Template | Resolves To |
+|------|----------|-------------|
+| Slack message | `Deploying {{webhook.deployment}} to {{webhook.environment}}` | `Deploying v2.1.0 to production` |
+| Condition | `{{webhook.environment}}` equals `production` | Routes to production-specific flow |
+| ForEach | Collection: `{{webhook.services}}` | Iterates over `["payment-api", "auth-service"]` |
+
+<Info>
+  Nested variables are supported: `{{webhook.config.timeout}}` accesses `{"variables": {"config": {"timeout": 30}}}`.
+</Info>
+
+---
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="401 Unauthorized" icon="lock">
+    **Cause:** Missing or invalid Bearer token.
+
+    **Steps:**
+    1. Verify the `Authorization: Bearer <secret>` header is present
+    2. Confirm the secret matches what was generated (it's shown only once)
+    3. Check for extra whitespace or line breaks in the secret
+    4. If unsure, regenerate the webhook key and use the new secret
+  </Accordion>
+  <Accordion title="404 Webhook Not Found" icon="magnifying-glass">
+    **Cause:** The webhook key doesn't exist, or the workflow is not active.
+
+    **Steps:**
+    1. Verify the webhook key in the URL matches the one shown in the workflow settings
+    2. Confirm the workflow is **published** and **activated**
+    3. Check if the webhook key was regenerated (which changes the URL)
+  </Accordion>
+  <Accordion title="429 Rate Limited" icon="gauge-high">
+    **Cause:** More than 60 requests sent in one minute.
+
+    **Steps:**
+    1. Check the `Retry-After` header for when to retry
+    2. Add backoff logic to your client
+    3. Batch events or reduce call frequency
+    4. Use `X-Idempotency-Key` to deduplicate retries safely
+  </Accordion>
+  <Accordion title="Variables not available in workflow" icon="braces">
+    **Cause:** Variables not included in the `variables` field of the payload.
+
+    **Steps:**
+    1. Verify your payload includes the `"variables": {...}` wrapper
+    2. Check that variable names match what the workflow expects (case-sensitive)
+    3. Verify the Content-Type header is `application/json`
+    4. Test with cURL to isolate whether the issue is client-side
+  </Accordion>
+  <Accordion title="Duplicate executions" icon="clone">
+    **Cause:** Retries from your source system without idempotency.
+
+    **Steps:**
+    1. Add `X-Idempotency-Key` header with a unique key per logical event
+    2. If using automatic dedup, note that different payloads create different executions even for the same logical event
+    3. The dedup window is 5 minutes — events older than 5 minutes are treated as new
+  </Accordion>
+</AccordionGroup>

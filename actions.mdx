@@ -1,0 +1,552 @@
+---
+title: 'Actions'
+description: '30+ action types for executing tasks across your infrastructure'
+icon: 'play'
+---
+
+## Overview
+
+Action nodes are the workhorses of your workflows. They execute tasks on target systems via agents and connections — from SSH commands and Kubernetes operations to Slack messages and Jira tickets.
+
+<CardGroup cols={4}>
+  <Card title="SSH" icon="terminal">
+    Remote commands and scripts
+  </Card>
+  <Card title="Kubernetes" icon="dharmachakra">
+    Deployments, pods, and logs
+  </Card>
+  <Card title="HTTP" icon="globe">
+    API requests to any endpoint
+  </Card>
+  <Card title="Slack" icon="hashtag">
+    Messages and reactions
+  </Card>
+  <Card title="Jira" icon="ticket">
+    Issues, comments, transitions
+  </Card>
+  <Card title="Script" icon="code">
+    Bash, PowerShell, Python
+  </Card>
+  <Card title="OS Service" icon="gears">
+    Start, stop, restart services
+  </Card>
+  <Card title="Email" icon="envelope">
+    SMTP email notifications
+  </Card>
+</CardGroup>
+
+<Info>
+  Every action node has two output handles: **Success** (bottom-left) and **Error** (bottom-right). Connect an Error Handler to the error output for automated failure handling.
+</Info>
+
+---
+
+## SSH
+
+Remote command execution and script deployment on Linux/Unix servers via SSH.
+
+<AccordionGroup>
+  <Accordion title="ssh.executeCommand" icon="terminal">
+    Execute a single command on the remote server.
+
+    | Parameter | Description | Example |
+    |-----------|-------------|---------|
+    | **Command** | Shell command to execute | `sudo systemctl restart nginx` |
+    | **Timeout** | Max execution time (seconds) | `60` |
+
+    **Output variables:**
+
+    | Variable | Description |
+    |----------|-------------|
+    | `{{nodes.<id>.output.stdout}}` | Standard output |
+    | `{{nodes.<id>.output.stderr}}` | Standard error |
+    | `{{nodes.<id>.exitCode}}` | Exit code (0 = success) |
+
+    **Example:** Restart a service after an incident
+
+    ```bash
+    sudo systemctl restart {{incident.service}}
+    ```
+  </Accordion>
+  <Accordion title="ssh.executeScript" icon="file-code">
+    Upload and execute a multi-line script on the remote server.
+
+    | Parameter | Description | Example |
+    |-----------|-------------|---------|
+    | **Script** | Multi-line script content | *(see example)* |
+    | **Interpreter** | Script interpreter | `/bin/bash` |
+    | **Timeout** | Max execution time (seconds) | `120` |
+
+    **Example:** Collect diagnostic info
+
+    ```bash
+    #!/bin/bash
+    echo "=== Service Status ==="
+    systemctl status {{incident.service}}
+    echo "=== Recent Logs ==="
+    journalctl -u {{incident.service}} --since "5 minutes ago" --no-pager
+    echo "=== Disk Usage ==="
+    df -h
+    ```
+  </Accordion>
+</AccordionGroup>
+
+**Connection required:** SSH (host, port, username, key/password)
+
+---
+
+## Script
+
+Execute scripts locally on the agent machine. No remote connection needed.
+
+<Tabs>
+  <Tab title="Bash">
+    **Action type:** `script.bash`
+
+    | Parameter | Description |
+    |-----------|-------------|
+    | **Script** | Bash script content |
+    | **Timeout** | Max execution time (seconds) |
+
+    ```bash
+    #!/bin/bash
+    # Check disk space and alert if over 90%
+    usage=$(df / | tail -1 | awk '{print $5}' | sed 's/%//')
+    if [ "$usage" -gt 90 ]; then
+      echo "CRITICAL: Disk usage at ${usage}%"
+      exit 1
+    fi
+    echo "OK: Disk usage at ${usage}%"
+    ```
+  </Tab>
+  <Tab title="PowerShell">
+    **Action type:** `script.powershell`
+
+    | Parameter | Description |
+    |-----------|-------------|
+    | **Script** | PowerShell script content |
+    | **Timeout** | Max execution time (seconds) |
+
+    ```powershell
+    # Restart IIS application pool
+    Import-Module WebAdministration
+    Restart-WebAppPool -Name "DefaultAppPool"
+    Write-Output "Application pool restarted successfully"
+    ```
+  </Tab>
+  <Tab title="Python">
+    **Action type:** `script.python`
+
+    | Parameter | Description |
+    |-----------|-------------|
+    | **Script** | Python script content |
+    | **Timeout** | Max execution time (seconds) |
+
+    ```python
+    import json
+    import urllib.request
+
+    # Check service health
+    url = "http://localhost:8080/health"
+    response = urllib.request.urlopen(url, timeout=5)
+    data = json.loads(response.read())
+    print(f"Service status: {data['status']}")
+    ```
+  </Tab>
+</Tabs>
+
+**Output:** `stdout`, `stderr`, `exitCode` (same as SSH)
+
+---
+
+## HTTP
+
+Make HTTP/HTTPS requests to any API endpoint. Useful for interacting with REST APIs, triggering webhooks, and checking service health.
+
+**Action type:** `http.request`
+
+| Parameter | Description | Example |
+|-----------|-------------|---------|
+| **Method** | HTTP method | `GET`, `POST`, `PUT`, `DELETE`, `PATCH` |
+| **URL** | Full URL (supports template variables) | `https://api.example.com/deploy` |
+| **Headers** | Key-value pairs | `Content-Type: application/json` |
+| **Body** | Request body (for POST/PUT/PATCH) | `{"version": "{{webhook.version}}"}` |
+| **Auth Type** | Authentication method | `none`, `basic`, `bearer`, `apiKey` |
+| **Timeout** | Request timeout in seconds | `30` |
+
+**Output variables:**
+
+| Variable | Description |
+|----------|-------------|
+| `{{nodes.<id>.output.statusCode}}` | HTTP status code |
+| `{{nodes.<id>.output.body}}` | Response body (raw string) |
+| `{{nodes.<id>.output.bodyParsed}}` | Response body (parsed JSON, if applicable) |
+| `{{nodes.<id>.output.headers}}` | Response headers |
+
+<Info>
+  By default, the HTTP executor blocks requests to private IP ranges (127.0.0.0/8, 10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16) to prevent SSRF attacks. To allow private network access, set `ALLOW_PRIVATE_NETWORK=true` on the agent.
+</Info>
+
+---
+
+## Kubernetes
+
+Manage Kubernetes deployments, pods, and logs directly from your workflow.
+
+<AccordionGroup>
+  <Accordion title="kubernetes.restartDeployment" icon="rotate">
+    Restart a deployment by performing a rolling restart.
+
+    | Parameter | Description | Example |
+    |-----------|-------------|---------|
+    | **Deployment** | Deployment name | `payment-api` |
+    | **Namespace** | Kubernetes namespace (overrides connection default) | `production` |
+
+    **Output:** `stdout` with rollout status
+  </Accordion>
+  <Accordion title="kubernetes.scaleDeployment" icon="up-right-and-down-left-from-center">
+    Scale a deployment to a specific replica count.
+
+    | Parameter | Description | Example |
+    |-----------|-------------|---------|
+    | **Deployment** | Deployment name | `web-frontend` |
+    | **Replicas** | Target replica count (0–10,000) | `5` |
+    | **Namespace** | Kubernetes namespace | `production` |
+
+    **Output:** `stdout` with scale confirmation
+  </Accordion>
+  <Accordion title="kubernetes.deletePod" icon="trash">
+    Delete one or more pods (useful for forcing recreation).
+
+    | Parameter | Description | Example |
+    |-----------|-------------|---------|
+    | **Pod Selector** | Pod name or label selector | `app=payment-api` |
+    | **Namespace** | Kubernetes namespace | `production` |
+
+    **Output:** `stdout`, `pods` (list of deleted pod names)
+  </Accordion>
+  <Accordion title="kubernetes.rollbackDeployment" icon="clock-rotate-left">
+    Roll back a deployment to the previous revision.
+
+    | Parameter | Description | Example |
+    |-----------|-------------|---------|
+    | **Deployment** | Deployment name | `payment-api` |
+    | **Namespace** | Kubernetes namespace | `production` |
+
+    **Output:** `stdout` with rollback status
+  </Accordion>
+  <Accordion title="kubernetes.getLogs" icon="file-lines">
+    Retrieve logs from one or more pods.
+
+    | Parameter | Description | Example |
+    |-----------|-------------|---------|
+    | **Pod Selector** | Pod name or label selector | `app=payment-api` |
+    | **Namespace** | Kubernetes namespace | `production` |
+    | **Lines** | Number of log lines to retrieve | `100` |
+    | **Since** | Duration to look back | `5m` |
+
+    **Output:** `stdout` (logs), `pods` (pod list), `matchedCount` (pods matched)
+  </Accordion>
+</AccordionGroup>
+
+**Connection required:** Kubernetes (context, namespace, kubeconfig path)
+
+---
+
+## OS Service
+
+Manage operating system services on the agent host using `systemctl` (Linux) or `sc.exe` (Windows).
+
+| Action Type | Description | Platform |
+|-------------|-------------|----------|
+| `os.restartService` | Restart a system service | Linux / Windows |
+| `os.stopService` | Stop a system service | Linux / Windows |
+| `os.startService` | Start a system service | Linux / Windows |
+| `os.restartOS` | Restart the operating system | Linux / Windows |
+
+**Parameters:**
+
+| Parameter | Description | Example |
+|-----------|-------------|---------|
+| **Service Name** | Name of the system service | `nginx`, `postgresql` |
+
+<Warning>
+  `os.restartOS` requires `ALLOW_OS_RESTART=true` in the agent configuration. This is disabled by default to prevent accidental system reboots.
+</Warning>
+
+---
+
+## Slack
+
+Send messages and reactions to Slack channels via the Slack Bot API.
+
+<Tabs>
+  <Tab title="Send Message">
+    **Action type:** `slack.sendMessage`
+
+    | Parameter | Description | Example |
+    |-----------|-------------|---------|
+    | **Channel** | Channel ID (starts with `C`) | `C01234ABCDE` |
+    | **Message** | Message text (supports template variables and Slack mrkdwn) | See example below |
+
+    ```
+    :rotating_light: *Incident Auto-Remediated*
+
+    *Title:* {{incident.title}}
+    *Severity:* {{incident.severity}}
+    *Service:* {{incident.service}}
+    *Action Taken:* Service restarted on {{incident.host}}
+    ```
+
+    **Output:** `channel`, `ts` (message timestamp), `message`
+  </Tab>
+  <Tab title="Update Message">
+    **Action type:** `slack.updateMessage`
+
+    | Parameter | Description | Example |
+    |-----------|-------------|---------|
+    | **Channel** | Channel ID | `C01234ABCDE` |
+    | **Timestamp** | Message `ts` to update | `{{nodes.slackMsg.output.ts}}` |
+    | **Message** | New message text | Updated status text |
+  </Tab>
+  <Tab title="Add Reaction">
+    **Action type:** `slack.addReaction`
+
+    | Parameter | Description | Example |
+    |-----------|-------------|---------|
+    | **Channel** | Channel ID | `C01234ABCDE` |
+    | **Timestamp** | Message `ts` to react to | `{{nodes.slackMsg.output.ts}}` |
+    | **Emoji** | Reaction emoji name (without colons) | `white_check_mark` |
+  </Tab>
+</Tabs>
+
+**Connection required:** Slack (bot token `xoxb-...`, default channel)
+
+<Tip>
+  Use the channel ID (starts with `C`), not the channel name. Find it in Slack by right-clicking a channel and selecting "View channel details" — the ID is at the bottom.
+</Tip>
+
+---
+
+## Jira
+
+Create and manage Jira issues directly from your workflows.
+
+<AccordionGroup>
+  <Accordion title="jira.createIssue" icon="plus">
+    Create a new Jira issue.
+
+    | Parameter | Description | Example |
+    |-----------|-------------|---------|
+    | **Project Key** | Jira project key | `OPS` |
+    | **Issue Type** | Issue type name | `Bug`, `Task`, `Story` |
+    | **Summary** | Issue title | `Post-incident: {{incident.title}}` |
+    | **Description** | Issue description | Incident details with template variables |
+    | **Priority** | Priority name | `High`, `Medium`, `Low` |
+
+    **Output:** `issueId`, `issueKey` (e.g., `OPS-123`), `url`
+  </Accordion>
+  <Accordion title="jira.updateIssue" icon="pen">
+    Update fields on an existing issue.
+
+    | Parameter | Description | Example |
+    |-----------|-------------|---------|
+    | **Issue Key** | Issue to update | `OPS-123` or `{{nodes.createJira.output.issueKey}}` |
+    | **Fields** | Fields to update (JSON) | `{"summary": "Updated title"}` |
+  </Accordion>
+  <Accordion title="jira.addComment" icon="comment">
+    Add a comment to an existing issue.
+
+    | Parameter | Description | Example |
+    |-----------|-------------|---------|
+    | **Issue Key** | Issue to comment on | `OPS-123` |
+    | **Body** | Comment text | `Incident resolved. Root cause: {{incident.description}}` |
+  </Accordion>
+  <Accordion title="jira.transitionIssue" icon="right-left">
+    Transition an issue to a different status (e.g., Open → In Progress → Done).
+
+    | Parameter | Description | Example |
+    |-----------|-------------|---------|
+    | **Issue Key** | Issue to transition | `OPS-123` |
+    | **Transition ID** | Target transition ID | `31` (Done) |
+  </Accordion>
+</AccordionGroup>
+
+**Connection required:** Jira (server URL, email, API token)
+
+---
+
+## Email
+
+Send emails via SMTP.
+
+**Action type:** `email.sendEmail`
+
+| Parameter | Description | Example |
+|-----------|-------------|---------|
+| **To** | Recipient email addresses (comma-separated) | `team@company.com` |
+| **Subject** | Email subject | `Incident {{incident.id}}: {{incident.title}}` |
+| **Body** | Email body (HTML or plain text) | Incident details |
+
+**Connection required:** Email (SMTP host, port, TLS, from address, credentials)
+
+---
+
+## Teams
+
+Send messages to Microsoft Teams channels.
+
+| Action Type | Description |
+|-------------|-------------|
+| `teams.sendMessage` | Send a plain text message to a channel |
+| `teams.sendAdaptiveCard` | Send a structured Adaptive Card with rich formatting |
+
+**Parameters:**
+
+| Parameter | Description | Example |
+|-----------|-------------|---------|
+| **Message** | Message text or Adaptive Card JSON | Incident notification text |
+
+**Connection required:** Teams (incoming webhook URL)
+
+---
+
+## Database
+
+Execute SQL queries against connected databases.
+
+**Action type:** `database.executeQuery`
+
+| Parameter | Description | Example |
+|-----------|-------------|---------|
+| **Query** | SQL query to execute | `SELECT count(*) FROM orders WHERE status = 'failed'` |
+| **Timeout** | Query timeout in seconds | `30` |
+
+**Output variables:**
+
+| Variable | Description |
+|----------|-------------|
+| `{{nodes.<id>.output.columns}}` | Column names |
+| `{{nodes.<id>.output.rows}}` | Result rows |
+| `{{nodes.<id>.output.rowCount}}` | Number of rows returned |
+| `{{nodes.<id>.output.rowsAffected}}` | Rows affected (for INSERT/UPDATE/DELETE) |
+
+**Connection required:** Database (host, port, database, driver, credentials)
+
+<Warning>
+  Be careful with template variables in SQL queries. While EasyAlert escapes shell commands, SQL queries should use parameterized queries when possible to prevent SQL injection.
+</Warning>
+
+---
+
+## WinRM
+
+Execute commands and scripts on Windows servers via WinRM (Windows Remote Management).
+
+| Action Type | Description |
+|-------------|-------------|
+| `winrm.executeCommand` | Execute a PowerShell command remotely |
+| `winrm.executeScript` | Upload and execute a PowerShell script remotely |
+
+**Parameters:**
+
+| Parameter | Description | Example |
+|-----------|-------------|---------|
+| **Command / Script** | PowerShell command or script content | `Restart-Service -Name "IIS"` |
+| **Timeout** | Max execution time (seconds) | `60` |
+
+**Output:** `stdout`, `stderr`, `exitCode` (same as SSH)
+
+**Connection required:** WinRM (host, port, SSL, auth method, credentials)
+
+---
+
+## Notification
+
+Send notifications through EasyAlert's built-in notification channels without requiring an agent connection.
+
+**Action type:** `notification.sendNotification`
+
+| Parameter | Description | Example |
+|-----------|-------------|---------|
+| **Channel** | Notification channel type | `email`, `sms`, `webhook` |
+| **Recipient** | Target recipient | Email address, phone number, or webhook URL |
+| **Message** | Notification content | `{{incident.title}} has been auto-remediated` |
+
+<Info>
+  Notification actions are routed through the SaaS notification service, not through the agent. This means they work even if all agents are offline.
+</Info>
+
+---
+
+## Using Variables in Actions
+
+Template variables (`{{variable.path}}`) can be used in any action parameter — commands, URLs, message bodies, query strings, and more.
+
+### Shell Escaping
+
+When template variables are used in SSH commands or scripts, EasyAlert automatically applies `shlex.quote()` escaping to prevent command injection. For example:
+
+```
+# Template:
+echo "Incident: {{incident.title}}"
+
+# If incident.title = "Server Down; rm -rf /"
+# Rendered (with escaping):
+echo "Incident: 'Server Down; rm -rf /'"
+```
+
+The semicolon and subsequent command are safely quoted as a literal string.
+
+### Chaining Node Outputs
+
+Reference outputs from previous nodes to build data pipelines:
+
+```
+# Step 1: HTTP action gets deploy info
+GET https://api.example.com/deploys/latest
+
+# Step 2: Slack message uses the response
+Latest deploy: {{nodes.getDeployInfo.output.bodyParsed.version}}
+Deployed by: {{nodes.getDeployInfo.output.bodyParsed.author}}
+```
+
+<Warning>
+  Template variables resolve at execution time. If the referenced node hasn't executed yet (e.g., it's in a different branch), the variable resolves to an empty string. Always ensure the data source node is upstream in the execution path.
+</Warning>
+
+---
+
+## Quick Reference
+
+| Action Type | Category | Connection | Key Parameters |
+|-------------|----------|:----------:|----------------|
+| `ssh.executeCommand` | SSH | Yes | command |
+| `ssh.executeScript` | SSH | Yes | script, interpreter |
+| `script.bash` | Script | No | script |
+| `script.powershell` | Script | No | script |
+| `script.python` | Script | No | script |
+| `http.request` | HTTP | Yes | method, url, headers, body |
+| `kubernetes.restartDeployment` | Kubernetes | Yes | deployment, namespace |
+| `kubernetes.scaleDeployment` | Kubernetes | Yes | deployment, replicas, namespace |
+| `kubernetes.deletePod` | Kubernetes | Yes | podSelector, namespace |
+| `kubernetes.rollbackDeployment` | Kubernetes | Yes | deployment, namespace |
+| `kubernetes.getLogs` | Kubernetes | Yes | podSelector, namespace, lines |
+| `os.restartService` | OS | No | serviceName |
+| `os.stopService` | OS | No | serviceName |
+| `os.startService` | OS | No | serviceName |
+| `os.restartOS` | OS | No | *(requires ALLOW_OS_RESTART)* |
+| `slack.sendMessage` | Slack | Yes | channel, message |
+| `slack.updateMessage` | Slack | Yes | channel, timestamp, message |
+| `slack.addReaction` | Slack | Yes | channel, timestamp, emoji |
+| `jira.createIssue` | Jira | Yes | projectKey, issueType, summary |
+| `jira.updateIssue` | Jira | Yes | issueKey, fields |
+| `jira.addComment` | Jira | Yes | issueKey, body |
+| `jira.transitionIssue` | Jira | Yes | issueKey, transitionId |
+| `email.sendEmail` | Email | Yes | to, subject, body |
+| `teams.sendMessage` | Teams | Yes | message |
+| `teams.sendAdaptiveCard` | Teams | Yes | card (JSON) |
+| `database.executeQuery` | Database | Yes | query |
+| `winrm.executeCommand` | WinRM | Yes | command |
+| `winrm.executeScript` | WinRM | Yes | script |
+| `notification.sendNotification` | Notification | No | channel, recipient, message |

@@ -1,0 +1,190 @@
+---
+title: 'Overview'
+description: 'Automate incident response with visual workflows, agents, and integrations'
+icon: 'wand-magic-sparkles'
+---
+
+## Overview
+
+EasyAlert Automation lets you build visual workflows that respond to incidents automatically. When an incident fires, your workflow can restart services, scale infrastructure, notify teams, create tickets, and more — all without human intervention.
+
+<CardGroup cols={2}>
+  <Card title="Visual Workflow Builder" icon="diagram-project">
+    Drag-and-drop designer with 10 node types for building complex automation logic
+  </Card>
+  <Card title="On-Premise Agents" icon="robot">
+    Lightweight agents run on your infrastructure — no inbound ports required
+  </Card>
+  <Card title="Secure Connections" icon="lock">
+    Credentials encrypted with AES-256-GCM, stored only on your agents
+  </Card>
+  <Card title="Real-Time Monitoring" icon="signal-stream">
+    Track executions live with Server-Sent Events and detailed job timelines
+  </Card>
+</CardGroup>
+
+---
+
+## Why Automate Incident Response
+
+Manual incident response is slow, inconsistent, and error-prone. Engineers are paged at 3 AM, follow runbooks from memory, and sometimes make things worse under pressure.
+
+<CardGroup cols={3}>
+  <Card title="Faster Recovery" icon="gauge-high">
+    Automated remediation runs in seconds, not the minutes it takes a human to SSH in and diagnose
+  </Card>
+  <Card title="Consistent Execution" icon="check-double">
+    Every incident gets the same response, regardless of who is on-call or how tired they are
+  </Card>
+  <Card title="Reduced Toil" icon="hand-sparkles">
+    Free your engineers from repetitive tasks so they can focus on root cause prevention
+  </Card>
+</CardGroup>
+
+---
+
+## How It Works
+
+```
+Trigger (incident / webhook / cron / manual)
+        ↓
+Workflow Engine evaluates nodes
+        ↓
+Jobs dispatched to Agent
+        ↓
+Agent executes via Connection
+        ↓
+Results reported back in real-time
+```
+
+<Steps>
+  <Step title="Trigger fires">
+    An incident is created, a webhook arrives, a cron schedule fires, or someone clicks **Execute** manually.
+  </Step>
+  <Step title="Engine traverses the graph">
+    The workflow engine walks through your nodes — checking conditions, branching in parallel, waiting for approvals, or iterating over collections.
+  </Step>
+  <Step title="Jobs dispatched to agents">
+    Action nodes create jobs that are dispatched to agents on your infrastructure. The engine selects the healthiest agent from the assigned pool.
+  </Step>
+  <Step title="Agents execute actions">
+    Agents combine the connection config (from SaaS) with credentials (from their encrypted local vault) and execute the action — SSH commands, Kubernetes operations, Slack messages, Jira tickets, and more.
+  </Step>
+  <Step title="Results flow back">
+    Job results stream back in real-time via Server-Sent Events. You can see stdout, exit codes, HTTP responses, and error messages as they happen.
+  </Step>
+</Steps>
+
+---
+
+## Core Concepts
+
+<CardGroup cols={2}>
+  <Card title="Workflows" icon="diagram-project" href="/guides/automation/workflows">
+    Visual DAGs of nodes and edges. Build them in the drag-and-drop designer, publish versioned snapshots, and activate them to respond to events.
+  </Card>
+  <Card title="Agents" icon="robot" href="/guides/automation/agents">
+    Lightweight Python processes that run on your infrastructure. They poll for jobs, execute actions, and report results. Deploy via Docker, systemd, or the one-line installer.
+  </Card>
+  <Card title="Connections" icon="plug" href="/guides/automation/connections">
+    Target system configurations — SSH hosts, Kubernetes clusters, Slack workspaces, Jira projects, and more. Config lives in SaaS; credentials stay encrypted on the agent.
+  </Card>
+  <Card title="Executions" icon="list-check" href="/guides/automation/executions">
+    Runtime instances of workflow runs. Monitor progress in real-time, approve or reject human gates, and debug failures with job-level detail.
+  </Card>
+</CardGroup>
+
+---
+
+## Getting Started
+
+<Steps>
+  <Step title="Deploy an Agent" icon="robot">
+    Create an agent in **Automation > Agents**, then install it on your infrastructure using the one-line installer, Docker, or manual setup. See the [Agents guide](/guides/automation/agents) for details.
+  </Step>
+  <Step title="Create Connections" icon="plug">
+    Set up connections to the systems your workflows will interact with — SSH servers, Kubernetes clusters, Slack, Jira, etc. See the [Connections guide](/guides/automation/connections).
+  </Step>
+  <Step title="Build a Workflow" icon="diagram-project">
+    Open **Automation > Workflows** and create a new workflow. Use the drag-and-drop designer to add triggers, actions, conditions, and other nodes. See the [Workflows guide](/guides/automation/workflows).
+  </Step>
+  <Step title="Publish and Activate" icon="rocket">
+    Click **Validate** to check your workflow, then **Publish** to create a versioned snapshot. Finally, **Activate** the workflow to start responding to events.
+  </Step>
+  <Step title="Monitor Executions" icon="signal-stream">
+    When your workflow runs, monitor it in **Automation > Executions**. View real-time job timelines, approve human gates, and debug failures. See the [Executions guide](/guides/automation/executions).
+  </Step>
+</Steps>
+
+---
+
+## Example: Auto-Restart on Critical Incident
+
+Here is a simple but powerful workflow that automatically restarts a service when a critical incident is created, then notifies the team on Slack.
+
+<Steps>
+  <Step title="Trigger: Incident Created">
+    The workflow starts when an incident is created. A trigger condition filters for `severity equals critical` so only critical incidents activate this workflow.
+  </Step>
+  <Step title="Condition: Check Service">
+    A condition node checks `{{incident.service}} equals payment-api` to scope the automation to a specific service.
+  </Step>
+  <Step title="Action: Restart Service">
+    An SSH action runs `sudo systemctl restart payment-api` on the target host. The connection and agent handle authentication automatically.
+  </Step>
+  <Step title="Action: Notify on Slack">
+    A Slack action sends a message to `#incidents`:
+
+    ```
+    Incident {{incident.title}} auto-remediated.
+    Service {{incident.service}} restarted on {{incident.host}}.
+    ```
+  </Step>
+  <Step title="Action: Create Jira Ticket">
+    A Jira action creates a follow-up ticket for the team to investigate the root cause, with the incident details pre-filled.
+  </Step>
+</Steps>
+
+<Tip>
+  You can build this workflow in under 5 minutes using the **Auto-Remediation** template in the workflow template gallery.
+</Tip>
+
+---
+
+## Permissions
+
+EasyAlert uses four granular permissions for automation:
+
+| Permission | Key | What It Grants |
+|-----------|-----|----------------|
+| **View Automation** | `automation:read` | View workflows, agents, connections, and execution history |
+| **Manage Automation** | `automation:write` | Create and update workflows, agents, and connections |
+| **Delete Automation** | `automation:delete` | Delete workflows, agents, and connections |
+| **Execute Automation** | `automation:execute` | Manually execute workflows, approve or reject approval steps |
+
+<Info>
+  Users without the required permission simply won't see the relevant buttons or pages — EasyAlert never shows "access denied" messages.
+</Info>
+
+---
+
+## Security Architecture
+
+<CardGroup cols={2}>
+  <Card title="Encrypted Credential Vault" icon="vault">
+    Credentials are encrypted with AES-256-GCM using a key derived from the agent's API key via PBKDF2 (600,000 iterations). Credentials never leave the agent and are never stored in the SaaS database.
+  </Card>
+  <Card title="Outbound-Only Agents" icon="arrow-right-from-bracket">
+    Agents initiate all communication — they poll the SaaS API for jobs and push results back. No inbound ports need to be opened on your infrastructure.
+  </Card>
+  <Card title="Template Variable Escaping" icon="shield-halved">
+    When template variables like `{{incident.title}}` are used in shell commands, EasyAlert automatically applies `shlex.quote()` escaping to prevent command injection attacks.
+  </Card>
+  <Card title="Webhook Authentication" icon="key">
+    Webhook triggers require a Bearer token for authentication. The secret is bcrypt-hashed server-side and rate-limited to 60 requests per minute with 5-minute idempotency deduplication.
+  </Card>
+</CardGroup>
+
+<Warning>
+  If you rotate an agent's API key, the encryption key for its vault changes. All existing credentials in the vault will become unreadable. Always re-deliver credentials after rotating an API key.
+</Warning>
