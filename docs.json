@@ -120,7 +120,7 @@
     }
   },
   "logo": {
-    "light": "/logo/light.svg",
-    "dark": "/logo/dark.svg"
+    "light": "/images/logo-light.png",
+    "dark": "/images/logo-dark.png"
   }
 }
